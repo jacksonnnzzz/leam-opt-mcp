@@ -1,0 +1,92 @@
+{
+  "input_summary": "LEAM paper Fig. 7: scanned prose plus a dimensioned topology drawing of a quasi-cross-slotted printed monopole.",
+  "antenna_type": "coplanar-waveguide-fed circular printed monopole with a quasi-cross slot",
+  "coordinate_system": {
+    "plane": "XY",
+    "origin": "lower-left corner of the substrate",
+    "axes": ["+x across substrate width", "+y from feed edge toward radiator", "+z through substrate"]
+  },
+  "components": [
+    {
+      "name": "substrate",
+      "role": "dielectric support",
+      "primitive": "box",
+      "material": "FR4_epoxy",
+      "geometric_evidence": "Outer rectangle labelled SW by SL; prose gives 0.8 mm thickness.",
+      "confidence": 0.99
+    },
+    {
+      "name": "radiator",
+      "role": "driven circular patch",
+      "primitive": "cylinder",
+      "material": "copper",
+      "geometric_evidence": "Top circular conductor, radius arrow DPR, centered on the feed axis at y=ML.",
+      "confidence": 0.96
+    },
+    {
+      "name": "feedline",
+      "role": "microstrip/CPW center conductor",
+      "primitive": "box",
+      "material": "copper",
+      "geometric_evidence": "Centered vertical strip labelled MW, extending from y=0 to the circular radiator.",
+      "confidence": 0.97
+    },
+    {
+      "name": "left_ground",
+      "role": "coplanar partial ground",
+      "primitive": "box",
+      "material": "copper",
+      "geometric_evidence": "Left rectangular metal plane; width RPW and length ML-RPL.",
+      "confidence": 0.97
+    },
+    {
+      "name": "right_ground",
+      "role": "coplanar partial ground",
+      "primitive": "box",
+      "material": "copper",
+      "geometric_evidence": "Mirror of left ground about the substrate centerline.",
+      "confidence": 0.97
+    },
+    {
+      "name": "horizontal_slot",
+      "role": "slot subtraction tool",
+      "primitive": "box",
+      "material": "vacuum",
+      "geometric_evidence": "Horizontal arm of the quasi-cross slot labelled SLH by SLT.",
+      "confidence": 0.94
+    },
+    {
+      "name": "vertical_slot",
+      "role": "slot subtraction tool",
+      "primitive": "box",
+      "material": "vacuum",
+      "geometric_evidence": "Vertical arm of the quasi-cross slot labelled SLV by SLT.",
+      "confidence": 0.94
+    }
+  ],
+  "parameters": [
+    {"symbol": "DPR", "value": 6.58, "unit": "mm", "geometric_meaning": "driven patch radius", "evidence_source": "Fig. 7 caption and radius arrow", "confidence": 0.97},
+    {"symbol": "SW", "value": 13.43, "unit": "mm", "geometric_meaning": "substrate width", "evidence_source": "Fig. 7 caption", "confidence": 0.99},
+    {"symbol": "SLT", "value": 1.0, "unit": "mm", "geometric_meaning": "common slot thickness", "evidence_source": "Fig. 7 caption", "confidence": 0.99},
+    {"symbol": "SLV", "value": 7.9, "unit": "mm", "geometric_meaning": "vertical slot length", "evidence_source": "Fig. 7 caption", "confidence": 0.99},
+    {"symbol": "SLH", "value": 7.9, "unit": "mm", "geometric_meaning": "horizontal slot length", "evidence_source": "Fig. 7 caption", "confidence": 0.99},
+    {"symbol": "ML", "value": 25.08, "unit": "mm", "geometric_meaning": "feed-edge to radiator-center distance", "evidence_source": "Fig. 7 caption and vertical dimension", "confidence": 0.96},
+    {"symbol": "RPL", "value": 6.67, "unit": "mm", "geometric_meaning": "gap from ground top to radiator center; ground length is ML-RPL", "evidence_source": "Fig. 7 and LEAM typo-correction note", "confidence": 0.98},
+    {"symbol": "MW", "value": 1.2, "unit": "mm", "geometric_meaning": "center feed width", "evidence_source": "Fig. 7 caption", "confidence": 0.99},
+    {"symbol": "MG", "value": 0.3, "unit": "mm", "geometric_meaning": "gap between feed and each ground plane", "evidence_source": "Fig. 7 caption", "confidence": 0.99},
+    {"symbol": "SL", "value": 31.86, "unit": "mm", "geometric_meaning": "substrate length; ML+DPR+0.2", "evidence_source": "Fig. 7 caption and LEAM correction", "confidence": 0.99},
+    {"symbol": "RPW", "value": 5.815, "unit": "mm", "geometric_meaning": "each partial-ground width", "evidence_source": "Fig. 7 caption", "confidence": 0.99},
+    {"symbol": "SubT", "value": 0.8, "unit": "mm", "geometric_meaning": "FR-4 substrate thickness", "evidence_source": "scanned prose in Fig. 7(a)", "confidence": 0.99},
+    {"symbol": "CuT", "value": 0.035, "unit": "mm", "geometric_meaning": "assumed copper thickness", "evidence_source": "not printed in Fig. 7; common PCB value used as explicit assumption", "confidence": 0.55}
+  ],
+  "operations": [
+    {"order": 1, "operation": "unite", "blank": "radiator", "tools": ["feedline"]},
+    {"order": 2, "operation": "unite", "blank": "horizontal_slot", "tools": ["vertical_slot"]},
+    {"order": 3, "operation": "subtract", "blank": "radiator", "tools": ["horizontal_slot"]}
+  ],
+  "uncertainties": [
+    "The source gives substrate thickness but not copper thickness; CuT=0.035 mm is an explicit baseline assumption.",
+    "The exact cross-slot reference point is visually inferred as the radiator center and must be checked against the original cited paper [12].",
+    "The LEAM paper demonstrates geometry generation only; port, air box, boundary, mesh, and sweep settings are not specified in Fig. 7."
+  ]
+}

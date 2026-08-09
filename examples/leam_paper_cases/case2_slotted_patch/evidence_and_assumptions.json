@@ -1,0 +1,26 @@
+{
+  "case_id": "case2_slotted_patch",
+  "figure": "Fig. 5",
+  "evidence": [
+    {"field": "target_frequency", "value": "2.45 GHz", "source": "paper"},
+    {"field": "PatchW", "value": "38 mm", "source": "paper"},
+    {"field": "PatchL", "value": "28 mm", "source": "paper"},
+    {"field": "SlotW", "value": "2 mm", "source": "paper"},
+    {"field": "SlotL", "value": "10 mm", "source": "paper"},
+    {"field": "solid_count", "value": 5, "source": "paper"},
+    {"field": "solids", "value": ["substrate", "patch", "slot", "feedline", "ground"], "source": "paper"},
+    {"field": "topology", "value": "center-fed rectangular patch with centered longitudinal slot", "source": "visual_interpretation"}
+  ],
+  "assumptions": [
+    {"field": "SubW", "value": "50 mm", "reason": "not stated"},
+    {"field": "SubL", "value": "50 mm", "reason": "not stated"},
+    {"field": "SubT", "value": "1.6 mm", "reason": "not stated"},
+    {"field": "substrate", "value": "FR-4, epsilon_r=4.4, tan_delta=0.02", "reason": "not stated"},
+    {"field": "CuT", "value": "0.035 mm", "reason": "not stated"},
+    {"field": "FeedW", "value": "3 mm", "reason": "not stated"},
+    {"field": "FeedL", "value": "11 mm", "reason": "visual-fit seed"},
+    {"field": "SlotYOffset", "value": "14 mm from patch bottom", "reason": "visual-fit seed"},
+    {"field": "ground", "value": "full back conductor", "reason": "extent not shown explicitly"}
+  ],
+  "excluded": ["port", "boundary", "mesh", "sweep", "solve"]
+}

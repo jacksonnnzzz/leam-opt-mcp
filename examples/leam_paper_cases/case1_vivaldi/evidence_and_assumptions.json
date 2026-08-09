@@ -1,0 +1,28 @@
+{
+  "case_id": "case1_vivaldi",
+  "figure": "Fig. 4",
+  "evidence": [
+    {"field": "substrate_size", "value": "30 x 20 mm", "source": "paper"},
+    {"field": "SubT", "value": "0.813 mm", "source": "paper_description"},
+    {"field": "CuT", "value": "0.035 mm", "source": "paper_description"},
+    {"field": "substrate_material", "value": "Rogers RO4003C", "source": "paper_description"},
+    {"field": "R1", "value": "2 mm", "source": "paper"},
+    {"field": "Gap1", "value": "1 mm", "source": "paper"},
+    {"field": "L1", "value": "7 mm", "source": "paper"},
+    {"field": "L2", "value": "8 mm", "source": "paper"},
+    {"field": "Gap2", "value": "5 mm", "source": "paper"},
+    {"field": "W1", "value": "2 mm", "source": "paper"},
+    {"field": "W2", "value": "1 mm", "source": "paper"},
+    {"field": "R2", "value": "2 mm", "source": "paper_caption_typo_interpreted_from_last_r1"},
+    {"field": "front_topology", "value": "full copper patch minus symmetric 20-point taper and circle", "source": "paper_and_visual_interpretation"},
+    {"field": "back_topology", "value": "two centered rectangles terminated by a circle", "source": "paper_and_visual_interpretation"}
+  ],
+  "assumptions": [
+    {"field": "X1..X20", "value": "0.250..14.000 mm monotonic visual-fit seed", "reason": "updated values are not published"},
+    {"field": "PF", "value": "Gap2 = 5 mm", "reason": "mapping inferred from the back-view dimension"},
+    {"field": "RO4003C_epsilon_r", "value": 3.55, "reason": "nominal material value, not stated in paper"},
+    {"field": "RO4003C_loss_tangent", "value": 0.0027, "reason": "nominal material value, not stated in paper"},
+    {"field": "taper_interpolation", "value": "20-point piecewise linear", "reason": "portable PyAEDT approximation of the pictured splines"}
+  ],
+  "excluded": ["port", "boundary", "mesh", "sweep", "solve"]
+}

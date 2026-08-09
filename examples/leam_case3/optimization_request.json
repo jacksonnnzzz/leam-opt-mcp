@@ -1,0 +1,58 @@
+{
+  "project_path": "./outputs/leam_case3_reproduction.aedt",
+  "design_name": "HFSS_SFF",
+  "setup_sweep": "Setup1 : Sweep1",
+  "parameters": [
+    {"name": "DPR", "lower": 5.5, "upper": 6.7, "unit": "mm"},
+    {"name": "SW", "lower": 13.43, "upper": 15.0, "unit": "mm"},
+    {"name": "SLT", "lower": 0.5, "upper": 2.0, "unit": "mm"},
+    {"name": "SLV", "lower": 5.0, "upper": 10.0, "unit": "mm"},
+    {"name": "SLH", "lower": 5.0, "upper": 10.0, "unit": "mm"},
+    {"name": "ML", "lower": 23.0, "upper": 28.0, "unit": "mm"},
+    {"name": "RPL", "lower": 5.0, "upper": 9.0, "unit": "mm"},
+    {"name": "MW", "lower": 0.8, "upper": 1.6, "unit": "mm"},
+    {"name": "MG", "lower": 0.2, "upper": 0.6, "unit": "mm"}
+  ],
+  "metrics": [
+    {
+      "name": "worst_s11_db",
+      "expression": "dB(S(1,1))",
+      "reducer": "max",
+      "frequency_min_ghz": 3.1,
+      "frequency_max_ghz": 10.6,
+      "goal": "upper_bound",
+      "target": -10.0,
+      "weight": 1.0
+    },
+    {
+      "name": "maximum_realized_gain_db",
+      "expression": "RealizedGainTotal",
+      "reducer": "max",
+      "frequency_min_ghz": 3.1,
+      "frequency_max_ghz": 10.6,
+      "goal": "upper_bound",
+      "target": 3.0,
+      "weight": 50.0
+    },
+    {
+      "name": "minimum_realized_gain_db",
+      "expression": "RealizedGainTotal",
+      "reducer": "min",
+      "frequency_min_ghz": 3.1,
+      "frequency_max_ghz": 10.6,
+      "goal": "lower_bound",
+      "target": 1.0,
+      "weight": 50.0
+    }
+  ],
+  "max_trials": 40,
+  "seed": 42,
+  "strategy": "adaptive_surrogate",
+  "initial_samples": 19,
+  "candidate_pool_size": 2048,
+  "exploration_weight": 1.5,
+  "initial_points": [
+    {"DPR": 6.58, "SW": 13.43, "SLT": 1.0, "SLV": 7.9, "SLH": 7.9, "ML": 25.08, "RPL": 6.67, "MW": 1.2, "MG": 0.3}
+  ],
+  "save_best_as": "leam_case3_optimized.aedt"
+}

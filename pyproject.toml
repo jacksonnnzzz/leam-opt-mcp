@@ -1,0 +1,66 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "leam-opt-mcp"
+version = "0.1.0"
+description = "MCP server for prompt-driven antenna modeling and HFSS optimization"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = {text = "MIT"}
+authors = [{name = "LEAM Opt MCP contributors"}]
+keywords = ["antenna", "HFSS", "MCP", "PyAEDT", "optimization"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = [
+  "mcp>=1.27,<2",
+  "numpy>=1.26,<3",
+  "openai>=1.68,<3",
+  "pydantic>=2.8,<3",
+]
+
+[project.urls]
+Homepage = "https://github.com/jacksonnnzzz/leam-opt-mcp"
+Repository = "https://github.com/jacksonnnzzz/leam-opt-mcp.git"
+Issues = "https://github.com/jacksonnnzzz/leam-opt-mcp/issues"
+Changelog = "https://github.com/jacksonnnzzz/leam-opt-mcp/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+hfss = ["pyaedt>=0.18,<0.27"]
+local-vision = ["pymupdf>=1.24,<2"]
+dev = ["build>=1.2", "pytest>=8.3", "pytest-cov>=6"]
+
+[project.scripts]
+leam-opt-mcp = "antenna_mcp.server:main"
+antenna-workflow = "antenna_mcp.workflow_cli:main"
+antenna-doctor = "antenna_mcp.doctor:main"
+hfss-smoke = "antenna_mcp.smoke:main"
+vision-smoke = "antenna_mcp.vision_smoke:main"
+text-smoke = "antenna_mcp.text_smoke:main"
+source-refine = "antenna_mcp.source_review_cli:refine_main"
+source-recheck = "antenna_mcp.source_review_cli:recheck_main"
+source-approve = "antenna_mcp.source_review_cli:approve_main"
+model-assume-propose = "antenna_mcp.reviewed_model_cli:assume_propose_main"
+model-assume-approve = "antenna_mcp.reviewed_model_cli:assume_approve_main"
+model-compile = "antenna_mcp.reviewed_model_cli:compile_main"
+antenna-codegen = "antenna_mcp.codegen_cli:main"
+antenna-feedback = "antenna_mcp.feedback_cli:submit_main"
+antenna-regenerate = "antenna_mcp.feedback_cli:regenerate_main"
+hfss-build = "antenna_mcp.reviewed_model_cli:build_main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/antenna_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

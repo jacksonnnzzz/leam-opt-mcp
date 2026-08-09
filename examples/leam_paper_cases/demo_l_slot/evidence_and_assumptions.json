@@ -1,0 +1,17 @@
+{
+  "case_id": "demo_l_slot",
+  "figure": "Fig. 3",
+  "evidence": [
+    {"field": "PatchW", "value": "10 mm", "source": "paper"},
+    {"field": "PatchL", "value": "8 mm", "source": "paper"},
+    {"field": "Slot1L", "value": "4 mm", "source": "paper"},
+    {"field": "Slot1W", "value": "1 mm", "source": "paper"},
+    {"field": "Slot2L", "value": "6 mm", "source": "paper"},
+    {"field": "Slot2W", "value": "1 mm", "source": "paper"},
+    {"field": "SlotOffset", "value": "2 mm", "source": "paper"},
+    {"field": "CuT", "value": "0.035 mm", "source": "paper"},
+    {"field": "topology", "value": "L-shaped slot subtracted from rectangular patch", "source": "paper"}
+  ],
+  "assumptions": [],
+  "excluded": ["substrate", "ground", "port", "boundary", "mesh", "sweep"]
+}

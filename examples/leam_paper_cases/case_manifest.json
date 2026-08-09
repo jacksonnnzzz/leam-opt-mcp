@@ -1,0 +1,45 @@
+{
+  "source": "LEAM_A_Prompt-only_Large_Language_Model-enabled_An(2).pdf",
+  "generation_mode": "offline_visual_and_text_reconstruction",
+  "execution_policy": {
+    "starts_aedt": false,
+    "requires_license_to_generate": false,
+    "requires_license_to_execute_build": true,
+    "creates_geometry_only": true,
+    "solves_model": false
+  },
+  "cases": [
+    {
+      "id": "demo_l_slot",
+      "figure": "Fig. 3",
+      "code": "demo_l_slot/generated_model_v001.py",
+      "confidence": "high"
+    },
+    {
+      "id": "case1_vivaldi",
+      "figure": "Fig. 4",
+      "code": "case1_vivaldi/generated_model_v001.py",
+      "confidence": "mixed",
+      "unresolved": ["updated xSpline1..xSpline20 values"]
+    },
+    {
+      "id": "case2_slotted_patch",
+      "figure": "Fig. 5",
+      "code": "case2_slotted_patch/generated_model_v001.py",
+      "confidence": "mixed",
+      "unresolved": [
+        "substrate dimensions and material",
+        "substrate and conductor thickness",
+        "feed width and feed length",
+        "slot offset within patch"
+      ]
+    },
+    {
+      "id": "case3_monopole",
+      "figure": "Fig. 7",
+      "code": "case3_monopole/generated_model_v001.py",
+      "confidence": "high",
+      "unresolved": ["conductor thickness"]
+    }
+  ]
+}

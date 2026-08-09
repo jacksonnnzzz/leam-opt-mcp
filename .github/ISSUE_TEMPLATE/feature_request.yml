@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a workflow, backend, case, or optimization enhancement.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Engineering use case
+      description: Describe the antenna workflow and why the current interface is insufficient.
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Proposed interface and safety boundary
+      description: Explain inputs, artifacts, review gates, and whether simulator execution is required.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: References or evidence
+      description: Link public sources; do not upload copyrighted papers without permission.

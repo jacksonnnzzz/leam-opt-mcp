@@ -1,0 +1,26 @@
+{
+  "case_id": "case3_monopole",
+  "figure": "Fig. 7",
+  "evidence": [
+    {"field": "DPR", "value": "6.58 mm", "source": "paper"},
+    {"field": "SW", "value": "13.43 mm", "source": "paper"},
+    {"field": "SLT", "value": "1 mm", "source": "paper_with_reviewed_label_correction"},
+    {"field": "SLV", "value": "7.9 mm", "source": "paper"},
+    {"field": "SLH", "value": "7.9 mm", "source": "paper"},
+    {"field": "ML", "value": "25.08 mm", "source": "paper"},
+    {"field": "RPL", "value": "6.67 mm", "source": "paper"},
+    {"field": "MW", "value": "1.2 mm", "source": "paper"},
+    {"field": "MG", "value": "0.3 mm", "source": "paper"},
+    {"field": "SL", "value": "ML + DPR + 0.2 mm = 31.86 mm", "source": "paper_correction"},
+    {"field": "RPW", "value": "5.815 mm", "source": "paper"},
+    {"field": "ground_length", "value": "ML - RPL", "source": "paper_description"},
+    {"field": "SubT", "value": "0.8 mm", "source": "paper"},
+    {"field": "epsilon_r", "value": 4.4, "source": "paper"},
+    {"field": "loss_tangent", "value": 0.02, "source": "paper"},
+    {"field": "solid_count", "value": 7, "source": "paper"}
+  ],
+  "assumptions": [
+    {"field": "CuT", "value": "0.035 mm", "reason": "conductor thickness is not stated"}
+  ],
+  "excluded": ["port", "boundary", "mesh", "sweep", "solve"]
+}

@@ -1,0 +1,26 @@
+{
+  "attachment": "./references/LEAM_A_Prompt-only_Large_Language_Model-enabled_An.pdf",
+  "policy": "Use visual evidence and adjacent text together. Never borrow dimensions from another case. Preserve unresolved fields as explicit assumptions. Generate geometry-only PyAEDT code and do not start or solve AEDT.",
+  "requests": [
+    {
+      "case_id": "demo_l_slot",
+      "visual_target": "Fig. 3 on PDF page 3",
+      "language_input": "Reconstruct the L-shaped slot subtraction demonstration exactly from its dimensioned diagram. Create the rectangular copper patch and the single fused L-slot tool only."
+    },
+    {
+      "case_id": "case1_vivaldi",
+      "visual_target": "Fig. 4 on PDF page 4",
+      "language_input": "Reconstruct only Case 1: the Vivaldi antenna. Combine the front/back topology image with its complete text description. Preserve all 30 described parameters and identify the unpublished updated spline coordinates instead of treating guessed values as paper evidence."
+    },
+    {
+      "case_id": "case2_slotted_patch",
+      "visual_target": "Fig. 5 on PDF page 4",
+      "language_input": "Reconstruct only Case 2: the 2.45 GHz rectangular-slotted rectangular patch. Use the four published dimensions exactly. Infer a usable first geometry from the picture, but label every substrate, material, thickness, feed, ground-extent, and slot-position completion as an engineering assumption."
+    },
+    {
+      "case_id": "case3_monopole",
+      "visual_target": "Fig. 7 on PDF page 4",
+      "language_input": "Reconstruct only Case 3: the quasi-cross-slotted printed monopole. Reconcile the seven solids, the corrected relation SL = ML + DPR + 0.2, the partial-ground relation ML - RPL, FR-4 properties, and the unresolved conductor thickness."
+    }
+  ]
+}
