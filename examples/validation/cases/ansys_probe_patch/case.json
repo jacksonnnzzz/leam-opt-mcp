@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "case_id": "ansys_probe_patch",
+  "design_name": "OfficialProbeFedPatch",
+  "runner": "run_case.py",
+  "shared_model": "../../ansys_pyaedt_probe_patch/reference_model.py",
+  "benchmark": "../../ansys_pyaedt_probe_patch/benchmark.json",
+  "default_outputs": ["local_results/official_probe_patch.aedt", "local_results/reference_s11.csv"],
+  "status": "reference_baseline_passed; independent candidate pending"
+}

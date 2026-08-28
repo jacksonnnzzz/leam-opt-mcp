@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "study_id": "wifi_patch_5250_engineering_assumption_interactions_v2",
+  "case_id": "wifi_patch_5250",
+  "recorded_date": "2026-08-28",
+  "environment": {
+    "aedt": "2025.1",
+    "pyaedt": "0.26.3",
+    "solution_type": "Terminal",
+    "sweep_ghz": [5.0, 5.5],
+    "sweep_points": 501
+  },
+  "integrity": {
+    "assumption_space_sha256": "0712e1f6ae2ea3db17dddda31fb8a5940a4b0772b37ec6c0151cc335098ac80a",
+    "paper_parameters_sha256": "7cafc6ee10fb4b08e00818febeb9192d59399942b28eda5ca8050ec02b5def13",
+    "paper_parameter_count": 13,
+    "paper_parameters_modified": false
+  },
+  "selection": {
+    "strategy": "cartesian_interactions",
+    "minimum_changed_assumptions": 2,
+    "maximum_changed_assumptions": 4,
+    "fields": [
+      "probe_inner_radius_mm",
+      "probe_outer_radius_mm",
+      "feed_length_mm",
+      "radiation_padding_mm"
+    ],
+    "evidence": "Only v1 one-at-a-time changes that improved the complete-band metric were combined."
+  },
+  "acceptance": {
+    "target_band_ghz": [5.15, 5.35],
+    "maximum_s11_in_target_band_db": -10.0,
+    "adaptive_delta_s_limit": 0.02,
+    "requires_adaptive_and_sweep_convergence": true
+  },
+  "summary": {
+    "trials_planned": 11,
+    "trials_completed_with_em_evidence": 11,
+    "trials_converged": 11,
+    "trials_failed": 0,
+    "completed_trials_passing_paper_gate": 0,
+    "status": "completed_no_passing_variant",
+    "best_completed_trial_id": "ast-d851d471eb78"
+  },
+  "comparison_to_v1": {
+    "v1_best_trial_id": "ast-cec96cb39f11",
+    "v1_best_maximum_s11_in_target_band_db": -8.02029313315898,
+    "v2_best_maximum_s11_in_target_band_db": -8.492023097516151,
+    "improvement_db": 0.471729964357171,
+    "remaining_margin_to_paper_gate_db": 1.507976902483849
+  },
+  "completed_trials": [
+    {
+      "rank": 1,
+      "trial_id": "ast-d851d471eb78",
+      "assumptions_sha256": "d851d471eb78ae99fdd5dff9935fcae6d2e84338b19738617da303f72fde1e41",
+      "changed_assumptions": {"probe_outer_radius_mm": 1.0, "radiation_padding_mm": 10.0},
+      "design": "ElGendyAst_d851d471eb78_r2",
+      "convergence": {"adaptive_passes_completed": 11, "final_max_magnitude_delta_s": 0.01007, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -8.492023097516151, "minimum_s11_in_target_band_db": -11.164822494363856, "resonant_frequency_ghz": 5.213},
+      "s11_sha256": "749832134b4afd185ab27c78ff135290ddb2dc0e261801b3a306df129f7391a8",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 2,
+      "trial_id": "ast-07cc2029a331",
+      "assumptions_sha256": "07cc2029a33198d55b2940298bf3fab6813c810e03fba2567a524547a7e9c76b",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.6, "radiation_padding_mm": 10.0},
+      "design": "ElGendyAst_07cc2029a331_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.00971, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -8.259229638485799, "minimum_s11_in_target_band_db": -11.868428478037936, "resonant_frequency_ghz": 5.2},
+      "s11_sha256": "db31cbc0fdcf5ea4e610506e0cb8d748cdf2dae48b0b5c9d7a8cbeb4cce429de",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 3,
+      "trial_id": "ast-2f0388078731",
+      "assumptions_sha256": "2f038807873186a3d2f955ae00078b77f71029b0ea1da0319ce5c35666682d05",
+      "changed_assumptions": {"feed_length_mm": 5.0, "radiation_padding_mm": 10.0},
+      "design": "ElGendyAst_2f0388078731_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01931, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -8.206474617260703, "minimum_s11_in_target_band_db": -20.782570218605095, "resonant_frequency_ghz": 5.199},
+      "s11_sha256": "7d3375090ab366023668c229c40217ef4138914e60144924512082b535589971",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 4,
+      "trial_id": "ast-5cb82e40797b",
+      "assumptions_sha256": "5cb82e40797b8ef3a70a0abadc818c3efd26af791265ffe257d38526ca0cc4cd",
+      "changed_assumptions": {"probe_outer_radius_mm": 1.0, "feed_length_mm": 5.0, "radiation_padding_mm": 10.0},
+      "design": "ElGendyAst_5cb82e40797b_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01041, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.9689269430584355, "minimum_s11_in_target_band_db": -12.275863308498469, "resonant_frequency_ghz": 5.19},
+      "s11_sha256": "9697324e9e752fe3f3929dd3aa5a7d531372f225bf2d693999ae3476a5321279",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 5,
+      "trial_id": "ast-1f07ba8a6e42",
+      "assumptions_sha256": "1f07ba8a6e426a807ef0ffa750ef1f65c104c249a88e451d2973b2aa9b07e0a8",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.6, "feed_length_mm": 5.0, "radiation_padding_mm": 10.0},
+      "design": "ElGendyAst_1f07ba8a6e42_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01995, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.96397412098241, "minimum_s11_in_target_band_db": -13.020237987543323, "resonant_frequency_ghz": 5.189},
+      "s11_sha256": "15a855354831cce366596fc515098e4cee17f92b0bcb38ef40f12631fc5b117d",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 6,
+      "trial_id": "ast-6abc4f77fa80",
+      "assumptions_sha256": "6abc4f77fa807307fe764be891d83d71d48e00665b4455d14b40f34977ef96d7",
+      "changed_assumptions": {"probe_outer_radius_mm": 1.0, "feed_length_mm": 5.0},
+      "design": "ElGendyAst_6abc4f77fa80_r2",
+      "convergence": {"adaptive_passes_completed": 11, "final_max_magnitude_delta_s": 0.00854, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.385785761057227, "minimum_s11_in_target_band_db": -11.319707422300798, "resonant_frequency_ghz": 5.185},
+      "s11_sha256": "3a7a9f5be83c88fa8572f2a39c7794fdbe04b7619187c62c217f33573f540e4b",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 7,
+      "trial_id": "ast-372d2c334136",
+      "assumptions_sha256": "372d2c3341366a613ad29085bd356e03144978cd39d770074afa9e965f7747d6",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.6, "feed_length_mm": 5.0},
+      "design": "ElGendyAst_372d2c334136_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01344, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.2392843808671605, "minimum_s11_in_target_band_db": -11.957122495666681, "resonant_frequency_ghz": 5.179},
+      "s11_sha256": "193b33e6c4113ce1dbf3804ddf1193d3c7ba7d4fd784f91ba5fc557862a6857d",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 8,
+      "trial_id": "ast-cc1ed7d551e0",
+      "assumptions_sha256": "cc1ed7d551e0ddf0549c65ab109e279a61ae6da13b9da790430103bbf92591e8",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.6, "probe_outer_radius_mm": 1.0, "feed_length_mm": 5.0, "radiation_padding_mm": 10.0},
+      "design": "ElGendyAst_cc1ed7d551e0_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01584, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -6.247070709623259, "minimum_s11_in_target_band_db": -7.761804922880801, "resonant_frequency_ghz": 5.15},
+      "s11_sha256": "871ec6a6b07c27def4d22e671e635b0a198e47a55afc1bf4d2de1cb86c36c53c",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 9,
+      "trial_id": "ast-26cce90c7249",
+      "assumptions_sha256": "26cce90c7249f78a6d1534813d53bcb9f309cb6cc3194599a21385470069ce29",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.6, "probe_outer_radius_mm": 1.0, "radiation_padding_mm": 10.0},
+      "design": "ElGendyAst_26cce90c7249_r2",
+      "convergence": {"adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01494, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -6.076885081768891, "minimum_s11_in_target_band_db": -6.3469923808771735, "resonant_frequency_ghz": 5.276},
+      "s11_sha256": "3f5d01c3efb919c7ffe7f2775bf61ca3ead5664cc099f19a604987d74b2c8161",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 10,
+      "trial_id": "ast-e621b00e038b",
+      "assumptions_sha256": "e621b00e038b540cd5cf3c924dc80eb47a826a96270719ebee53b5da6fdfea63",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.6, "probe_outer_radius_mm": 1.0, "feed_length_mm": 5.0},
+      "design": "ElGendyAst_e621b00e038b_r2",
+      "convergence": {"adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01756, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -5.767986647050664, "minimum_s11_in_target_band_db": -7.232318456350048, "resonant_frequency_ghz": 5.15},
+      "s11_sha256": "0a75851ccc78018e7e3ad9e769473dd521b60dd20418bc509de9702f1588c707",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 11,
+      "trial_id": "ast-1885e23aa5f1",
+      "assumptions_sha256": "1885e23aa5f12ca15632f01f99fe476338825050befd0baf2a697ca21aed697b",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.6, "probe_outer_radius_mm": 1.0},
+      "design": "ElGendyAst_1885e23aa5f1_r2",
+      "convergence": {"adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01815, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -5.71079360639458, "minimum_s11_in_target_band_db": -5.978539664842108, "resonant_frequency_ghz": 5.28},
+      "s11_sha256": "42fdcfc599188de5c4cf45475b129a082a903e6bf2f936b0ee1d1d341ebd2dc4",
+      "paper_gate_passed": false
+    }
+  ],
+  "interpretation": "The best interaction improves the v1 full-band metric by 0.472 dB but still misses the unchanged paper gate by 1.508 dB. The interaction study therefore provides negative cross-solver evidence and does not authorize promotion to an HFSS reference or optimization baseline."
+}

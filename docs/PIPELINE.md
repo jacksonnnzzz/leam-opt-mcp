@@ -35,6 +35,26 @@ created
 必须用 `source-approve` 提交候选与报告的联合哈希，才能生成下游使用的
 `source_analysis_approved.json`。
 
+纯文本请求也会调用配置的文本 provider 生成 `source_analysis.json`，不会再用空组件、空参数
+占位。随后有一个不可绕过的跨阶段一致性门：`parameters.json` 必须逐项保留来源参数的
+symbol/value/unit；`solids.json` 必须逐项保留来源组件的 name/role/primitive/material；
+`materials.json` 必须且只能覆盖来源组件和 solids 引用的非空材料。任何遗漏、改名、数值或
+单位变化、未经证据的新增项都会让 job 在对应 stage 进入 `failed`，下游代码不会生成。
+
+下游还有三组不可绕过的离线门禁。`dimensions.json` 必须与 `solids.json` 一一对应并显式
+保留 patch 所属层和 open-region boundary；`simulation_spec.json` 必须使用可比较的 HFSS
+solver schema（design/setup/sweep/S 参数均不可缺失）。每个 Python fragment 还要同时通过：
+
+1. 通用代码安全检查；
+2. stage ownership 检查（model 只建 primitive、boolean 只做已审核布尔、simulation 只配求解）；
+3. PyAEDT 0.26.3 关键接口静态检查，包括边界、端口、setup 和 sweep 的真实关键字；
+4. 跨阶段执行语义检查，例如 helper 生成的端口帽不得提前建模、端口必须绑定审核过的
+   源面，以及 `far_field.enabled=false` 时不得创建无限远球。
+
+因此 `completed` 只会在这些生成门禁通过后出现；它仍不代替 benchmark contract 和 HFSS
+电磁验证。若来源没有任何布尔操作，系统写入一个确定性的空 `boolean.py`，不会要求模型
+编造 subtract/unite。
+
 源证据门还会自动定位并裁切目标 PDF 图页，为组件和尺寸生成稳定的 `entity_id` / `claim_id`，
 再执行文本校正和视觉否决式复核。确定性检查覆盖组件数量变化、低置信度核心几何、claim 绑定
 冲突、视觉数值冲突和跨案例污染。审批哈希覆盖候选、报告、视觉审计、视觉判决及实际视觉输入。
@@ -119,14 +139,30 @@ $env:ANTENNA_MCP_ALLOW_SIMULATION = "1"
 后续采用拉丁超立方初始化和高斯过程 LCB 在线选点。每次 HFSS 结果立即追加到
 `trials.jsonl`，当前最好参数写入 `best.json`，最好工程另存为独立 `.aedt`。
 
+独立优化任务应先运行 `optimization-preflight`。预检会在不求解的情况下逐个改变变量并
+比较全模型包围盒签名；任何变量没有几何效果时 fail closed。正式求解默认要求自适应
+Delta S 和 sweep 同时收敛，未收敛或失败试验保存审计记录但不参加最优选择。输入工程、
+请求和最优工程均保存 SHA-256；任务使用唯一工作工程名，支持基于 `trials.jsonl` 的确定性
+续跑，且绝不覆盖源工程。
+
+2026-08-28 的官方探针贴片真实回归完成 12/12 个收敛试验，把 9.9-10.1 GHz 内最差
+S11 从 -9.9348 dB 改善到 -11.4999 dB。该结果证明上述执行和审计闭环可用，但 12 个点
+不构成全局最优证明，也不能外推至其他天线。机器记录位于
+`examples/validation/ansys_pyaedt_probe_patch/reference_data/optimization_study_2026_08_28.json`。
+
 ## 后端边界
 
 - 图片识别可设置 `ANTENNA_VISION_PROVIDER=ollama`，使用本机 Ollama 与
   `qwen3-vl:8b`，无需云端视觉 API Key；PDF 通过 PyMuPDF 逐页渲染后作为图像输入。
   也可设置为 `openai` 并配置 `OPENAI_API_KEY` / `OPENAI_VISION_MODEL`。
+- JSON、Markdown、CSV 等 UTF-8 文本附件不会因为“存在附件”就调用视觉模型；系统会给内容
+  加上不可信证据边界并受 `ANTENNA_TEXT_ATTACHMENT_MAX_CHARS` 限制，然后交给文本提供方。
+  只有包含图片/PDF 的请求（包括文本与视觉混合附件）才走视觉提供方。
 - 文本规划与 PyAEDT 代码生成可设置 `ANTENNA_TEXT_PROVIDER=deepseek`，并通过
   `DEEPSEEK_API_KEY`、`DEEPSEEK_BASE_URL` 和 `DEEPSEEK_MODEL` 配置。当前 DeepSeek API
-  模型不接收图片/PDF，因此附件阶段不能设置 `ANTENNA_VISION_PROVIDER=deepseek`。
+  模型不接收图片/PDF，因此附件阶段不能设置 `ANTENNA_VISION_PROVIDER=deepseek`。续跑旧任务
+  时可设置 `ANTENNA_TEXT_MODEL`，让本次进程的文本模型覆盖任务中保存的 `request.model`；
+  该变量不会传给视觉提供方，也不会改变 `OLLAMA_VISION_MODEL`。
 - `session_mode=existing` 只允许严格连接已经以 gRPC 启动的 GUI，`grpc_port` 必须显式指定。
   系统会先验证该端口确实是活动 AEDT gRPC 会话；验证失败会直接拒绝，绝不回退为启动新 AEDT。
 - `session_mode=new` 启动隔离的非图形 AEDT，会受到本机 HFSS 许可证状态约束。

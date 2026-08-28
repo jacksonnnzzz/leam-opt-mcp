@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "wifi_patch_5250",
+  "scope": "HFSS translation assumptions for the paper's single rectangular patch element only",
+  "paper_explicit": {
+    "source_pages": [5, 6],
+    "source_items": ["Section 3.1", "Figure 2", "Table 1", "Figure 3"],
+    "parameters": ["f0", "band_start", "band_stop", "er", "tan_delta", "h", "Lg", "Wg", "WR", "LR", "Lp", "Wp", "Xp"]
+  },
+  "assumed": {
+    "conductor_model": "zero-thickness PEC sheets",
+    "feed_type": "coaxial probe with a terminal wave port",
+    "feed_offset_interpretation": "Xp is measured from a radiating patch edge; deterministic coordinate x=-Lp/2+Xp",
+    "probe_inner_radius_mm": 0.5,
+    "probe_outer_radius_mm": 1.225,
+    "feed_length_mm": 7.35,
+    "coax_dielectric": "vacuum",
+    "port_impedance_ohm": 50.0,
+    "radiation_padding_mm": 15.0,
+    "solution_type": "DrivenTerminal",
+    "adaptive_frequency_ghz": 5.25,
+    "sweep_ghz": [5.0, 5.5],
+    "sweep_type": "Interpolating",
+    "sweep_points": 501,
+    "maximum_adaptive_passes": 12,
+    "minimum_adaptive_passes": 2,
+    "max_delta_s": 0.02
+  },
+  "unresolved_from_paper": [
+    "conductor material, conductivity, and thickness",
+    "SMA connector and coaxial probe dimensions",
+    "connector dielectric material",
+    "CST boundary placement and boundary type",
+    "mesh settings and convergence criteria",
+    "frequency sampling details",
+    "numeric S11 samples"
+  ],
+  "acceptance_policy": [
+    "The local HFSS reference must itself satisfy the paper's stated -10 dB band from 5.15 to 5.35 GHz before it is used as a correctness baseline.",
+    "If the translated reference misses that target, revise a documented engineering assumption; do not alter a paper-explicit parameter silently.",
+    "Candidate and reference curves must be solved with the same AEDT/PyAEDT versions and the same frozen assumptions."
+  ]
+}

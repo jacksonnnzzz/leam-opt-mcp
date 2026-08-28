@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "scope": "HFSS translation assumptions shared by the three Kaur 2021 cases",
+  "paper_explicit": {
+    "source_pages": [3, 4, 5, 6, 7, 8, 9, 10, 12, 13],
+    "source_items": ["Section 2", "Figures 1 and 5", "Table 1", "Figure 7", "Table 2", "Figures 8, 10, 12, 13 and 17"],
+    "common_parameters": ["WS", "LS", "h", "er", "tan_delta", "WP", "LP", "WG", "LG", "WF", "LF", "X1", "Y1"],
+    "wlan_only": ["R1", "R2", "S1"],
+    "xband_only": ["R1_prime", "R2_prime", "S1_prime"]
+  },
+  "assumed": {
+    "coordinate_convention": "substrate lower-left=(-9,0,0), feed points in +y, metal lies on z=h",
+    "vertical_connectivity": "feed end y=LF touches stub bottom; stub top y=LF+Y1 touches patch bottom",
+    "derived_patch_top_clearance_mm": 1.566,
+    "srs_center": "on x=0 at the lower patch edge",
+    "srs_split": "centred at the bottom of the circular slot",
+    "conductor_model": "zero-thickness PEC sheets",
+    "port": "XZ 50-ohm lumped-port sheet spans the 2.1 mm CPW centre opening at y=0; the integration line runs from x=0.6 to x=1.05 mm at z=h",
+    "solution_type": "DrivenModal",
+    "radiation_padding_mm": 25.0,
+    "adaptive_frequency_ghz": 7.5,
+    "sweep_ghz": [3.0, 12.0],
+    "sweep_type": "Interpolating",
+    "sweep_points": 901,
+    "maximum_adaptive_passes": 14,
+    "minimum_adaptive_passes": 2,
+    "max_delta_s": 0.02
+  },
+  "unresolved_from_paper": [
+    "vertical patch placement and exact SRS centre coordinates",
+    "conductor material, conductivity, and thickness",
+    "SMA connector and CPW port dimensions",
+    "radiation-boundary distance and type",
+    "mesh operations and adaptive convergence settings",
+    "frequency sampling used for the published curves",
+    "numeric simulated and measured S-parameter data"
+  ],
+  "case_isolation": [
+    "baseline contains no split-ring slot",
+    "wlan_notch contains only R1=2.4 mm, R2=2.1 mm, S1=0.4 mm",
+    "xband_notch contains only R1_prime=2.1 mm, R2_prime=1.6 mm, S1_prime=0.4 mm"
+  ],
+  "acceptance_policy": [
+    "The baseline must remain matched at VSWR <= 2 over 3-12 GHz.",
+    "A notched case is checked for matching outside its target rejection interval only.",
+    "Inside the rejection interval, the inequality is reversed: VSWR must remain >= 2, equivalently dB(S11) >= -9.542425 dB.",
+    "A failed local paper gate triggers review of labelled assumptions; paper-explicit dimensions must never be silently changed."
+  ]
+}

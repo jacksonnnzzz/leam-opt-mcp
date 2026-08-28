@@ -16,6 +16,7 @@ tmp/
 outputs/
 references/*.pdf
 examples/**/references/*.pdf
+examples/validation/**/local_results/
 *.aedt
 *.aedtresults/
 *.lock

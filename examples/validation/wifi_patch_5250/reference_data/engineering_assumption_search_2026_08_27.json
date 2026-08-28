@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "study_id": "wifi_patch_5250_engineering_assumptions_v1",
+  "case_id": "wifi_patch_5250",
+  "recorded_date": "2026-08-27",
+  "environment": {
+    "aedt": "2025.1",
+    "pyaedt": "0.26.3",
+    "solution_type": "Terminal",
+    "sweep_ghz": [5.0, 5.5],
+    "sweep_points": 501
+  },
+  "integrity": {
+    "assumption_space_sha256": "3371bee022b50ff3797d4dedf8e3bc98eefbfce50032d24902e84105b5bb1c30",
+    "paper_parameters_sha256": "7cafc6ee10fb4b08e00818febeb9192d59399942b28eda5ca8050ec02b5def13",
+    "paper_parameter_count": 13,
+    "paper_parameters_modified": false
+  },
+  "acceptance": {
+    "target_band_ghz": [5.15, 5.35],
+    "maximum_s11_in_target_band_db": -10.0,
+    "adaptive_delta_s_limit": 0.02,
+    "requires_adaptive_and_sweep_convergence": true
+  },
+  "summary": {
+    "trials_planned": 10,
+    "trials_completed_with_em_evidence": 10,
+    "trials_failed": 0,
+    "completed_trials_passing_paper_gate": 0,
+    "status": "completed_no_passing_variant",
+    "best_completed_trial_id": "ast-cec96cb39f11"
+  },
+  "completed_trials": [
+    {
+      "rank": 1,
+      "trial_id": "ast-cec96cb39f11",
+      "assumptions_sha256": "cec96cb39f11f444a6401579351e85797f93905a59136a8e96f31dff49c02353",
+      "changed_assumptions": {"radiation_padding_mm": 10.0},
+      "design": "ElGendyAst_cec96cb39f11_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01278, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -8.02029313315898, "minimum_s11_in_target_band_db": -22.12149401767097, "resonant_frequency_ghz": 5.196},
+      "s11_sha256": "6042e71a088b89c794fce8d062a4fa3d051b51b9af22f3fe2cc42d6f3419e79d",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 2,
+      "trial_id": "ast-e80c38bbfe94",
+      "assumptions_sha256": "e80c38bbfe949fed61921014a585c093bd9a566c6dcd31bfa5ba741516bf0e45",
+      "changed_assumptions": {"probe_outer_radius_mm": 1.0},
+      "design": "ElGendyAst_e80c38bbfe94_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01964, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.683071450451302, "minimum_s11_in_target_band_db": -10.356396313536658, "resonant_frequency_ghz": 5.2},
+      "s11_sha256": "177326444da2954c19c8cf0f7a8f47626a404a9190d81582d56f1a06026786b1",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 3,
+      "trial_id": "ast-e13de4e719c3",
+      "assumptions_sha256": "e13de4e719c329d6116e57647634c2d9282babf1ec1e00e0bab4ed447a9c6845",
+      "changed_assumptions": {"feed_length_mm": 5.0},
+      "design": "ElGendyAst_e13de4e719c3_r2",
+      "convergence": {"adaptive_passes_completed": 12, "final_max_magnitude_delta_s": 0.01057, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.659777501737138, "minimum_s11_in_target_band_db": -18.472791717642103, "resonant_frequency_ghz": 5.195},
+      "s11_sha256": "ff542344e63f6731646d9320af868717a9458159885ee95f99c9730583b6a516",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 4,
+      "trial_id": "ast-c5ef7747af6a",
+      "assumptions_sha256": "c5ef7747af6af14076b9a316ec992751aad18ac15ff8d9e91faa0b5624502bbf",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.6},
+      "design": "ElGendyAst_c5ef7747af6a_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01018, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.540365555125437, "minimum_s11_in_target_band_db": -10.973031549177254, "resonant_frequency_ghz": 5.192},
+      "s11_sha256": "480b0ae5b5666f223ab0f233126b9fe6140f692b24b492994708bb90a2b0f8eb",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 5,
+      "trial_id": "ast-81f5eb413c86",
+      "assumptions_sha256": "81f5eb413c8683843ac55c75aa4e0a1c46881015de088d8e46046b98a602c263",
+      "changed_assumptions": {"radiation_padding_mm": 25.0},
+      "design": "ElGendyAst_81f5eb413c86_r2",
+      "convergence": {"adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01729, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.203656782771752, "minimum_s11_in_target_band_db": -20.38940325601891, "resonant_frequency_ghz": 5.181},
+      "s11_sha256": "1101ba2665f10429d5282dd0c0b6ab79f007c15caf8b5dd23db7189cb8a3d639",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 6,
+      "trial_id": "ast-df16a948ec80",
+      "assumptions_sha256": "df16a948ec800f3cf314f2d3393233d049cdd701dc2d153784922ba3fcb2272c",
+      "changed_assumptions": {"coax_dielectric": "ptfe_er2p1"},
+      "design": "ElGendyAst_df16a948ec80_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01698, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.133184283385857, "minimum_s11_in_target_band_db": -9.47538615760293, "resonant_frequency_ghz": 5.316},
+      "s11_sha256": "99abd5c7efac7397992c551895a591d3f9fd45225ae89fc3dbd63a2f21cf44cf",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 7,
+      "trial_id": "ast-8a793bd0e4c0",
+      "assumptions_sha256": "8a793bd0e4c00ab107670e72eb9ddeeb80764bfc82a80970836c219e135041cb",
+      "changed_assumptions": {"feed_length_mm": 10.0},
+      "design": "ElGendyAst_8a793bd0e4c0_r2",
+      "convergence": {"adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01986, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -7.122045352048296, "minimum_s11_in_target_band_db": -19.886461526413026, "resonant_frequency_ghz": 5.184},
+      "s11_sha256": "17434def85c6ad5814ce7c13af87eabd3ae3e283655ca9f3eee64b74499ea744",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 8,
+      "trial_id": "ast-98b80a8c8975",
+      "assumptions_sha256": "98b80a8c8975a5ae3cde414e5ef5a5b2fb5e5860fbffb84a8808a0d4199be6cf",
+      "changed_assumptions": {"conductor_model": "finite_copper_0p035mm"},
+      "design": "ElGendyAst_98b80a8c8975_r2",
+      "convergence": {"adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01729, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -6.910701200148868, "minimum_s11_in_target_band_db": -20.162853419301364, "resonant_frequency_ghz": 5.177},
+      "s11_sha256": "a240b2f205756fa2a317354c34c43dd0955527d61577bb619161ab9b60322ea4",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 9,
+      "trial_id": "ast-028530c27715",
+      "assumptions_sha256": "028530c27715183c19ec0b12d3b5057b8ebc27748d8a9e98ab300f451f9e13c0",
+      "changed_assumptions": {"probe_outer_radius_mm": 1.5},
+      "design": "ElGendyAst_028530c27715_r2",
+      "convergence": {"adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.01765, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -6.0931242032914845, "minimum_s11_in_target_band_db": -23.801872449739406, "resonant_frequency_ghz": 5.188},
+      "s11_sha256": "db1c7b2e4028563aabc3af64b4e07256a59a1bd9d10a8d04ae60d49cc5267bf9",
+      "paper_gate_passed": false
+    },
+    {
+      "rank": 10,
+      "trial_id": "ast-ca0105fc3489",
+      "assumptions_sha256": "ca0105fc34893c0df0f6fd95c32f98fb875cf7c2c557db7b4ac85c9b065302e8",
+      "changed_assumptions": {"probe_inner_radius_mm": 0.4},
+      "design": "ElGendyAst_ca0105fc3489_r2",
+      "convergence": {"adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01857, "sweep_converged": true},
+      "metrics": {"maximum_s11_in_target_band_db": -5.8464468546544275, "minimum_s11_in_target_band_db": -22.739813568371122, "resonant_frequency_ghz": 5.184},
+      "s11_sha256": "b454e1c3b2b22ebd57f53ea6c45b831c7e6ed1052319e5b30b3d2c5433e776e9",
+      "paper_gate_passed": false
+    }
+  ],
+  "execution_history": {
+    "initial_license_block": {
+      "feature": "elec_solve_hfss",
+      "license_server": "1055@localhost",
+      "flexnet_error": "-97,121",
+      "affected_trial_count": 6,
+      "interpretation": "Execution infrastructure failure only; no electromagnetic conclusion was assigned while blocked."
+    },
+    "recovery": "All six blocked trials were retried after the vendor daemon was restored. Four client-interrupted solves were retried after adding a global AEDT-idle guard. The final evidence set has ten completed and zero failed trials."
+  },
+  "policy": "None of the ten one-at-a-time assumption variants reproduces the paper's complete -10 dB band. Keep the reference and independent-candidate gates closed; do not alter any paper-explicit parameter or reinterpret a narrow resonance minimum as full-band agreement."
+}

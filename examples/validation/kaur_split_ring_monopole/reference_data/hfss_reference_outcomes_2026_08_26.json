@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "case_group": "kaur_2021_split_ring_monopole",
+  "recorded_at": "2026-08-26",
+  "environment": {
+    "aedt": "2025.1",
+    "pyaedt": "0.26.3"
+  },
+  "execution_correction": {
+    "issue": "PyAEDT 0.26.3 maps XZ rectangle dimensions as [Z span, X span].",
+    "rejected_api_dimensions": [
+      2.1,
+      1.6
+    ],
+    "corrected_api_dimensions": [
+      1.6,
+      2.1
+    ],
+    "physical_port_extent_mm": {
+      "x": [
+        -1.05,
+        1.05
+      ],
+      "z": [
+        0.0,
+        1.6
+      ]
+    },
+    "note": "The initial failed baseline design contained no setup, was exact-name/object/boundary verified, and was deleted before rebuilding. No failed curve was produced."
+  },
+  "vswr_two_s11_db": -9.542425094393248,
+  "results": {
+    "baseline": {
+      "curve_sha256": "24ac959f7c666c970758ec7ab63f6903e191804c5e63bf3ceb58e0beba2b1fe4",
+      "point_count": 901,
+      "frequency_range_ghz": [
+        3.0,
+        12.0
+      ],
+      "maximum_s11_in_required_matched_band_db": -1.2438224022821012,
+      "paper_gate_passed": false
+    },
+    "wlan_notch": {
+      "curve_sha256": "2fbcf876f09f8895d43632a4e77440fc559912252825d76d6528159e7e21c597",
+      "point_count": 901,
+      "matched_band_maximum_s11_db": [
+        -0.3430656306043048,
+        -1.1723830241635738
+      ],
+      "observed_notch_peak_frequency_ghz": 5.81,
+      "observed_notch_peak_s11_db": -1.6853591275557518,
+      "observed_notch_peak_vswr": 10.33978318933403,
+      "notch_entire_reported_band_high_reflection": true,
+      "paper_gate_passed": false
+    },
+    "xband_notch": {
+      "curve_sha256": "9792e67800dcffa1a9395fc3dc3df13c2b93b74b35585edede457a911d2210a7",
+      "point_count": 901,
+      "matched_band_maximum_s11_db": [
+        -0.18600607404969827,
+        -1.0368033795548086
+      ],
+      "observed_notch_peak_frequency_ghz": 7.71,
+      "observed_notch_peak_s11_db": -1.1185112442994205,
+      "observed_notch_peak_vswr": 15.552618246564448,
+      "notch_entire_reported_band_high_reflection": true,
+      "paper_gate_passed": false
+    }
+  },
+  "paper_gate_passed_cases": [],
+  "status": "all_three_solved_fail_paper_gate",
+  "interpretation": "The current HFSS translations do not reproduce the published UWB matching, and the two slot cases also miss the reported notch centers/peak magnitudes. Undimensioned Figure 7 placement plus unpublished port, conductor, boundary, and CST settings remain possible causes; paper parameters must not be mixed or tuned silently.",
+  "policy": "Do not use any of the three curves as independent-candidate references."
+}

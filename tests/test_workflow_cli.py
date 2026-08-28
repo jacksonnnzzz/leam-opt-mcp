@@ -34,6 +34,7 @@ def test_doctor_never_exposes_credentials(tmp_path, monkeypatch, capsys):
     environment = {
         "ANTENNA_TEXT_PROVIDER": "deepseek",
         "ANTENNA_VISION_PROVIDER": "ollama",
+        "ANTENNA_TEXT_MODEL": "deepseek-v4-pro",
         "DEEPSEEK_API_KEY": secret,
         "OLLAMA_VISION_MODEL": "qwen3-vl:8b",
     }
@@ -41,10 +42,17 @@ def test_doctor_never_exposes_credentials(tmp_path, monkeypatch, capsys):
     serialized = json.dumps(report)
     assert secret not in serialized
     assert report["providers"]["deepseek_key_configured"] is True
+    assert report["providers"]["text_model_override"] == "deepseek-v4-pro"
+    blank_override = build_report(
+        workspace=tmp_path,
+        environment={**environment, "ANTENNA_TEXT_MODEL": "   "},
+    )
+    assert blank_override["providers"]["text_model_override"] is None
 
     for key in (
         "ANTENNA_TEXT_PROVIDER",
         "ANTENNA_VISION_PROVIDER",
+        "ANTENNA_TEXT_MODEL",
         "DEEPSEEK_API_KEY",
         "OPENAI_API_KEY",
         "ANSYSEM_ROOT251",

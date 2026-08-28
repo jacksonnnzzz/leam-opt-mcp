@@ -6,11 +6,13 @@ from pathlib import Path
 
 from .aedt_runtime import (
     aedt_license_preflight,
+    aedt_grpc_session_is_active,
     describe_aedt_exception,
     ensure_strict_existing_attachment,
     is_aedt_app_released,
     prepare_pyaedt_environment,
     temporary_multi_desktop,
+    temporary_grpc_session_probe,
 )
 from .discovery import preferred_aedt_version
 
@@ -22,9 +24,7 @@ def _load_hfss_class():
 
 
 def _grpc_session_is_active(port: int) -> bool:
-    from ansys.aedt.core.generic.general_methods import is_grpc_session_active
-
-    return bool(is_grpc_session_active(port, "127.0.0.1"))
+    return aedt_grpc_session_is_active(port, "127.0.0.1")
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -86,7 +86,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                 non_graphical=True,
             )
         if args.attach_existing:
-            with temporary_multi_desktop():
+            with temporary_grpc_session_probe(), temporary_multi_desktop():
                 hfss = Hfss(**options)
         else:
             hfss = Hfss(**options)

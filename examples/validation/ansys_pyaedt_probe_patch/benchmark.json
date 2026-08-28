@@ -1,0 +1,308 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "ansys_pyaedt_probe_patch",
+  "title": "Ansys PyAEDT probe-fed patch antenna",
+  "source": {
+    "title": "Probe-fed patch antenna — PyAEDT Examples",
+    "url": "https://examples.aedt.docs.pyansys.com/version/dev/examples/high_frequency/antenna/patch.html",
+    "source_type": "official_example",
+    "accessed_on": "2026-08-11",
+    "notes": [
+      "The official page currently demonstrates AEDT 2026 R1.",
+      "Generate the reference and candidate curves with the same local AEDT and PyAEDT versions.",
+      "The official page provides a plotted result but no frozen numeric S11 CSV, so a local reference solve is required."
+    ]
+  },
+  "generation_evidence": {
+    "status": "producer_metadata_not_compared_with_candidate",
+    "source_contract": {
+      "component_roles": {
+        "ground": "stackup_ground_layer",
+        "dielectric": "stackup_dielectric_layer",
+        "signal": "stackup_signal_layer",
+        "Patch": "radiator",
+        "Region": "open_region",
+        "Probe": "probe_inner",
+        "Probe_feed_wire": "coax_inner",
+        "Probe_feed_outer": "coax_outer_dielectric",
+        "Probe_feed_outer_ObjectFromFace1": "wave_port_cap"
+      },
+      "component_material_semantics": {
+        "ground": {"material": "copper", "fill_material": "air", "body_material": "copper"},
+        "dielectric": {"material": "Duroid (tm)", "body_material": "Duroid (tm)"},
+        "signal": {"material": "copper", "fill_material": "air", "body_material": "air"},
+        "Patch": {"material": "copper", "body_material": "copper", "parent_layer": "signal"},
+        "Region": {"material": null, "boundary": "radiation"},
+        "Probe": {"material": "copper"},
+        "Probe_feed_wire": {"material": "copper"},
+        "Probe_feed_outer": {"material": "vacuum"},
+        "Probe_feed_outer_ObjectFromFace1": {"material": "pec"}
+      },
+      "component_geometric_evidence": {
+        "ground": {
+          "z_range_mm": [0.0, 0.035],
+          "post_resize_x_range_mm": [-2.3925, 11.9625],
+          "post_resize_y_range_mm": [-6.9375, 6.9375]
+        },
+        "dielectric": {
+          "z_range_mm": [0.035, 0.535],
+          "post_resize_x_range_mm": [-2.3925, 11.9625],
+          "post_resize_y_range_mm": [-6.9375, 6.9375]
+        },
+        "signal": {
+          "z_range_mm": [0.535, 0.57],
+          "post_resize_x_range_mm": [-2.3925, 11.9625],
+          "post_resize_y_range_mm": [-6.9375, 6.9375]
+        },
+        "Patch": {
+          "x_range_mm": [0.0, 9.57],
+          "y_range_mm": [-4.625, 4.625],
+          "z_range_mm": [0.535, 0.57]
+        },
+        "Region": {
+          "x_range_mm": [-5.3925, 14.9625],
+          "y_range_mm": [-9.9375, 9.9375],
+          "z_range_mm": [-3.0, 3.57],
+          "generation_mode": "absolute_offset_from_resized_stackup_bbox"
+        },
+        "Probe": {
+          "origin_mm": [7.105725, 0.0, 0.035],
+          "radius_mm": 0.01,
+          "signed_height_mm": 0.5,
+          "z_range_mm": [0.035, 0.535]
+        },
+        "Probe_feed_wire": {
+          "origin_mm": [7.105725, 0.0, 0.035],
+          "radius_mm": 0.01,
+          "signed_height_mm": -0.147,
+          "z_range_mm": [-0.112, 0.035]
+        },
+        "Probe_feed_outer": {
+          "origin_mm": [7.105725, 0.0, 0.035],
+          "radius_mm": 0.0245,
+          "signed_height_mm": -0.147,
+          "z_range_mm": [-0.112, 0.035],
+          "perfect_e_face_selector": "maximum_area_lateral_face"
+        },
+        "Probe_feed_outer_ObjectFromFace1": {
+          "port_plane_z_mm": -0.112,
+          "source_face": "Probe_feed_outer.bottom_face_z",
+          "thickness_rule": "-sqrt(Probe_feed_outer.faces[0].area)/10_with_internal_direction_reversal"
+        }
+      },
+      "resolved_semantics": [
+        "signal.material=copper is the conceptual conductor definition; signal.fill_material=air and signal.body_material=air describe the physical layer body containing the separate copper Patch and are not contradictory",
+        "Probe_feed_outer is intentionally a solid vacuum cylinder overlapping the copper inner feed wire",
+        "Probe_feed_outer_ObjectFromFace1 is the PEC cap created by wave_port(create_pec_cap=true), while the port assignment face remains Probe_feed_outer.bottom_face_z"
+      ],
+      "required_relationships": {
+        "signal": ["fill_material", "body_material"],
+        "Patch": ["parent_layer"],
+        "Region": ["boundary"]
+      }
+    },
+    "implementation": {
+      "package": "pyaedt",
+      "version": "0.26.3",
+      "module": "ansys.aedt.core.modeler.advanced_cad.stackup_3d",
+      "methods": [
+        "Stackup3D._layer_position_manager",
+        "Stackup3D.resize_around_element",
+        "Layer3D.add_patch",
+        "Patch.create_probe_port",
+        "Hfss.wave_port",
+        "Hfss._create_pec_cap"
+      ],
+      "model_units": "mm"
+    },
+    "stackup_layers": {
+      "initial_stackup_end": "layer_1_position = 0mm",
+      "elevation_rule": "layer.elevation = previous StackUp_End; StackUp_End = layer.elevation + layer.thickness",
+      "evaluated_z_ranges_mm": {
+        "ground": [0.0, 0.035],
+        "dielectric": [0.035, 0.535],
+        "signal": [0.535, 0.57]
+      },
+      "signal_fill_material": "air",
+      "signal_conductor_rule": "Patch is a copper box and is subtracted from the air-filled signal-layer box with keep_originals=true"
+    },
+    "resize_around_patch": {
+      "percentage_offset_argument": 0.25,
+      "formulas": {
+        "dielectric_x_position": "Patch_position_x - Patch_length * 0.25",
+        "dielectric_y_position": "Patch_position_y - Patch_width * (0.5 + 0.25)",
+        "dielectric_length": "Patch_length * (1 + 0.25 * 2)",
+        "dielectric_width": "Patch_width * (1 + 0.25 * 2)"
+      },
+      "evaluated_mm": {
+        "x_position": -2.3925,
+        "y_position": -6.9375,
+        "length": 14.355,
+        "width": 13.875,
+        "x_range": [-2.3925, 11.9625],
+        "y_range": [-6.9375, 6.9375]
+      }
+    },
+    "patch": {
+      "axis": "X",
+      "coordinate_system_origin": ["Patch_position_x", "Patch_position_y", "signal_elevation"],
+      "local_box_origin": ["0", "-Patch_width/2", "0"],
+      "box_sizes": ["Patch_length", "Patch_width", "signal_thickness"],
+      "evaluated_bounding_box_mm": {
+        "x_range": [0.0, 9.57],
+        "y_range": [-4.625, 4.625],
+        "z_range": [0.535, 0.57]
+      }
+    },
+    "probe": {
+      "formulas": {
+        "outer_radius": "2.45 * r",
+        "feed_length": "6 * outer_radius",
+        "x": "Patch_position_x + (1 + probe_x_rel) * Patch_length / 2",
+        "y": "Patch_position_y + probe_y_rel * Patch_width / 2",
+        "z_reference": "ground_elevation + ground_thickness",
+        "height": "signal_elevation - ground_elevation - ground_thickness"
+      },
+      "evaluated_mm": {
+        "inner_radius": 0.01,
+        "outer_radius": 0.0245,
+        "feed_length": 0.147,
+        "origin": [7.105725, 0.0, 0.035],
+        "height": 0.5,
+        "z_range": [0.035, 0.535]
+      }
+    },
+    "feed": {
+      "inner": {
+        "name": "Probe_feed_wire",
+        "material": "copper",
+        "radius_mm": 0.01,
+        "origin_mm": [7.105725, 0.0, 0.035],
+        "signed_height_mm": -0.147,
+        "z_range_mm": [-0.112, 0.035]
+      },
+      "outer": {
+        "name": "Probe_feed_outer",
+        "material": "vacuum",
+        "radius_mm": 0.0245,
+        "origin_mm": [7.105725, 0.0, 0.035],
+        "signed_height_mm": -0.147,
+        "z_range_mm": [-0.112, 0.035]
+      },
+      "ground_cut": "subtract ground by Probe_feed_outer with keep_originals=true"
+    },
+    "region": {
+      "call": "create_region([3, 3, 3, 3, 3, 3], is_percentage=False)",
+      "rule": "3 mm absolute offset on +X, -X, +Y, -Y, +Z, and -Z from the resized stackup bounding box; created before the probe/feed",
+      "evaluated_bounding_box_mm": {
+        "x_range": [-5.3925, 14.9625],
+        "y_range": [-9.9375, 9.9375],
+        "z_range": [-3.0, 3.57]
+      }
+    },
+    "face_boundary": {
+      "selection_rule": "areas = [face.area for face in Probe_feed_outer.faces]; select areas.index(max(areas))",
+      "selected_topology": "lateral cylindrical face",
+      "area_formulas_mm2": {
+        "lateral": "2 * pi * outer_radius * feed_length",
+        "each_cap": "pi * outer_radius^2"
+      },
+      "evaluated_areas_mm2": {
+        "lateral": 0.02262889188380728,
+        "each_cap": 0.0018857409903172734
+      },
+      "boundary": "Perfect E",
+      "boundary_name": "Probe_PEC"
+    },
+    "port_cap": {
+      "port_call": "wave_port(Probe_feed_outer.bottom_face_z, reference=Probe_feed_outer.name, create_pec_cap=true, name=Probe_Port)",
+      "port_plane_z_mm": -0.112,
+      "cap_rule": "create an object from the selected bottom face, thicken by -sqrt(Probe_feed_outer.faces[0].area)/10 for AEDT newer than 2022.2, reverse the direction if the first result is internal, then assign pec",
+      "result_object": "Probe_feed_outer_ObjectFromFace1",
+      "result_material": "pec"
+    }
+  },
+  "reference": {
+    "parameters": {
+      "ground_thickness": {"value": 0.035, "unit": "mm"},
+      "substrate_thickness": {"value": 0.5, "unit": "mm"},
+      "signal_thickness": {"value": 0.035, "unit": "mm"},
+      "patch_length": {"value": 9.57, "unit": "mm"},
+      "patch_width": {"value": 9.25, "unit": "mm"},
+      "patch_frequency": {"value": 10.0, "unit": "GHz"},
+      "probe_relative_x_offset": {"value": 0.485, "unit": "ratio"},
+      "probe_relative_y_offset": {"value": 0.0, "unit": "ratio"},
+      "probe_inner_radius": {"value": 0.01, "unit": "mm"},
+      "probe_outer_radius": {"value": 0.0245, "unit": "mm"},
+      "probe_feed_length": {"value": 0.147, "unit": "mm"},
+      "region_padding": {"value": 3.0, "unit": "mm"}
+    },
+    "materials": {
+      "copper": {"conductivity": 58000000.0},
+      "Duroid (tm)": {},
+      "vacuum": {"permittivity": 1.0, "permeability": 1.0},
+      "air": {"permittivity": 1.0, "permeability": 1.0},
+      "pec": {}
+    },
+    "objects": {
+      "ground": {"primitive": "stackup_ground_layer", "role": "stackup_ground_layer", "material": "copper", "fill_material": "air", "body_material": "copper"},
+      "dielectric": {"primitive": "stackup_dielectric_layer", "role": "stackup_dielectric_layer", "material": "Duroid (tm)", "body_material": "Duroid (tm)"},
+      "signal": {"primitive": "stackup_signal_layer", "role": "stackup_signal_layer", "material": "copper", "fill_material": "air", "body_material": "air"},
+      "Patch": {"primitive": "rectangular_patch", "role": "radiator", "material": "copper", "body_material": "copper", "parent_layer": "signal"},
+      "Region": {"primitive": "open_region", "role": "open_region", "boundary": "radiation"},
+      "Probe": {"primitive": "cylinder", "material": "copper", "role": "probe_inner"},
+      "Probe_feed_wire": {"primitive": "cylinder", "material": "copper", "role": "coax_inner"},
+      "Probe_feed_outer": {"primitive": "cylinder", "material": "vacuum", "role": "coax_outer_dielectric"},
+      "Probe_feed_outer_ObjectFromFace1": {"primitive": "sheet", "material": "pec", "role": "wave_port_cap"}
+    },
+    "operations": [
+      {"order": 1, "operation": "add_ground_layer", "target": "ground"},
+      {"order": 2, "operation": "add_dielectric_layer", "target": "dielectric"},
+      {"order": 3, "operation": "add_signal_layer", "target": "signal"},
+      {"order": 4, "operation": "add_patch", "target": "Patch"},
+      {"order": 5, "operation": "subtract", "target": "signal", "tool": "Patch", "keep_originals": true},
+      {"order": 6, "operation": "resize_stackup_around_patch", "target": "Patch"},
+      {"order": 7, "operation": "create_region", "target": "Region"},
+      {"order": 8, "operation": "assign_radiation", "target": "Region"},
+      {"order": 9, "operation": "create_probe_inner", "target": "Probe"},
+      {"order": 10, "operation": "create_probe_feed_wire", "target": "Probe_feed_wire"},
+      {"order": 11, "operation": "create_probe_feed_outer", "target": "Probe_feed_outer"},
+      {"order": 12, "operation": "subtract", "target": "ground", "tool": "Probe_feed_outer", "keep_originals": true},
+      {"order": 13, "operation": "assign_perfect_e", "target": "Probe_feed_outer"},
+      {"order": 14, "operation": "assign_wave_port", "target": "Probe_Port", "reference": "Probe_feed_outer"}
+    ],
+    "solver": {
+      "design_type": "HFSS",
+      "solution_type": "Terminal",
+      "setup": {
+        "name": "Setup1",
+        "type": "HFSSDriven",
+        "adaptive_frequency": {"value": 10.0, "unit": "GHz"}
+      },
+      "sweep": {
+        "name": "Sweep1",
+        "type": "Interpolating",
+        "start": {"value": 8.0, "unit": "GHz"},
+        "stop": {"value": 12.0, "unit": "GHz"}
+      },
+      "s_parameter": "S11_dB"
+    }
+  },
+  "default_absolute_tolerance": 0.0,
+  "tolerance_by_path": {
+    "parameters.*.value": 0.001,
+    "materials.air.permittivity": 0.001,
+    "materials.air.permeability": 0.00001,
+    "solver.*.*.value": 0.000001
+  },
+  "s11": {
+    "frequency_column": "frequency_ghz",
+    "value_column": "s11_db",
+    "threshold_db": -10.0,
+    "minimum_overlap_points": 20,
+    "resonance_relative_error_max": 0.01,
+    "bandwidth_relative_error_max": 0.05,
+    "curve_rmse_db_max": 1.0,
+    "required": true
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "yeo_2019_scaled_slot_loaded_patch",
+  "title": "Yeo 2019 scaled radiating-edge-slot-loaded RF-35 patch",
+  "source": {
+    "title": "Slot-Loaded Microstrip Patch Sensor Antenna for High-Sensitivity Permittivity Characterization",
+    "url": "https://doi.org/10.3390/electronics8050502",
+    "source_type": "paper",
+    "accessed_on": "2026-08-12",
+    "notes": [
+      "Geometry and material values are from Figure 1(c) and Section 2.",
+      "This is the scaled slot-loaded case, not the unscaled Figure 1(b) antenna.",
+      "The paper reference solver is CST Microwave Studio; this benchmark implementation is an HFSS cross-solver translation.",
+      "Conductor, port, open boundary, mesh, and sweep details unresolved by the paper are explicitly recorded as engineering assumptions.",
+      "Generate candidate and local HFSS reference curves with the same AEDT and PyAEDT versions."
+    ]
+  },
+  "reference": {
+    "parameters": {
+      "ground_width": {"value": 80.0, "unit": "mm", "evidence": "paper"},
+      "ground_length": {"value": 80.0, "unit": "mm", "evidence": "paper"},
+      "substrate_thickness": {"value": 0.76, "unit": "mm", "evidence": "paper"},
+      "substrate_relative_permittivity": {"value": 3.5, "unit": "ratio", "evidence": "paper"},
+      "substrate_loss_tangent": {"value": 0.0018, "unit": "ratio", "evidence": "paper"},
+      "patch_width": {"value": 31.8, "unit": "mm", "evidence": "paper"},
+      "patch_length": {"value": 25.4, "unit": "mm", "evidence": "paper"},
+      "feed_width": {"value": 1.66, "unit": "mm", "evidence": "paper"},
+      "feed_length": {"value": 27.3, "unit": "mm", "evidence": "paper"},
+      "inset_width": {"value": 2.3, "unit": "mm", "evidence": "paper"},
+      "inset_length": {"value": 12.0, "unit": "mm", "evidence": "paper"},
+      "slot_width": {"value": 1.0, "unit": "mm", "evidence": "paper"},
+      "slot_length": {"value": 29.8, "unit": "mm", "evidence": "paper"},
+      "slot_to_radiating_edge": {"value": 1.0, "unit": "mm", "evidence": "paper"}
+    },
+    "engineering_assumptions": {
+      "coordinate_convention": "ground lower-left is (-40, 0); feed enters from y=0; z=0 is the substrate bottom",
+      "patch_lower_edge_y": "feed_length",
+      "inset_definition": "centered opening of total width inset_width and depth inset_length",
+      "slot_definition": "centered horizontal opening; its upper edge is slot_to_radiating_edge below the upper patch edge",
+      "conductor_material": "copper",
+      "conductor_thickness": {"value": 0.035, "unit": "mm"},
+      "mut_present": false,
+      "radiation_padding": {"value": 30.0, "unit": "mm"}
+    },
+    "materials": {
+      "RF35_Substrate": {
+        "commercial_name": "RF-35",
+        "relative_permittivity": 3.5,
+        "dielectric_loss_tangent": 0.0018,
+        "evidence": "paper"
+      },
+      "Ground": {"material": "copper", "evidence": "engineering_assumption"},
+      "PatchFeed": {"material": "copper", "evidence": "engineering_assumption"},
+      "Region": {"material": "air", "evidence": "engineering_assumption"}
+    },
+    "objects": {
+      "RF35_Substrate": {
+        "primitive": "box",
+        "origin_mm": [-40.0, 0.0, 0.0],
+        "size_mm": [80.0, 80.0, 0.76],
+        "material": "Yeo2019_RF35_er3p5_tand0p0018"
+      },
+      "Ground": {
+        "primitive": "box",
+        "origin_mm": [-40.0, 0.0, -0.035],
+        "size_mm": [80.0, 80.0, 0.035],
+        "material": "copper"
+      },
+      "PatchFeed": {
+        "primitive": "united_patch_and_feed_with_inset_and_slot_cuts",
+        "patch_origin_mm": [-15.9, 27.3, 0.76],
+        "patch_size_mm": [31.8, 25.4, 0.035],
+        "feed_origin_mm": [-0.83, 0.0, 0.76],
+        "feed_size_mm": [1.66, 39.3, 0.035],
+        "inset_origin_mm": [-1.15, 27.3, 0.76],
+        "inset_size_mm": [2.3, 12.0, 0.035],
+        "slot_origin_mm": [-14.9, 50.7, 0.76],
+        "slot_size_mm": [29.8, 1.0, 0.035],
+        "material": "copper"
+      },
+      "Region": {
+        "primitive": "open_region",
+        "padding_order": ["+X", "-X", "+Y", "-Y", "+Z", "-Z"],
+        "padding_mm": [30.0, 30.0, 30.0, 0.0, 30.0, 30.0],
+        "boundary": "radiation_except_negative_y_port_face"
+      }
+    },
+    "operations": [
+      {"order": 1, "operation": "create_box", "target": "RF35_Substrate"},
+      {"order": 2, "operation": "create_box", "target": "Ground"},
+      {"order": 3, "operation": "create_box", "target": "PatchFeed", "role": "patch_body"},
+      {"order": 4, "operation": "subtract", "target": "PatchFeed", "tool": "InsetCutTool"},
+      {"order": 5, "operation": "create_box", "target": "FeedLine"},
+      {"order": 6, "operation": "unite", "target": "PatchFeed", "tool": "FeedLine"},
+      {"order": 7, "operation": "subtract", "target": "PatchFeed", "tool": "RadiatingEdgeSlotTool"},
+      {"order": 8, "operation": "create_region", "target": "Region"},
+      {"order": 9, "operation": "assign_radiation", "target": "Region", "faces": "all_except_negative_y"},
+      {"order": 10, "operation": "assign_wave_port", "target": "WavePort1", "face": "Region_negative_y"}
+    ],
+    "solver": {
+      "design_type": "HFSS",
+      "solution_type": "Modal",
+      "source_solver_in_paper": "CST Microwave Studio",
+      "setup": {
+        "name": "Setup1",
+        "type": "HFSSDriven",
+        "adaptive_frequency": {"value": 2.5, "unit": "GHz"},
+        "maximum_passes": 12,
+        "minimum_passes": 2,
+        "max_delta_s": 0.02
+      },
+      "sweep": {
+        "name": "Sweep1",
+        "type": "Interpolating",
+        "start": {"value": 1.5, "unit": "GHz"},
+        "stop": {"value": 3.7, "unit": "GHz"},
+        "points": 1101,
+        "interpolation_tolerance": 0.25,
+        "interpolation_max_solutions": 350
+      },
+      "port": {"name": "WavePort1", "type": "wave_port", "modes": 1, "impedance_ohm": 50},
+      "s_parameter": "S11_dB"
+    }
+  },
+  "default_absolute_tolerance": 0.0,
+  "tolerance_by_path": {
+    "parameters.*.value": 0.001,
+    "objects.*.*": 0.001,
+    "solver.*.*.value": 0.000001
+  },
+  "s11": {
+    "frequency_column": "frequency_ghz",
+    "value_column": "s11_db",
+    "threshold_db": -10.0,
+    "minimum_overlap_points": 100,
+    "resonance_relative_error_max": 0.01,
+    "bandwidth_relative_error_max": 0.10,
+    "curve_rmse_db_max": 1.5,
+    "required": true,
+    "targets": [
+      {
+        "name": "fundamental",
+        "kind": "resonance",
+        "window_ghz": [2.35, 2.65],
+        "threshold_db": -10.0,
+        "minimum_points": 50,
+        "resonance_relative_error_max": 0.01,
+        "band_edge_relative_error_max": 0.10
+      },
+      {
+        "name": "upper_mode",
+        "kind": "resonance",
+        "window_ghz": [3.25, 3.65],
+        "threshold_db": -10.0,
+        "minimum_points": 50,
+        "resonance_relative_error_max": 0.01,
+        "band_edge_relative_error_max": 0.10
+      }
+    ]
+  }
+}

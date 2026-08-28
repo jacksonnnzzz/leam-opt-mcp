@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "case_id": "wifi_patch_5250",
+  "recorded_date": "2026-08-28",
+  "purpose": "Recheck primary and related sources before expanding the engineering-assumption search.",
+  "primary_source": {
+    "title": "Wi-Fi Access Point Design Concept Targeting Indoor Positioning for Smartphones and IoT",
+    "doi": "10.3390/s22030797",
+    "publisher_url": "https://www.mdpi.com/1424-8220/22/3/797",
+    "local_pdf_sha256": "8b089a4ef87cbf316bae4e1af59c10e358282f0780e6942b49e778d8738c272b"
+  },
+  "page_audit": [
+    {
+      "page": 4,
+      "evidence": "The assembly description states 50-ohm coaxial cable with a U.FL connector, while the antenna assembly also uses SMA adaptors. It provides no connector dimensions."
+    },
+    {
+      "page": 5,
+      "evidence": "Section 3.1 states FR-4 er=4.5, tan(delta)=0.025, h=1.5 mm; Figure 2 shows the patch, substrate, reflector, and an SMA connector; Equation (3) specifies the 50-ohm feed-location relation. No conductor, SMA, mesh, or boundary dimensions are stated."
+    },
+    {
+      "page": 6,
+      "evidence": "Table 1 states only Lg, Wg=WR, LR, Lp, Wp, and Xp. Figure 3 is a plotted simulated S11 curve with no numeric data table."
+    },
+    {
+      "page": 15,
+      "evidence": "The article states 'Data Availability Statement: Not applicable.' No supplementary CST project or numeric S11 dataset is identified."
+    }
+  ],
+  "related_source_audit": [
+    {
+      "title": "New Approach for Indoor Positioning With Wi-Fi Using Quadratic Antenna Arrays",
+      "doi": "10.1109/LCOMM.2020.3035216",
+      "relationship": "Prior concept cited as reference 16.",
+      "result": "No author-hosted CST model or accessible supplementary connector/boundary specification was located."
+    },
+    {
+      "title": "Evaluation of Low Cost Indoor Positioning for Next Generation IoT Industrial Applications",
+      "relationship": "Prior evaluation cited as reference 17.",
+      "result": "No supplementary CST model or missing single-element feed dimensions were located."
+    }
+  ],
+  "confirmed_source_gaps": [
+    "conductor material, conductivity, thickness, and roughness",
+    "SMA and U.FL transition geometry",
+    "probe inner and outer dimensions",
+    "connector dielectric and feed length",
+    "CST boundary placement and type",
+    "mesh and convergence settings",
+    "numeric Figure 3 S11 samples",
+    "CST project file"
+  ],
+  "decision": "No new source-backed geometry value can be added. A second search may combine only explicitly labelled engineering assumptions selected from the completed v1 electromagnetic evidence; all 13 paper parameters remain hash-frozen."
+}

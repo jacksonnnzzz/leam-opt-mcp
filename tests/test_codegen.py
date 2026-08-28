@@ -101,10 +101,35 @@ def test_existing_builder_exports_without_aedt_or_modeling_retry(tmp_path):
     assert fake.modeler.created == [([0, 0, 0], ["W", "W2", "1mm"], "part")]
     assert result["revision"] == 1
     assert Path(result["latest_python_file"]).name == "generated_model.py"
+    versioned_runner = Path(result["versioned_aedt_runner"])
+    latest_runner = Path(result["aedt_runner"])
+    assert versioned_runner.name == "run_in_aedt_v001.py"
+    assert latest_runner.name == "run_in_aedt.py"
+    assert versioned_runner.is_file()
+    assert latest_runner.is_file()
+    versioned_runner_source = versioned_runner.read_text("utf-8")
+    latest_runner_source = latest_runner.read_text("utf-8")
+    compile(versioned_runner_source, str(versioned_runner), "exec")
+    assert "from __future__" not in versioned_runner_source
+    assert "generated_model_v001.py" in versioned_runner_source
+    assert "generated_model_v001.py" in latest_runner_source
+    assert "create_new_design=True" in versioned_runner_source
+    assert "SaveProject" not in versioned_runner_source
+    assert "Analyze" not in versioned_runner_source
+    assert result["aedt_runner_contract"].endswith("never saves or solves.")
+    assert result["native_aedt_adapter_sha256"] == hashlib.sha256(
+        Path(result["native_aedt_adapter"]).read_bytes()
+    ).hexdigest()
+    assert exported_state.artifacts["aedt_runner_v001"] == str(versioned_runner)
+    assert exported_state.artifacts["aedt_runner"] == str(latest_runner)
 
+    versioned_runner.unlink()
+    latest_runner.unlink()
     repeated = PythonArtifactService(store, _NeverRunModeling()).generate(state.job_id)
     assert repeated["revision"] == 1
     assert repeated["reused"] is True
+    assert Path(repeated["versioned_aedt_runner"]).is_file()
+    assert Path(repeated["aedt_runner"]).is_file()
 
 
 def test_export_rejects_unresolved_parameter(tmp_path):
@@ -115,6 +140,69 @@ def test_export_rejects_unresolved_parameter(tmp_path):
     )
     with pytest.raises(ValueError, match="finite numeric value"):
         PythonArtifactService(store, _NeverRunModeling()).generate(state.job_id)
+
+
+def test_simulation_export_does_not_create_or_replace_native_geometry_runner(tmp_path):
+    store, state = _job_with_builder(tmp_path)
+    simulation = store.write_artifact(
+        state.job_id,
+        "simulation_setup.py",
+        "hfss.create_setup(name='Setup1')\n",
+    )
+    state.artifacts["simulation_setup"] = str(simulation)
+    store.save_state(state)
+    service = PythonArtifactService(store, _NeverRunModeling())
+
+    geometry = service.generate(state.job_id, through_stage="boolean")
+    stable_runner = Path(geometry["aedt_runner"])
+    runner_before = stable_runner.read_bytes()
+    assert b"generated_model_v001.py" in runner_before
+
+    simulation_export = service.generate(state.job_id, through_stage="simulation_setup")
+
+    assert simulation_export["revision_tag"] == "v002"
+    assert simulation_export["native_aedt_execution_available"] is False
+    assert simulation_export["native_aedt_execution_scope"] == "unsupported_for_simulation_setup"
+    assert "external CPython/PyAEDT" in simulation_export["native_aedt_execution_reason"]
+    assert "versioned_aedt_runner" not in simulation_export
+    assert "aedt_runner" not in simulation_export
+    assert stable_runner.read_bytes() == runner_before
+    assert b"generated_model_v001.py" in stable_runner.read_bytes()
+    assert b"generated_model.py" not in stable_runner.read_bytes()
+    saved = store.load_state(state.job_id)
+    assert saved.artifacts["aedt_runner_v001"] == str(Path(geometry["versioned_aedt_runner"]))
+    assert saved.artifacts["aedt_runner"] == str(stable_runner)
+    assert "aedt_runner_v002" not in saved.artifacts
+    manifest = json.loads(
+        Path(simulation_export["manifest"]).read_text(encoding="utf-8")
+    )
+    assert manifest["native_aedt_execution_available"] is False
+    assert "aedt_runner" not in manifest
+
+
+def test_first_simulation_export_has_no_native_aedt_wrapper(tmp_path):
+    store, state = _job_with_builder(tmp_path)
+    simulation = store.write_artifact(
+        state.job_id,
+        "simulation_setup.py",
+        "hfss.create_setup(name='Setup1')\n",
+    )
+    state.artifacts["simulation_setup"] = str(simulation)
+    store.save_state(state)
+
+    result = PythonArtifactService(store, _NeverRunModeling()).generate(
+        state.job_id,
+        through_stage="simulation_setup",
+    )
+
+    assert result["revision_tag"] == "v001"
+    assert result["native_aedt_execution_available"] is False
+    job_dir = store.job_dir(state.job_id)
+    assert not (job_dir / "run_in_aedt.py").exists()
+    assert not (job_dir / "run_in_aedt_v001.py").exists()
+    saved = store.load_state(state.job_id)
+    assert "aedt_runner" not in saved.artifacts
+    assert "aedt_runner_v001" not in saved.artifacts
 
 
 def test_export_rejects_source_stage_outside_job(tmp_path):

@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "case_id": "wifi_patch_5250",
+  "recorded_at": "2026-08-26",
+  "environment": {
+    "aedt": "2025.1",
+    "pyaedt": "0.26.3"
+  },
+  "paper_gate": {
+    "frequency_band_ghz": [
+      5.15,
+      5.35
+    ],
+    "maximum_s11_db": -10.0,
+    "condition": "every point in the complete band must be at or below the threshold"
+  },
+  "rejected_center_referenced_xp_translation": {
+    "reason_rejected": "Figure 2 and Equation (3) define Xp from a radiating edge, not from the patch center.",
+    "curve_sha256": "3e74808c0d8d22b62ea8bb602ccf4f019bcc946435be0503fbe0969f720102c9",
+    "point_count": 501,
+    "resonant_frequency_ghz": 5.167,
+    "minimum_s11_db": -33.95725086806086,
+    "maximum_s11_in_5p15_to_5p35_db": -5.782864240941946,
+    "paper_gate_passed": false
+  },
+  "edge_referenced_xp_translation": {
+    "feed_coordinate_expression": "x=-Lp/2+Xp",
+    "evaluated_feed_x_mm": -3.385,
+    "curve_sha256": "93426ae1df6cd8fbac4636d1d0bac8ebb790ea2acb9931bc603a6fa2d7e38889",
+    "point_count": 501,
+    "frequency_range_ghz": [
+      5.0,
+      5.5
+    ],
+    "resonant_frequency_ghz": 5.183,
+    "minimum_s11_db": -19.320212641911784,
+    "maximum_s11_in_5p15_to_5p35_db": -7.106688591506792,
+    "paper_gate_passed": false
+  },
+  "status": "solved_fail_paper_gate_after_evidence_correction",
+  "interpretation": "The source-backed Xp correction improves the complete-band worst point but does not reproduce the paper's full 5.15-5.35 GHz -10 dB band. Unpublished SMA, conductor, boundary, and CST implementation choices remain possible causes; paper-explicit dimensions must not be tuned silently.",
+  "policy": "Do not use either curve as an independent-candidate reference. A future controlled connector/conductor study must be versioned separately."
+}

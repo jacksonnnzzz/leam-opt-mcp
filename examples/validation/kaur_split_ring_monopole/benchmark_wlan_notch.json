@@ -1,0 +1,422 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "kaur_2021_wlan_notch",
+  "source": {
+    "title": "Split Ring Slot Loaded Compact CPW-Fed Printed Monopole Antennas for Ultra-Wideband Applications with Band Notch Characteristics",
+    "url": "https://doi.org/10.2528/PIERC20122401",
+    "source_type": "paper",
+    "accessed_on": "2026-08-12",
+    "notes": [
+      "Geometry/material dimensions are from Figures 1/5/7 and Tables 1/2.",
+      "Published response is VSWR; local curves are dB(S11).",
+      "Paper-unresolved implementation details are isolated in assumptions.json."
+    ]
+  },
+  "reference": {
+    "case": "wlan_notch",
+    "design_name": "Kaur2021WLANNotch",
+    "parameters": {
+      "substrate_width_WS": {
+        "value": 18.0,
+        "unit": "mm"
+      },
+      "substrate_length_LS": {
+        "value": 18.0,
+        "unit": "mm"
+      },
+      "substrate_thickness_h": {
+        "value": 1.6,
+        "unit": "mm"
+      },
+      "substrate_relative_permittivity": {
+        "value": 4.4,
+        "unit": "ratio"
+      },
+      "substrate_loss_tangent": {
+        "value": 0.02,
+        "unit": "ratio"
+      },
+      "patch_width_WP": {
+        "value": 13.5,
+        "unit": "mm"
+      },
+      "patch_length_LP": {
+        "value": 9.0,
+        "unit": "mm"
+      },
+      "ground_width_WG": {
+        "value": 7.95,
+        "unit": "mm"
+      },
+      "ground_length_LG": {
+        "value": 5.4,
+        "unit": "mm"
+      },
+      "feed_width_WF": {
+        "value": 1.2,
+        "unit": "mm"
+      },
+      "feed_length_LF": {
+        "value": 5.934,
+        "unit": "mm"
+      },
+      "stub_width_X1": {
+        "value": 6.0,
+        "unit": "mm"
+      },
+      "stub_length_Y1": {
+        "value": 1.5,
+        "unit": "mm"
+      },
+      "srs_outer_radius_R1": {
+        "value": 2.4,
+        "unit": "mm"
+      },
+      "srs_inner_radius_R2": {
+        "value": 2.1,
+        "unit": "mm"
+      },
+      "srs_split_gap_S1": {
+        "value": 0.4,
+        "unit": "mm"
+      }
+    },
+    "paper_response_target": {
+      "metric": "VSWR",
+      "rejection_band_ghz": [
+        5.15,
+        5.81
+      ],
+      "center_ghz": 5.3,
+      "simulated_peak": 5.44
+    },
+    "engineering_assumptions": {
+      "conductor_model": "zero_thickness_pec_sheets",
+      "coordinate_convention": "substrate lower-left=(-9,0,0), feed points +y, metal z=h",
+      "patch_top_margin_mm": 1.566,
+      "srs_center": "x=0, y=patch_bottom",
+      "srs_split_orientation": "bottom",
+      "port_sheet": "XZ across CPW centre opening",
+      "radiation_padding_mm": 25.0
+    },
+    "materials": {
+      "substrate": {
+        "name": "FR4_Kaur_2021_er4p4_tand0p02",
+        "relative_permittivity": 4.4,
+        "dielectric_loss_tangent": 0.02
+      },
+      "conductor": {
+        "name": "pec",
+        "model": "zero_thickness_sheet"
+      }
+    },
+    "objects": {
+      "FR4_Substrate": {
+        "primitive": "box",
+        "material": "FR4_Kaur_2021_er4p4_tand0p02",
+        "origin_mm": [
+          -9.0,
+          0,
+          0
+        ],
+        "size_mm": [
+          18.0,
+          18.0,
+          1.6
+        ]
+      },
+      "LeftGround": {
+        "primitive": "rectangle",
+        "material": "pec",
+        "origin_mm": [
+          -9.0,
+          0,
+          1.6
+        ],
+        "size_mm": [
+          7.95,
+          5.4
+        ]
+      },
+      "RightGround": {
+        "primitive": "rectangle",
+        "material": "pec",
+        "origin_mm": [
+          1.0499999999999998,
+          0,
+          1.6
+        ],
+        "size_mm": [
+          7.95,
+          5.4
+        ]
+      },
+      "Patch": {
+        "primitive": "rectangle",
+        "material": "pec",
+        "origin_mm": [
+          -6.75,
+          7.434,
+          1.6
+        ],
+        "size_mm": [
+          13.5,
+          9.0
+        ]
+      },
+      "MatchingStub": {
+        "primitive": "rectangle",
+        "material": "pec",
+        "origin_mm": [
+          -3.0,
+          5.934,
+          1.6
+        ],
+        "size_mm": [
+          6.0,
+          1.5
+        ]
+      },
+      "FeedLine": {
+        "primitive": "rectangle",
+        "material": "pec",
+        "origin_mm": [
+          -0.6,
+          0,
+          1.6
+        ],
+        "size_mm": [
+          1.2,
+          5.934
+        ]
+      },
+      "LumpedPortSheet": {
+        "primitive": "rectangle",
+        "material": "vacuum",
+        "origin_mm": [
+          -1.0499999999999998,
+          0,
+          0
+        ],
+        "size_mm": [
+          2.0999999999999996,
+          1.6
+        ]
+      },
+      "Region": {
+        "primitive": "open_region",
+        "material": "air"
+      },
+      "SRSOuterTool": {
+        "primitive": "circle",
+        "material": "vacuum",
+        "center_mm": [
+          0,
+          7.434,
+          1.6
+        ],
+        "radius_mm": 2.4
+      },
+      "SRSInnerKeepTool": {
+        "primitive": "circle",
+        "material": "vacuum",
+        "center_mm": [
+          0,
+          7.434,
+          1.6
+        ],
+        "radius_mm": 2.1
+      },
+      "SRSSplitKeepTool": {
+        "primitive": "rectangle",
+        "material": "vacuum",
+        "origin_mm": [
+          -0.2,
+          5.034000000000001,
+          1.6
+        ],
+        "size_mm": [
+          0.4,
+          2.4
+        ]
+      }
+    },
+    "operations": [
+      {
+        "order": 1,
+        "operation": "create_substrate",
+        "target": "FR4_Substrate"
+      },
+      {
+        "order": 2,
+        "operation": "create_conductor",
+        "target": "LeftGround"
+      },
+      {
+        "order": 3,
+        "operation": "create_conductor",
+        "target": "RightGround"
+      },
+      {
+        "order": 4,
+        "operation": "create_conductor",
+        "target": "Patch"
+      },
+      {
+        "order": 5,
+        "operation": "create_conductor",
+        "target": "MatchingStub"
+      },
+      {
+        "order": 6,
+        "operation": "create_conductor",
+        "target": "FeedLine"
+      },
+      {
+        "order": 7,
+        "operation": "unite",
+        "target": "Patch",
+        "tools": [
+          "MatchingStub",
+          "FeedLine"
+        ]
+      },
+      {
+        "order": 8,
+        "operation": "unite",
+        "target": "LeftGround",
+        "tools": [
+          "RightGround"
+        ]
+      },
+      {
+        "order": 9,
+        "operation": "subtract",
+        "target": "SRSOuterTool",
+        "tool": "SRSInnerKeepTool"
+      },
+      {
+        "order": 10,
+        "operation": "subtract",
+        "target": "SRSOuterTool",
+        "tool": "SRSSplitKeepTool"
+      },
+      {
+        "order": 11,
+        "operation": "subtract",
+        "target": "Patch",
+        "tool": "SRSOuterTool"
+      },
+      {
+        "order": 12,
+        "operation": "assign_perfect_e",
+        "target": "Patch"
+      },
+      {
+        "order": 13,
+        "operation": "assign_perfect_e",
+        "target": "LeftGround"
+      },
+      {
+        "order": 14,
+        "operation": "create_lumped_port",
+        "target": "LumpedPort1",
+        "sheet": "LumpedPortSheet",
+        "integration_line_mm": [
+          [
+            0.6,
+            0,
+            1.6
+          ],
+          [
+            1.0499999999999998,
+            0,
+            1.6
+          ]
+        ]
+      },
+      {
+        "order": 15,
+        "operation": "create_region",
+        "target": "Region"
+      },
+      {
+        "order": 16,
+        "operation": "assign_radiation",
+        "target": "Region"
+      }
+    ],
+    "solver": {
+      "design_type": "HFSS",
+      "solution_type": "Modal",
+      "port": {
+        "name": "LumpedPort1",
+        "type": "lumped_port",
+        "impedance_ohm": 50
+      },
+      "setup": {
+        "name": "Setup1",
+        "type": "HFSSDriven",
+        "adaptive_frequency_ghz": 7.5,
+        "maximum_passes": 14,
+        "minimum_passes": 2,
+        "max_delta_s": 0.02
+      },
+      "sweep": {
+        "name": "Sweep1",
+        "type": "Interpolating",
+        "start_ghz": 3.0,
+        "stop_ghz": 12.0,
+        "points": 901
+      },
+      "s_parameter": "S11_dB"
+    }
+  },
+  "default_absolute_tolerance": 0.0,
+  "tolerance_by_path": {
+    "parameters.*.value": 0.001
+  },
+  "s11": {
+    "frequency_column": "frequency_ghz",
+    "value_column": "s11_db",
+    "threshold_db": -9.5424250944,
+    "minimum_overlap_points": 100,
+    "resonance_relative_error_max": 0.02,
+    "bandwidth_relative_error_max": 0.1,
+    "curve_rmse_db_max": 1.5,
+    "required": true,
+    "targets": [
+      {
+        "name": "pre_notch_match",
+        "kind": "passband",
+        "window_ghz": [
+          3.0,
+          5.15
+        ],
+        "threshold_db": -9.5424250944,
+        "minimum_points": 20
+      },
+      {
+        "name": "wlan_rejection",
+        "kind": "stopband",
+        "window_ghz": [
+          5.15,
+          5.81
+        ],
+        "threshold_db": -9.5424250944,
+        "minimum_points": 20
+      },
+      {
+        "name": "post_notch_match",
+        "kind": "passband",
+        "window_ghz": [
+          5.81,
+          12.0
+        ],
+        "threshold_db": -9.5424250944,
+        "minimum_points": 20
+      }
+    ]
+  },
+  "title": "Kaur 2021 CPW-fed UWB monopole with the WLAN circular split-ring slot"
+}

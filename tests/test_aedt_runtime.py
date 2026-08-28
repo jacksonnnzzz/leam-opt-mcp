@@ -2,10 +2,12 @@ import pytest
 
 import antenna_mcp.aedt_runtime as aedt_runtime
 from antenna_mcp.aedt_runtime import (
+    aedt_grpc_session_is_active,
     ensure_strict_existing_attachment,
     is_aedt_app_released,
     planned_transport,
     temporary_multi_desktop,
+    temporary_grpc_session_probe,
 )
 
 
@@ -29,6 +31,27 @@ def test_transport_can_be_forced_secure(tmp_path):
     config = planned_transport({"ANSYSEM_ROOT251": str(root), "ANTENNA_MCP_GRPC_MODE": "secure"})
     assert config["mode"] == "secure"
     assert config["pre_service_pack_args"] is False
+
+
+def test_grpc_probe_uses_owner_checked_local_fallback(monkeypatch):
+    monkeypatch.setattr(aedt_runtime, "_pyaedt_grpc_probe", lambda port, machine: False)
+    monkeypatch.setattr(
+        aedt_runtime, "_local_aedt_listener_is_active", lambda port: port == 50051
+    )
+    assert aedt_grpc_session_is_active(50051, "127.0.0.1") is True
+    assert aedt_grpc_session_is_active(50052, "127.0.0.1") is False
+
+
+def test_grpc_probe_never_applies_local_fallback_to_remote_machine(monkeypatch):
+    called = []
+    monkeypatch.setattr(aedt_runtime, "_pyaedt_grpc_probe", lambda port, machine: False)
+    monkeypatch.setattr(
+        aedt_runtime,
+        "_local_aedt_listener_is_active",
+        lambda port: called.append(port) or True,
+    )
+    assert aedt_grpc_session_is_active(50051, "remote.example") is False
+    assert called == []
 
 
 class _Desktop:
@@ -95,3 +118,12 @@ def test_temporary_multi_desktop_restores_after_exception(monkeypatch):
             raise RuntimeError("boom")
 
     assert settings.use_multi_desktop is False
+
+
+def test_temporary_grpc_probe_patches_and_restores_pyaedt_desktop():
+    from ansys.aedt.core import desktop as desktop_module
+
+    original = desktop_module.is_grpc_session_active
+    with temporary_grpc_session_probe():
+        assert desktop_module.is_grpc_session_active is aedt_grpc_session_is_active
+    assert desktop_module.is_grpc_session_active is original

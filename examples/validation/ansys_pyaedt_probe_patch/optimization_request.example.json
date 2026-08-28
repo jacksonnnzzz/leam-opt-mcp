@@ -1,0 +1,45 @@
+{
+  "project_path": "./examples/validation/ansys_pyaedt_probe_patch/local_results/OfficialProbeFedPatch.aedt",
+  "design_name": "OfficialProbeFedPatch",
+  "setup_sweep": "Setup1 : Sweep1",
+  "parameters": [
+    {"name": "Patch_length", "lower": 9.35, "upper": 9.8, "unit": "mm"},
+    {"name": "Patch_width", "lower": 9.0, "upper": 9.5, "unit": "mm"},
+    {"name": "probe_x_rel", "lower": 0.44, "upper": 0.53, "unit": "ratio"}
+  ],
+  "metrics": [
+    {
+      "name": "worst_s11_9p9_to_10p1_db",
+      "expression": "auto_s11",
+      "reducer": "max",
+      "frequency_min_ghz": 9.9,
+      "frequency_max_ghz": 10.1,
+      "goal": "minimize",
+      "weight": 1.0
+    },
+    {
+      "name": "s11_at_10ghz_db",
+      "expression": "auto_s11",
+      "reducer": "at_frequency",
+      "frequency_ghz": 10.0,
+      "goal": "minimize",
+      "weight": 0.25
+    }
+  ],
+  "max_trials": 12,
+  "seed": 42,
+  "strategy": "adaptive_surrogate",
+  "initial_samples": 7,
+  "candidate_pool_size": 1024,
+  "exploration_weight": 1.5,
+  "require_convergence": true,
+  "max_delta_s": 0.02,
+  "maximum_adaptive_passes": 12,
+  "verify_parameter_effects": true,
+  "initial_points": [
+    {"Patch_length": 9.57, "Patch_width": 9.25, "probe_x_rel": 0.485}
+  ],
+  "save_best_as": "official_probe_patch_optimized.aedt",
+  "session_mode": "existing",
+  "grpc_port": 50051
+}

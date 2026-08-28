@@ -103,6 +103,10 @@ class OptimizationRequest(BaseModel):
     initial_samples: int | None = Field(default=None, ge=1)
     candidate_pool_size: int = Field(default=512, ge=32, le=100000)
     exploration_weight: float = Field(default=1.5, ge=0.0, le=10.0)
+    require_convergence: bool = True
+    max_delta_s: float = Field(default=0.02, gt=0.0)
+    maximum_adaptive_passes: int | None = Field(default=None, ge=1, le=100)
+    verify_parameter_effects: bool = True
     initial_points: list[dict[str, float]] = Field(default_factory=list)
     save_best_as: str = "optimized.aedt"
     session_mode: Literal["new", "existing"] = "new"
@@ -110,6 +114,9 @@ class OptimizationRequest(BaseModel):
 
     @model_validator(mode="after")
     def valid_optimization(self) -> "OptimizationRequest":
+        setup_parts = [item.strip() for item in self.setup_sweep.split(":")]
+        if len(setup_parts) != 2 or not all(setup_parts):
+            raise ValueError("setup_sweep must use 'SetupName : SweepName'")
         names = [parameter.name for parameter in self.parameters]
         if len(names) != len(set(names)):
             raise ValueError("parameter names must be unique")
@@ -149,6 +156,10 @@ class OptimizationPlan(BaseModel):
     initial_samples: int | None = Field(default=None, ge=1)
     candidate_pool_size: int = Field(default=512, ge=32, le=100000)
     exploration_weight: float = Field(default=1.5, ge=0.0, le=10.0)
+    require_convergence: bool = True
+    max_delta_s: float = Field(default=0.02, gt=0.0)
+    maximum_adaptive_passes: int | None = Field(default=None, ge=1, le=100)
+    verify_parameter_effects: bool = True
     initial_points: list[dict[str, float]] = Field(default_factory=list)
     save_best_as: str = "optimized.aedt"
 
@@ -198,8 +209,9 @@ class Evaluation(BaseModel):
     trial: int
     parameters: dict[str, float]
     metrics: dict[str, float]
-    score: float
-    status: Literal["ok", "failed"] = "ok"
+    score: float | None
+    status: Literal["ok", "rejected", "failed"] = "ok"
+    convergence: dict[str, Any] | None = None
     error: str | None = None
 
 

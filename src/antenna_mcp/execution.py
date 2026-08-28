@@ -21,6 +21,7 @@ from .aedt_runtime import (
     ensure_strict_existing_attachment,
     prepare_pyaedt_environment,
     temporary_multi_desktop,
+    temporary_grpc_session_probe,
 )
 from .review import ArtifactReviewService
 
@@ -1081,16 +1082,16 @@ def _default_hfss_factory(**kwargs: Any) -> Any:
     if session_mode == "existing":
         if grpc_port is None:
             raise ValueError("session_mode='existing' requires an explicit AEDT gRPC port")
-        from ansys.aedt.core.generic.general_methods import is_grpc_session_active
+        from .aedt_runtime import aedt_grpc_session_is_active
 
-        if not is_grpc_session_active(grpc_port, "127.0.0.1"):
+        if not aedt_grpc_session_is_active(grpc_port, "127.0.0.1"):
             raise RuntimeError(
                 f"no active AEDT gRPC session is available on port {grpc_port}; refusing to launch a fallback session"
             )
         # Force PyAEDT to honor the explicit port even if this Python process has
         # cached another Desktop object. Create a dedicated project/design inside
         # that Desktop instead of copying or modifying the user's active project.
-        with temporary_multi_desktop():
+        with temporary_grpc_session_probe(), temporary_multi_desktop():
             app = Hfss(
                 non_graphical=False,
                 new_desktop=False,

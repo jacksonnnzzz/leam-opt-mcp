@@ -21,8 +21,20 @@ The command writes a versioned pair and updates stable `latest` aliases:
   a `build(hfss)` function;
 - `python_export_manifest_v001.json`, which records source hashes and the license boundary;
 - `generated_model.py` and `python_export_manifest.json`, stable aliases for the latest revision.
+- for geometry-only (`boolean`) exports, `run_in_aedt_vNNN.py` and `run_in_aedt.py`,
+  IronPython-compatible AEDT entrypoints for the immutable and latest geometry models.
+  They delegate to the single reviewed native adapter, create a new design, and never save
+  or solve.
 
 Reading, importing, or reviewing `generated_model.py` requires neither AEDT nor PyAEDT.
+To inspect geometry, keep the target project open and choose the generated `run_in_aedt_vNNN.py`
+with **AEDT > Tools > Run Script**. Do not select `generated_model_vNNN.py` directly. The wrapper
+hash-checks the adapter shipped by the installed package or complete source checkout before it
+executes anything.
+Exports through `simulation_setup` deliberately do not create or replace a native wrapper: the
+native adapter does not expose setup, port, or boundary APIs. Run those full artifacts with
+external CPython/PyAEDT. This prevents a native run from building partial geometry and then
+failing halfway through simulation setup.
 Executing `build(hfss)` modifies the explicitly supplied HFSS session and therefore requires
 a working AEDT installation and license at that later stage.
 

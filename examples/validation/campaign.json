@@ -1,0 +1,625 @@
+{
+  "schema_version": "1.0",
+  "campaign_id": "antenna_reference_correctness_campaign",
+  "title": "Antenna reconstruction correctness validation campaign",
+  "status_vocabulary": {
+    "solved/pass": "A local HFSS reference was built, solved, and passed its stated reference gate. This does not imply that an independently generated candidate has passed.",
+    "candidate-solved/pass": "Both the local reference and an independently generated candidate passed their contracts and same-version electromagnetic comparison gates.",
+    "solved/fail-paper-gate": "A local HFSS translation was built and solved, but it did not reproduce the paper-explicit electromagnetic acceptance targets and therefore is not an accepted candidate reference.",
+    "static-tested/pending-solve": "The benchmark contract and deterministic implementation pass offline checks, but no accepted HFSS reference curve has been solved yet.",
+    "static-tested/blocked": "The benchmark contract and deterministic implementation pass offline checks, but no accepted HFSS reference curve exists because the solver license is unavailable.",
+    "queued": "The source has been selected, but no frozen benchmark implementation or accepted HFSS result exists."
+  },
+  "campaign_rules": [
+    "Never describe an offline contract or import test as electromagnetic correctness evidence.",
+    "A license checkout failure is an execution blocker, not an antenna-model failure.",
+    "Paper-explicit values and cross-solver engineering assumptions must remain separately labelled.",
+    "A generated candidate is accepted only after both its contract and its independently solved S11 curve pass the applicable gates.",
+    "Use repository-relative artifact paths; do not depend on a specific project name, gRPC port, user directory, or job identifier."
+  ],
+  "summary": {
+    "case_records": 5,
+    "implemented_reference_designs": 7,
+    "solved_pass": 1,
+    "solved_failed_paper_gate": 4,
+    "static_tested_blocked": 0,
+    "static_tested_pending_solve": 0,
+    "reference_designs_solved": 7,
+    "reference_designs_passing_reference_gate": 1,
+    "reference_designs_failing_reference_gate": 6,
+    "queued": 0,
+    "independent_candidates_attempted": 1,
+    "independent_candidate_artifact_sets_completed": 3,
+    "independent_candidate_contracts_failed": 3,
+    "independent_candidate_contracts_passed": 1,
+    "independently_generated_candidates_passed": 1,
+    "candidate_solved_pass": 1,
+    "convergence_gated_optimization_studies_completed": 1,
+    "optimization_trials_completed": 12,
+    "optimization_trials_converged": 12
+  },
+  "cases": [
+    {
+      "case_id": "ansys_pyaedt_probe_patch",
+      "title": "Official PyAEDT probe-fed patch",
+      "status": "candidate-solved/pass",
+      "status_scope": "local HFSS reference and independent candidate passed G0-G5 including same-version S11 comparison",
+      "source": {
+        "kind": "official_example",
+        "title": "Probe-fed patch antenna - PyAEDT Examples",
+        "url": "https://examples.aedt.docs.pyansys.com/version/dev/examples/high_frequency/antenna/patch.html",
+        "doi": null,
+        "evidence": "Official example construction and its documented parameters."
+      },
+      "artifacts": {
+        "case_launcher": "cases/ansys_probe_patch/run_case.py",
+        "benchmark": "ansys_pyaedt_probe_patch/benchmark.json",
+        "reference_model": "ansys_pyaedt_probe_patch/reference_model.py",
+        "runner": "ansys_pyaedt_probe_patch/run_reference.py",
+        "optimization_request_example": "ansys_pyaedt_probe_patch/optimization_request.example.json",
+        "recorded_optimization_study": "ansys_pyaedt_probe_patch/reference_data/optimization_study_2026_08_28.json",
+        "documentation": "ansys_pyaedt_probe_patch/README.md"
+      },
+      "implementation_state": {
+        "benchmark_contract": "implemented",
+        "offline_static_tests": "pass",
+        "hfss_reference_build": "pass",
+        "hfss_reference_solve": "pass",
+        "reference_gate": "pass",
+        "independent_candidate_generation": "completed_through_simulation_setup_on_2026_08_26",
+        "independent_candidate_contract": "passed_124_of_124_checks",
+        "independent_candidate_fragment_gate": "passed_safety_stage_ownership_pyaedt_api_and_execution_semantics",
+        "offline_generation_gates": "text_visual_attachment_routing_frozen_source_contract_cross_stage_stackup_topology_stage_ownership_structured_solver_and_pyaedt_api_integrated",
+        "latest_strict_retry": "completed_and_exported_as_immutable_generated_model_v001",
+        "independent_candidate_build": "pass_in_empty_existing_terminal_design",
+        "independent_candidate_solve": "pass_converged_at_adaptive_pass_11",
+        "independent_candidate_s11_export": "pass_401_points_8_to_12_ghz",
+        "independent_candidate_electromagnetic_gate": "pass",
+        "optimization_parameter_effect_preflight": "pass_all_three_variables",
+        "optimization_study": "completed_12_of_12_trials_all_converged",
+        "optimization_source_project_integrity": "pass_sha256_unchanged",
+        "optimization_best_project_saved_separately": "pass"
+      },
+      "key_parameter_evidence": [
+        "Copper ground and signal layers are each 0.035 mm thick; the Duroid substrate is 0.5 mm thick.",
+        "The rectangular patch is 9.57 mm by 9.25 mm and targets 10 GHz.",
+        "The probe relative x offset is 0.485; the terminal solution adapts at 10 GHz and sweeps 8-12 GHz.",
+        "The expanded official construction contains nine named model objects plus Radiation, Perfect E, and Wave Port boundaries."
+      ],
+      "reference_targets": {
+        "target_resonance_ghz": 10.0,
+        "maximum_resonance_relative_error": 0.01,
+        "maximum_s11_db": -10.0
+      },
+      "recorded_local_reference_result": {
+        "resonance_ghz": 9.98,
+        "resonance_relative_error": 0.002,
+        "minimum_s11_db": -16.115089611371157,
+        "minus_10db_crossings_ghz": [
+          9.853843019063927,
+          10.111105462350334
+        ],
+        "minus_10db_bandwidth_mhz": 257.26244328640746
+      },
+      "recorded_independent_candidate_contract_result": {
+        "passed": true,
+        "checks_passed": 124,
+        "checks_total": 124,
+        "categories": {
+          "parameters": "24/24",
+          "materials": "5/5",
+          "objects": "34/34",
+          "operations": "48/48",
+          "solver": "13/13"
+        },
+        "fragment_gate": {
+          "model_3d": "pass",
+          "boolean": "pass",
+          "simulation_setup": "pass"
+        },
+        "hfss_execution": "pass"
+      },
+      "recorded_independent_candidate_electromagnetic_result": {
+        "passed": true,
+        "validation_level": "electromagnetic",
+        "adaptive_passes_completed": 11,
+        "final_max_magnitude_delta_s": 0.013212,
+        "adaptive_delta_s_limit": 0.02,
+        "sweep_status": "converged_and_passive_normal_completion",
+        "point_count": 401,
+        "frequency_range_ghz": [
+          8.0,
+          12.0
+        ],
+        "resonance_ghz": 10.04,
+        "resonance_relative_error": 0.006012024048096064,
+        "minus_10db_crossings_ghz": [
+          9.91214550950015,
+          10.171912591582522
+        ],
+        "minus_10db_bandwidth_mhz": 259.767082082372,
+        "bandwidth_relative_error": 0.009735734310729266,
+        "curve_rmse_db": 0.9305774831025786,
+        "candidate_s11_sha256": "ad52401ee13aa7b7f015cbf5e6605425c27de792cac276af067d79366531ed1c",
+        "contract_checks": "124/124"
+      },
+      "recorded_optimization_result": {
+        "passed": true,
+        "validation_scope": "bounded_convergence_gated_optimizer_regression",
+        "trial_count": 12,
+        "successful_trials": 12,
+        "rejected_trials": 0,
+        "failed_trials": 0,
+        "baseline_trial": 1,
+        "best_trial": 9,
+        "baseline_parameters": {
+          "Patch_length_mm": 9.57,
+          "Patch_width_mm": 9.25,
+          "probe_x_rel": 0.485
+        },
+        "best_parameters": {
+          "Patch_length_mm": 9.594167117460739,
+          "Patch_width_mm": 9.20662378539966,
+          "probe_x_rel": 0.45688242872550744
+        },
+        "baseline_worst_s11_9p9_to_10p1_db": -9.93483617873241,
+        "best_worst_s11_9p9_to_10p1_db": -11.499926496836375,
+        "worst_band_improvement_db": 1.5650903181039642,
+        "baseline_s11_at_10ghz_db": -15.475447363593329,
+        "best_s11_at_10ghz_db": -19.285516439419922,
+        "s11_at_10ghz_improvement_db": 3.8100690758265934,
+        "best_adaptive_passes_completed": 10,
+        "best_final_max_magnitude_delta_s": 0.0132,
+        "adaptive_delta_s_limit": 0.02,
+        "all_sweeps_converged": true,
+        "source_project_unchanged": true,
+        "global_optimum_claimed": false
+      },
+      "uncertainties": [
+        "The official web example currently targets a newer AEDT release than the local 2025.1 reference, so every candidate must be solved with the same local AEDT/PyAEDT versions as its comparison reference.",
+        "The official page does not publish a frozen numeric S11 CSV; the accepted curve is a locally generated reference.",
+        "The first independent project candidate attempt produced five structured artifacts but local qwen3-vl:8b timed out in model_3d after 900 seconds.",
+        "The first same-job DeepSeek text-stage retry generated through simulation_setup, but five component primitives drifted from source evidence, two Python stages returned nested build functions, geometry subtraction was duplicated, and the solver contract remained incomplete.",
+        "A second strict retry preserved the source primitives and immediate-fragment form, but eight contract fields still failed and the code used incompatible PyAEDT 0.26.3 calls, crossed stage responsibilities, repeated geometry/simulation operations, and left the coaxial port physics unresolved.",
+        "The latest fail-closed dimensions retry exposed a deeper upstream defect: source evidence omitted Stackup resize/fill-body semantics and used the wrong probe formula, so source_analysis must be regenerated before any AEDT execution.",
+        "The first source-only retry failed before artifact registration because JSON evidence was incorrectly routed to Ollama vision; MIME-aware text/visual routing is now fixed and the failed stage can resume directly.",
+        "The first resumed DeepSeek response used a non-array coordinate_system.axes value and was rejected before registration; the exact schema prompt is now integrated.",
+        "The next DeepSeek response fixed axes but used evidence instead of evidence_source, put prose in required_relationships, and marked the air-filled signal body as copper; it was retained as rejected source audit v001 and never registered or executed.",
+        "Frozen JSON benchmarks can now publish a generic source_contract that enforces component roles, primitive/material/fill/body semantics, parameters, relationships, and ordered operations before source acceptance; the official benchmark also includes Stackup3D's internal signal-minus-Patch keep-originals operation.",
+        "The next source response completed with the correct object, parameter, and operation sets, but manual review rejected prose-only geometric_evidence and a misleading ambiguity note before downstream use; structured component geometry is now mandatory and preserved into solids/dimensions.",
+        "The structured-geometry retry matched all nine components and fourteen operations but promoted percentage_offset_argument=0.25 into a thirteenth design parameter; the exact twelve-parameter contract rejected and versioned it, while preserving that implementation constant for derived relations.",
+        "The direct source-stage resume then passed with exactly nine components, twelve parameters, fourteen operations, X/Y/Z axes, and structured per-component geometry; this source is accepted for downstream offline generation but is not candidate HFSS or electromagnetic evidence.",
+        "The v006 dimensions candidate was numerically complete but initially rejected because the generic gate disallowed an explicitly null Region material and ignored the existing nested dimensions container; both validator defects are fixed, X/Y/Z preservation is enforced, and the immutable rejected v001 text passes read-only revalidation.",
+        "On 2026-08-26 the recovered independent candidate completed through simulation_setup, passed all static execution gates and 124/124 frozen contract checks, and was exported as immutable generated_model_v001.py.",
+        "The candidate was then built and solved with the same AEDT 2025.1/PyAEDT 0.26.3 environment as the reference; its adaptive solution converged at pass 11 and its G5 resonance, bandwidth, and curve-RMSE checks all passed."
+      ],
+      "acceptance_criteria": [
+        "Reference contract, nine-object topology, required boundaries, adaptive frequency, and sweep must match the frozen benchmark.",
+        "The local reference must resonate within 1% of 10 GHz and reach S11 at or below -10 dB; this gate passed.",
+        "The independent candidate contract passed, and its same-version comparison passed resonance error <= 1%, bandwidth error <= 5%, and curve RMSE <= 1 dB.",
+        "Optimization variables must pass geometry-effect preflight, every eligible trial must converge at Delta S <= 0.02 with a converged sweep, and the source project hash must remain unchanged; all gates passed in the 12-trial regression."
+      ],
+      "blocker": null,
+      "next_action": "Preserve the G0-G5 and 12-trial optimization records as regression baselines; apply the same evidence and convergence gates only after each paper-derived design independently passes its reference and candidate gates."
+    },
+    {
+      "case_id": "yeo_2019_conventional_inset_patch",
+      "title": "Yeo 2019 conventional inset-fed RF-35 patch",
+      "status": "solved/fail-paper-gate",
+      "status_scope": "local baseline and three controlled HFSS variants solved; none reproduced the complete paper gate",
+      "source": {
+        "kind": "paper",
+        "title": "Slot-Loaded Microstrip Patch Sensor Antenna for High-Sensitivity Permittivity Characterization",
+        "url": "https://doi.org/10.3390/electronics8050502",
+        "doi": "10.3390/electronics8050502",
+        "evidence": "Figure 1(a), Figure 2, and Section 2, especially the explicit geometry on PDF page 4 and bandwidth/Q statements on page 5."
+      },
+      "artifacts": {
+        "case_launcher": "cases/yeo_conventional_patch/run_case.py",
+        "benchmark": "yeo_slot_loaded_patch/benchmark_conventional.json",
+        "reference_model": "yeo_slot_loaded_patch/reference_model.py",
+        "runner": "yeo_slot_loaded_patch/run_reference.py",
+        "paper_target_evaluator": "yeo_slot_loaded_patch/paper_targets.py",
+        "assumption_study_runner": "yeo_slot_loaded_patch/run_assumption_study.py",
+        "recorded_assumption_study": "yeo_slot_loaded_patch/reference_data/conventional_hfss_assumption_study_2026_08_26.json",
+        "literature_targets": "yeo_slot_loaded_patch/reference_data/literature_targets.json",
+        "digitization_notes": "yeo_slot_loaded_patch/reference_data/DIGITIZATION.md"
+      },
+      "implementation_state": {
+        "benchmark_contract": "implemented",
+        "offline_static_tests": "pass",
+        "paper_target_evaluator": "implemented_and_static_tested",
+        "hfss_reference_build": "pass",
+        "hfss_reference_solve": "pass_1101_points_1p5_to_3p7_ghz",
+        "reference_gate": "failed",
+        "controlled_assumption_study": "completed_three_variants_none_passed",
+        "independent_candidate_generation": "not_run_by_policy_reference_gate_failed",
+        "independent_candidate_solve": "not_run"
+      },
+      "key_parameter_evidence": [
+        "RF-35 substrate: relative permittivity 3.5, loss tangent 0.0018, thickness 0.76 mm; board/ground 80 mm by 80 mm.",
+        "Patch 40 mm by 31.9 mm; feed 1.66 mm by 24.5 mm; inset 2.8 mm by 9 mm.",
+        "Paper resonance 2.5 GHz; published VSWR < 2 / S11 < -10 dB interval 2.490-2.510 GHz; fractional bandwidth 0.8%; Q = 125."
+      ],
+      "reference_targets": {
+        "resonances_ghz": [
+          2.5
+        ],
+        "first_minus_10db_band_ghz": [
+          2.49,
+          2.51
+        ],
+        "first_fractional_bandwidth_percent": 0.8,
+        "first_quality_factor": 125
+      },
+      "recorded_local_reference_result": {
+        "variant": "solid_copper_0p035mm_with_wave_port",
+        "point_count": 1101,
+        "frequency_range_ghz": [
+          1.5,
+          3.7
+        ],
+        "resonance_ghz": 2.468,
+        "resonance_relative_error": 0.0128,
+        "minimum_s11_db": -7.832682239427586,
+        "first_minus_10db_band_ghz": null,
+        "curve_sha256": "774a2f08e38fcd6a77d48b202c5a4c1005a19deb52484a4e44efcbe74f79d016",
+        "paper_gate_passed": false
+      },
+      "recorded_controlled_assumption_study": {
+        "held_fixed": "all paper-explicit dimensions and RF-35 properties",
+        "varied": [
+          "conductor representation",
+          "HFSS excitation implementation"
+        ],
+        "variants_solved": 3,
+        "variants_passing_paper_gate": 0,
+        "closest_variant": {
+          "name": "solid_lumped",
+          "resonance_ghz": 2.47,
+          "minimum_s11_db": -10.060949212854162,
+          "first_minus_10db_band_ghz": [
+            2.469030984348128,
+            2.4721133095595813
+          ],
+          "paper_gate_passed": false
+        }
+      },
+      "uncertainties": [
+        "The paper used CST; conductor material/thickness, feed-port construction, boundary clearance, mesh, convergence, and sweep settings are not published.",
+        "Copper at 0.035 mm, a 50-ohm HFSS wave port, coordinate placement, radiation padding, and solver settings are explicitly labelled engineering assumptions.",
+        "The black Figure 2 curve is overdrawn by the red curve at resonance and cannot provide a defensible numeric golden curve."
+      ],
+      "acceptance_criteria": [
+        "All paper-explicit geometry/material fields and Figure 1(a) topology must match the benchmark; assumptions must not be relabelled as paper evidence.",
+        "A local HFSS reference must first reproduce a 2.5 GHz fundamental within 1% and show a -10 dB band consistent with the published 2.490-2.510 GHz interval.",
+        "After that paper gate passes, an independent candidate must pass its contract and same-version reference comparison with resonance error <= 1%, bandwidth error <= 10%, and curve RMSE <= 1.5 dB."
+      ],
+      "blocker": {
+        "kind": "local_hfss_translation_failed_paper_gate",
+        "diagnostic": "The baseline plus solid-lumped, PEC-wave, and PEC-lumped controlled variants were solved in AEDT 2025.1; no variant passed the complete resonance and first -10 dB band gate.",
+        "interpretation": "The current HFSS translations are not accepted reference baselines. The mismatch may arise from unpublished CST port, conductor, boundary, mesh, or other implementation choices; paper-explicit dimensions must not be silently tuned."
+      },
+      "next_action": "Keep the independent-candidate gates closed for this case, preserve the negative result, and continue reference validation with the scaled Yeo case while seeking stronger CST or implementation evidence."
+    },
+    {
+      "case_id": "yeo_2019_scaled_slot_loaded_patch",
+      "title": "Yeo 2019 scaled radiating-edge-slot-loaded RF-35 patch",
+      "status": "solved/fail-paper-gate",
+      "status_scope": "local baseline and three controlled HFSS variants solved; none reproduced the complete dual-mode paper gate",
+      "source": {
+        "kind": "paper",
+        "title": "Slot-Loaded Microstrip Patch Sensor Antenna for High-Sensitivity Permittivity Characterization",
+        "url": "https://doi.org/10.3390/electronics8050502",
+        "doi": "10.3390/electronics8050502",
+        "evidence": "Figure 1(c), Figure 2, and Section 2, especially the scaled geometry, resonances, bandwidth, and Q on PDF page 5."
+      },
+      "artifacts": {
+        "case_launcher": "cases/yeo_scaled_slot_loaded_patch/run_case.py",
+        "benchmark": "yeo_slot_loaded_patch/benchmark_scaled_slot_loaded.json",
+        "reference_model": "yeo_slot_loaded_patch/reference_model.py",
+        "runner": "yeo_slot_loaded_patch/run_reference.py",
+        "paper_target_evaluator": "yeo_slot_loaded_patch/paper_targets.py",
+        "assumption_study_runner": "yeo_slot_loaded_patch/run_assumption_study.py",
+        "recorded_assumption_study": "yeo_slot_loaded_patch/reference_data/scaled_hfss_assumption_study_2026_08_26.json",
+        "literature_targets": "yeo_slot_loaded_patch/reference_data/literature_targets.json",
+        "digitization_notes": "yeo_slot_loaded_patch/reference_data/DIGITIZATION.md"
+      },
+      "implementation_state": {
+        "benchmark_contract": "implemented",
+        "offline_static_tests": "pass",
+        "paper_target_evaluator": "implemented_and_static_tested",
+        "hfss_reference_build": "pass",
+        "hfss_reference_solve": "pass_1101_points_1p5_to_3p7_ghz",
+        "reference_gate": "failed",
+        "controlled_assumption_study": "completed_three_variants_none_passed",
+        "independent_candidate_generation": "not_run_by_policy_reference_gate_failed",
+        "independent_candidate_solve": "not_run"
+      },
+      "key_parameter_evidence": [
+        "Shared RF-35/board values: er 3.5, tan(delta) 0.0018, h 0.76 mm, and 80 mm by 80 mm ground.",
+        "Patch 31.8 mm by 25.4 mm; feed 1.66 mm by 27.3 mm; inset 2.3 mm by 12 mm.",
+        "Radiating-edge slot 1 mm by 29.8 mm, positioned 1 mm from the radiating edge.",
+        "Paper resonances 2.5 and 3.465 GHz; first -10 dB interval 2.496-2.503 GHz; fractional bandwidth 0.28%; Q = 357."
+      ],
+      "reference_targets": {
+        "resonances_ghz": [
+          2.5,
+          3.465
+        ],
+        "first_minus_10db_band_ghz": [
+          2.496,
+          2.503
+        ],
+        "first_fractional_bandwidth_percent": 0.28,
+        "first_quality_factor": 357
+      },
+      "recorded_local_reference_result": {
+        "variant": "solid_copper_0p035mm_with_wave_port",
+        "point_count": 1101,
+        "frequency_range_ghz": [
+          1.5,
+          3.7
+        ],
+        "observed_resonances": [
+          {
+            "frequency_ghz": 2.482,
+            "s11_db": -12.306747790456228,
+            "relative_error": 0.0072
+          },
+          null
+        ],
+        "first_minus_10db_band_ghz": [
+          2.478674324580235,
+          2.486260436389462
+        ],
+        "curve_sha256": "ec9877b75794cf2bd68b0c21aacff38179ff100af74f2d28bbe56eb64ee3e886",
+        "paper_gate_passed": false
+      },
+      "recorded_controlled_assumption_study": {
+        "held_fixed": "all paper-explicit dimensions, radiating-edge slot, and RF-35 properties",
+        "varied": [
+          "conductor representation",
+          "HFSS excitation implementation"
+        ],
+        "variants_solved": 3,
+        "variants_passing_paper_gate": 0
+      },
+      "uncertainties": [
+        "The paper used CST and omits conductor, port, boundary, mesh, convergence, and sweep implementation details.",
+        "The HFSS translation freezes those missing choices as labelled assumptions rather than inferred paper facts.",
+        "The 7 MHz first bandwidth spans about two source-image pixels; the red raster curve is broadened by its 3-5 pixel line width and is not a strict S11 golden curve.",
+        "The paper does not state the upper-mode -10 dB bandwidth."
+      ],
+      "acceptance_criteria": [
+        "All paper-explicit geometry/material fields and Figure 1(c) slot topology must match without importing Figure 1(b) dimensions.",
+        "A local HFSS reference must first place both modes within 1% of 2.5 and 3.465 GHz and reproduce the narrow first published band as closely as documented assumptions permit.",
+        "After the paper gate passes, an independent candidate must pass its contract and same-version reference comparison with per-mode resonance error <= 1%, bandwidth error <= 10%, and curve RMSE <= 1.5 dB.",
+        "Raster-derived first-band width must not replace the explicit 2.496-2.503 GHz prose target."
+      ],
+      "blocker": {
+        "kind": "local_hfss_translation_failed_paper_gate",
+        "diagnostic": "The baseline plus solid-lumped, PEC-wave, and PEC-lumped controlled variants were solved in AEDT 2025.1; no variant reproduced both resonances and the published first narrow band.",
+        "interpretation": "The current HFSS translations are not accepted reference baselines. Paper-explicit dimensions and slot topology must not be silently tuned."
+      },
+      "next_action": "Keep the independent-candidate gates closed for this case, preserve the negative result, and continue with the 5.25 GHz Wi-Fi reference."
+    },
+    {
+      "case_id": "wifi_patch_5250",
+      "title": "El-Gendy 5.25 GHz single Wi-Fi patch element",
+      "status": "solved/fail-paper-gate",
+      "status_scope": "source-corrected reference plus ten one-at-a-time and eleven interaction engineering-assumption variants solved and converged; all failed the complete 5.15-5.35 GHz paper band",
+      "source": {
+        "kind": "paper",
+        "title": "Wi-Fi Access Point Design Concept Targeting Indoor Positioning for Smartphones and IoT",
+        "url": "https://doi.org/10.3390/s22030797",
+        "doi": "10.3390/s22030797",
+        "evidence": "Section 3.1, Figure 2, Table 1, and Figure 3; only the single patch element is in scope."
+      },
+      "artifacts": {
+        "case_launcher": "cases/wifi_patch_5250/run_case.py",
+        "benchmark": "wifi_patch_5250/benchmark.json",
+        "assumptions": "wifi_patch_5250/assumptions.json",
+        "assumption_space": "wifi_patch_5250/assumption_space.json",
+        "assumption_space_v2": "wifi_patch_5250/assumption_space_v2.json",
+        "assumption_adapter": "wifi_patch_5250/assumption_adapter.py",
+        "reference_model": "wifi_patch_5250/reference_model.py",
+        "runner": "wifi_patch_5250/run_reference.py",
+        "recorded_reference_outcome": "wifi_patch_5250/reference_data/hfss_reference_outcome_2026_08_26.json",
+        "recorded_assumption_search": "wifi_patch_5250/reference_data/engineering_assumption_search_2026_08_27.json",
+        "source_gap_audit": "wifi_patch_5250/reference_data/source_gap_audit_2026_08_28.json",
+        "recorded_assumption_interactions": "wifi_patch_5250/reference_data/engineering_assumption_interactions_2026_08_28.json",
+        "documentation": "wifi_patch_5250/README.md"
+      },
+      "implementation_state": {
+        "benchmark_contract": "implemented",
+        "offline_static_tests": "pass",
+        "hfss_reference_build": "pass_after_source_backed_xp_coordinate_correction",
+        "hfss_reference_solve": "pass_501_points_5p0_to_5p5_ghz",
+        "reference_gate": "failed_complete_5p15_to_5p35_ghz_band",
+        "versioned_assumption_search": "implemented_with_immutable_trials_receipts_curves_and_rankings",
+        "assumption_search_execution": "completed_10_of_10_all_converged_none_passed_paper_gate_on_2026_08_27",
+        "assumption_interaction_v2": "completed_11_of_11_all_converged_none_passed_paper_gate_on_2026_08_28",
+        "independent_candidate_generation": "not_run_by_policy_reference_gate_failed",
+        "independent_candidate_solve": "not_run"
+      },
+      "key_parameter_evidence": [
+        "FR-4: relative permittivity 4.5, loss tangent 0.025, thickness 1.5 mm.",
+        "Lg = 25.92 mm, Wg = WR = 34.44 mm, LR = 20 mm, Lp = 12.55 mm, Wp = 17.22 mm, and probe offset Xp = 2.89 mm.",
+        "The paper targets 5.25 GHz and reports S11 <= -10 dB across 5.15-5.35 GHz."
+      ],
+      "reference_targets": {
+        "center_frequency_ghz": 5.25,
+        "required_minus_10db_band_ghz": [
+          5.15,
+          5.35
+        ]
+      },
+      "recorded_local_reference_result": {
+        "revision": "edge_referenced_xp",
+        "feed_coordinate_expression": "x=-Lp/2+Xp",
+        "evaluated_feed_x_mm": -3.385,
+        "point_count": 501,
+        "frequency_range_ghz": [
+          5.0,
+          5.5
+        ],
+        "resonant_frequency_ghz": 5.183,
+        "minimum_s11_db": -19.320212641911784,
+        "maximum_s11_in_5p15_to_5p35_db": -7.106688591506792,
+        "curve_sha256": "93426ae1df6cd8fbac4636d1d0bac8ebb790ea2acb9931bc603a6fa2d7e38889",
+        "paper_gate_passed": false
+      },
+      "recorded_engineering_assumption_search": {
+        "strategy": "one_at_a_time_over_paper_unresolved_fields_only",
+        "trials_completed": 10,
+        "trials_converged": 10,
+        "trials_passing_paper_gate": 0,
+        "best_trial_id": "ast-cec96cb39f11",
+        "best_changed_assumption": {"radiation_padding_mm": 10.0},
+        "best_resonant_frequency_ghz": 5.196,
+        "best_maximum_s11_in_5p15_to_5p35_db": -8.02029313315898,
+        "record_sha256_policy": "Every trial freezes the assumption and paper-parameter hashes plus its S11 SHA-256."
+      },
+      "recorded_engineering_assumption_interaction_search": {
+        "strategy": "cartesian_interactions_over_v1_improving_paper_unresolved_fields_only",
+        "minimum_changed_assumptions": 2,
+        "maximum_changed_assumptions": 4,
+        "trials_completed": 11,
+        "trials_converged": 11,
+        "trials_passing_paper_gate": 0,
+        "paper_parameters_sha256": "7cafc6ee10fb4b08e00818febeb9192d59399942b28eda5ca8050ec02b5def13",
+        "best_trial_id": "ast-d851d471eb78",
+        "best_changed_assumptions": {"probe_outer_radius_mm": 1.0, "radiation_padding_mm": 10.0},
+        "best_resonant_frequency_ghz": 5.213,
+        "best_maximum_s11_in_5p15_to_5p35_db": -8.492023097516151,
+        "improvement_over_v1_best_db": 0.471729964357171,
+        "execution_status": "completed_no_passing_variant"
+      },
+      "uncertainties": [
+        "The paper used CST and does not publish conductor material/thickness, SMA/coax dimensions, connector dielectric, boundary placement/type, mesh/convergence, sampling details, or numeric S11 samples.",
+        "The HFSS model therefore freezes zero-thickness PEC sheets, a coaxial probe/terminal port, its radii and feed length, radiation padding, coordinate mapping, and sweep as engineering assumptions.",
+        "The reflector interpretation follows Figure 2 but remains a cross-solver translation decision."
+      ],
+      "acceptance_criteria": [
+        "The local HFSS reference must itself satisfy S11 <= -10 dB over the complete 5.15-5.35 GHz paper band before it can become the comparison baseline.",
+        "If that paper gate fails, change only a documented assumption and preserve every paper-explicit parameter.",
+        "After the reference gate passes, an independent candidate must pass the contract and same-version comparison with resonance error <= 1%, band-edge/bandwidth error <= 10%, and curve RMSE <= 1 dB."
+      ],
+      "blocker": {
+        "kind": "local_hfss_translation_failed_paper_gate",
+        "diagnostic": "The source-corrected design, ten one-at-a-time variants, and eleven interaction variants converged. The v2 best full-band worst point is -8.4920 dB rather than <= -10 dB.",
+        "interpretation": "The tested HFSS translations are not accepted references. A deep resonance minimum cannot substitute for agreement over the complete published band."
+      },
+      "next_action": "Keep candidate gates closed and preserve the frozen v2 negative evidence. Before any v3, obtain new source evidence or define a separately versioned engineering-assumption hypothesis; do not change paper-explicit dimensions or promote any result unless it passes the complete paper band."
+    },
+    {
+      "case_id": "kaur_2021_split_ring_monopole",
+      "title": "Kaur 2021 CPW-fed split-ring-slot UWB monopoles",
+      "status": "solved/fail-paper-gate",
+      "status_scope": "all three isolated HFSS translations solved; baseline matching and both full notch-case gates failed",
+      "source": {
+        "kind": "paper",
+        "title": "Split Ring Slot Loaded Compact CPW-Fed Printed Monopole Antennas for Ultra-Wideband Applications with Band Notch Characteristics",
+        "url": "https://doi.org/10.2528/PIERC20122401",
+        "doi": "10.2528/PIERC20122401",
+        "evidence": "Section 2 and Table 1 define the UWB monopole; Figure 7 and Table 2 define the two SRS variants; the abstract and results state the operating/notch bands."
+      },
+      "artifacts": {
+        "case_launchers": [
+          "cases/kaur_baseline_uwb/run_case.py",
+          "cases/kaur_wlan_notch/run_case.py",
+          "cases/kaur_xband_notch/run_case.py"
+        ],
+        "source_pdf": "kaur_split_ring_monopole/references/kaur_2021_split_ring_monopole.pdf",
+        "benchmarks": [
+          "kaur_split_ring_monopole/benchmark_baseline.json",
+          "kaur_split_ring_monopole/benchmark_wlan_notch.json",
+          "kaur_split_ring_monopole/benchmark_xband_notch.json"
+        ],
+        "assumptions": "kaur_split_ring_monopole/assumptions.json",
+        "reference_model": "kaur_split_ring_monopole/reference_model.py",
+        "runner": "kaur_split_ring_monopole/run_reference.py",
+        "paper_target_evaluator": "kaur_split_ring_monopole/paper_targets.py",
+        "recorded_reference_outcomes": "kaur_split_ring_monopole/reference_data/hfss_reference_outcomes_2026_08_26.json",
+        "documentation": "kaur_split_ring_monopole/README.md"
+      },
+      "implementation_state": {
+        "benchmark_contract": "implemented_as_three_non_mixed_contracts",
+        "offline_static_tests": "pass",
+        "paper_target_evaluator": "implemented_and_static_tested",
+        "hfss_reference_build": "pass_all_three_after_pyaedt_xz_port_order_correction",
+        "hfss_reference_solve": "pass_all_three_901_points_3_to_12_ghz",
+        "reference_gate": "failed_all_three",
+        "independent_candidate_generation": "not_run_by_policy_reference_gate_failed",
+        "independent_candidate_solve": "not_run"
+      },
+      "key_parameter_evidence": [
+        "FR-4 board 18 mm by 18 mm, relative permittivity 4.4, loss tangent 0.02, and thickness 1.6 mm.",
+        "Table 1: WF = 1.2 mm, LF = 5.934 mm, WP = 13.5 mm, LP = 9 mm, WG = 7.95 mm, LG = 5.4 mm, X1 = 6 mm, and Y1 = 1.5 mm.",
+        "Table 2 WLAN SRS: R1 = 2.4 mm, R2 = 2.1 mm, S1 = 0.4 mm; X-band SRS: R1' = 2.1 mm, R2' = 1.6 mm, S1' = 0.4 mm.",
+        "Reported baseline UWB range is 3-12 GHz with VSWR <= 2; WLAN rejection is centred at 5.3 GHz over 5.15-5.81 GHz; X-band rejection is centred at 7.4 GHz over 7.16-7.71 GHz."
+      ],
+      "reference_targets": {
+        "baseline_uwb_vswr_at_or_below_2_ghz": [
+          3.0,
+          12.0
+        ],
+        "wlan_notch_center_ghz": 5.3,
+        "wlan_rejection_band_ghz": [
+          5.15,
+          5.81
+        ],
+        "xband_notch_center_ghz": 7.4,
+        "xband_rejection_band_ghz": [
+          7.16,
+          7.71
+        ]
+      },
+      "recorded_local_reference_results": {
+        "baseline": {
+          "maximum_s11_in_3_to_12_ghz_db": -1.2438224022821012,
+          "curve_sha256": "24ac959f7c666c970758ec7ab63f6903e191804c5e63bf3ceb58e0beba2b1fe4",
+          "paper_gate_passed": false
+        },
+        "wlan_notch": {
+          "observed_peak_frequency_ghz": 5.81,
+          "observed_peak_vswr": 10.33978318933403,
+          "matched_band_maximum_s11_db": [
+            -0.3430656306043048,
+            -1.1723830241635738
+          ],
+          "curve_sha256": "2fbcf876f09f8895d43632a4e77440fc559912252825d76d6528159e7e21c597",
+          "paper_gate_passed": false
+        },
+        "xband_notch": {
+          "observed_peak_frequency_ghz": 7.71,
+          "observed_peak_vswr": 15.552618246564448,
+          "matched_band_maximum_s11_db": [
+            -0.18600607404969827,
+            -1.0368033795548086
+          ],
+          "curve_sha256": "9792e67800dcffa1a9395fc3dc3df13c2b93b74b35585edede457a911d2210a7",
+          "paper_gate_passed": false
+        }
+      },
+      "uncertainties": [
+        "Figure 7 does not dimension the exact vertical patch placement, SRS centre, or split orientation; the frozen coordinate interpretation is labelled as an assumption.",
+        "Conductor material/thickness, CPW excitation geometry, open boundary, mesh, convergence, and frequency sampling are not published and remain labelled assumptions.",
+        "No numeric simulated or measured S-parameter data file is published; strict candidate RMSE requires a same-version local HFSS reference rather than the raster plot."
+      ],
+      "acceptance_criteria": [
+        "Keep the baseline, WLAN SRS, and X-band SRS parameters in three separate contracts and preserve every paper-explicit dimension.",
+        "For the baseline, require VSWR <= 2 across 3-12 GHz.",
+        "For each SRS variant, require the full published rejection interval at VSWR >= 2, the surrounding UWB bands at VSWR <= 2, peak centre error <= 0.15 GHz, and simulated peak VSWR relative error <= 20%.",
+        "Only after a local reference passes the paper gate may a same-version S11 curve become the candidate-comparison baseline."
+      ],
+      "blocker": {
+        "kind": "local_hfss_translations_failed_paper_gates",
+        "diagnostic": "All three designs solved normally after the XZ-port correction. Baseline worst S11 is -1.2438 dB over 3-12 GHz; both notch cases fail surrounding matched bands and notch-centre/peak checks.",
+        "interpretation": "None of the three curves is an accepted reference. Undimensioned Figure 7 placement and unpublished port, conductor, boundary, and CST choices remain unresolved."
+      },
+      "next_action": "Keep all Kaur candidate gates closed, preserve the negative results, and use the official probe-patch case as the only current G0-G5 regression baseline."
+    }
+  ]
+}

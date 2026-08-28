@@ -24,6 +24,10 @@ PUBLIC_FILES = (
 
 def _text_files():
     for path in PUBLIC_FILES:
+        # Local HFSS requests and solver outputs are intentionally Git-ignored and may
+        # contain machine-specific project paths. They are not public repository files.
+        if "local_results" in path.parts:
+            continue
         if path.is_file() and path.suffix.lower() in {
             "",
             ".example",

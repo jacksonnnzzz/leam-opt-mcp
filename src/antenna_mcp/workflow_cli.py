@@ -6,16 +6,19 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
+from .assumption_search import AssumptionStudyLedger, run_aedt_assumption_search
 from .codegen import PythonArtifactService
 from .execution import HfssBuildService
 from .feedback import ModelFeedbackService
 from .modeling import ModelingService
+from .model_retry import ModelRetryService
 from .models import ModelingRequest, OptimizationRequest, PipelineRequest
 from .optimizer import OptimizationService
 from .pipeline import PipelineService
 from .review import ArtifactReviewService
 from .reviewed_model import EngineeringAssumptionService, ReviewedModelCompiler
 from .source_refinement import SourceRefinementService
+from .validation import ValidationService
 from .workspace import WorkspaceStore
 
 
@@ -66,6 +69,46 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
 
+    retry = commands.add_parser(
+        "model-retry",
+        help="Audit old downstream artifacts and regenerate from an earlier stage.",
+    )
+    retry.add_argument("job_id")
+    retry.add_argument(
+        "--from-stage",
+        required=True,
+        choices=(
+            "source_analysis",
+            "parameters",
+            "materials",
+            "solids",
+            "dimensions",
+            "model_3d",
+            "model_2d",
+            "boolean",
+            "simulation_spec",
+            "simulation_setup",
+            "optimization_spec",
+        ),
+    )
+    retry.add_argument(
+        "--through-stage",
+        default="boolean",
+        choices=(
+            "source_analysis",
+            "parameters",
+            "materials",
+            "solids",
+            "dimensions",
+            "model_3d",
+            "model_2d",
+            "boolean",
+            "simulation_spec",
+            "simulation_setup",
+            "optimization_spec",
+        ),
+    )
+
     status = commands.add_parser("status", help="Read a job state and artifact paths.")
     status.add_argument("job_id")
 
@@ -96,6 +139,43 @@ def build_parser() -> argparse.ArgumentParser:
     )
     assumption_approve.add_argument("job_id")
     assumption_approve.add_argument("approval_hash")
+
+    assumption_plan = commands.add_parser(
+        "assumption-plan",
+        help="Freeze an engineering-assumption space and deterministically plan trials.",
+    )
+    assumption_plan.add_argument("--space", required=True, type=Path)
+    assumption_plan.add_argument("--output-dir", required=True, type=Path)
+    assumption_plan.add_argument("--limit", type=int)
+
+    assumption_report = commands.add_parser(
+        "assumption-report", help="Rank immutable results from an assumption study."
+    )
+    assumption_report.add_argument("--space", required=True, type=Path)
+    assumption_report.add_argument("--output-dir", required=True, type=Path)
+
+    assumption_run = commands.add_parser(
+        "assumption-run",
+        help="Run a bounded, resumable engineering-assumption study in an existing AEDT project.",
+    )
+    assumption_run.add_argument("--space", required=True, type=Path)
+    assumption_run.add_argument("--adapter", required=True, type=Path)
+    assumption_run.add_argument("--output-dir", required=True, type=Path)
+    assumption_run.add_argument("--grpc-port", required=True, type=int)
+    assumption_run.add_argument("--active-project", required=True)
+    assumption_run.add_argument("--aedt-version", default=None)
+    assumption_run.add_argument("--limit", type=int)
+    assumption_run.add_argument("--resume", action="store_true")
+    assumption_run.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="With --resume, append a new immutable attempt for failed trials.",
+    )
+    assumption_run.add_argument(
+        "--postprocess-existing",
+        action="store_true",
+        help="Do not solve; extract evidence only from already solved, receipt-matched designs.",
+    )
 
     compile_model = commands.add_parser(
         "model-compile", help="Compile approved evidence into deterministic model artifacts."
@@ -162,10 +242,32 @@ def build_parser() -> argparse.ArgumentParser:
     )
     optimization_create.add_argument("request_json", type=Path)
 
+    optimization_preflight = commands.add_parser(
+        "optimization-preflight",
+        help="Verify that every optimization variable changes copied-project geometry.",
+    )
+    optimization_preflight.add_argument("job_id")
+
     optimization_run = commands.add_parser(
         "optimization-run", help="Run a prepared optimization job."
     )
     optimization_run.add_argument("job_id")
+
+    validate = commands.add_parser(
+        "validate", help="Compare a generated model contract and optional S11 data with a benchmark."
+    )
+    validate.add_argument("--benchmark", required=True, type=Path)
+    source = validate.add_mutually_exclusive_group(required=True)
+    source.add_argument("--candidate", type=Path)
+    source.add_argument("--job-id")
+    validate.add_argument("--reference-s11", type=Path)
+    validate.add_argument("--candidate-s11", type=Path)
+    validate.add_argument("--report", type=Path)
+    validate.add_argument(
+        "--contract-only",
+        action="store_true",
+        help="Validate geometry/material/solver declarations without claiming EM-result validity.",
+    )
     return parser
 
 
@@ -187,6 +289,12 @@ def run_command(args: argparse.Namespace) -> dict[str, Any]:
         return ModelingService(store).create(request).model_dump(mode="json")
     if command == "model-run":
         return ModelingService(store).run(args.job_id, args.through_stage).model_dump(mode="json")
+    if command == "model-retry":
+        return ModelRetryService(store).retry(
+            args.job_id,
+            from_stage=args.from_stage,
+            through_stage=args.through_stage,
+        )
     if command == "status":
         return store.load_state(args.job_id).model_dump(mode="json")
     if command == "source-refine":
@@ -203,6 +311,26 @@ def run_command(args: argparse.Namespace) -> dict[str, Any]:
         )
     if command == "assumption-approve":
         return EngineeringAssumptionService(store).approve(args.job_id, args.approval_hash)
+    if command == "assumption-plan":
+        return AssumptionStudyLedger(args.space, args.output_dir).prepare(limit=args.limit)
+    if command == "assumption-report":
+        ledger = AssumptionStudyLedger(args.space, args.output_dir)
+        ledger.initialize()
+        path = ledger.write_summary()
+        return {**ledger.summary(), "summary": str(path)}
+    if command == "assumption-run":
+        return run_aedt_assumption_search(
+            space_path=args.space,
+            adapter_path=args.adapter,
+            output_dir=args.output_dir,
+            grpc_port=args.grpc_port,
+            active_project=args.active_project,
+            version=args.aedt_version,
+            limit=args.limit,
+            resume=args.resume,
+            retry_failed=args.retry_failed,
+            postprocess_existing=args.postprocess_existing,
+        )
     if command == "model-compile":
         return ReviewedModelCompiler(store).compile(
             args.job_id, args.profile, args.assumption_approval_hash
@@ -246,8 +374,30 @@ def run_command(args: argparse.Namespace) -> dict[str, Any]:
     if command == "optimization-create":
         request = OptimizationRequest.model_validate_json(args.request_json.read_text("utf-8"))
         return OptimizationService(store).create(request).model_dump(mode="json")
+    if command == "optimization-preflight":
+        return OptimizationService(store).preflight(args.job_id).model_dump(mode="json")
     if command == "optimization-run":
         return OptimizationService(store).run(args.job_id).model_dump(mode="json")
+    if command == "validate":
+        service = ValidationService(store)
+        if args.job_id:
+            if args.report is not None:
+                raise ValueError("--report is only valid with --candidate; job reports are stored in the job")
+            return service.validate_job(
+                args.benchmark,
+                args.job_id,
+                reference_s11=args.reference_s11,
+                candidate_s11=args.candidate_s11,
+                contract_only=args.contract_only,
+            )
+        return service.validate_manifest(
+            args.benchmark,
+            args.candidate,
+            reference_s11=args.reference_s11,
+            candidate_s11=args.candidate_s11,
+            report_path=args.report,
+            contract_only=args.contract_only,
+        )
     raise AssertionError(f"unhandled command: {command}")
 
 
@@ -265,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _result_failed(result: dict[str, Any]) -> bool:
-    if result.get("status") == "failed":
+    if result.get("status") in {"failed", "incomplete"}:
         return True
     for key in ("pipeline", "modeling", "optimization"):
         nested = result.get(key)

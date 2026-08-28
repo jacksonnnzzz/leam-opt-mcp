@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "wifi_patch_5250",
+  "title": "El-Gendy 5.25 GHz single rectangular Wi-Fi patch element",
+  "source": {
+    "title": "Wi-Fi Access Point Design Concept Targeting Indoor Positioning for Smartphones and IoT",
+    "url": "https://doi.org/10.3390/s22030797",
+    "source_type": "paper",
+    "accessed_on": "2026-08-12",
+    "notes": [
+      "Only the single rectangular patch element in Section 3.1, Figure 2, Table 1, and Figure 3 is in scope; the four-element arrays and feed networks are excluded.",
+      "The paper used CST Studio Suite and does not publish a numeric S11 data file.",
+      "Paper-explicit quantities and translation assumptions are separate under reference.parameters and reference.engineering_assumptions.",
+      "A full validation requires a same-version local HFSS reference curve and an independently generated candidate curve."
+    ]
+  },
+  "reference": {
+    "parameters": {
+      "center_frequency": {"value": 5.25, "unit": "GHz", "evidence": "Section 3.1, page 5"},
+      "wifi_band_start": {"value": 5.15, "unit": "GHz", "evidence": "Section 3.1 and Figure 3"},
+      "wifi_band_stop": {"value": 5.35, "unit": "GHz", "evidence": "Section 3.1 and Figure 3"},
+      "substrate_relative_permittivity": {"value": 4.5, "unit": "ratio", "evidence": "Section 3.1, page 5"},
+      "substrate_loss_tangent": {"value": 0.025, "unit": "ratio", "evidence": "Section 3.1, page 5"},
+      "substrate_thickness_h": {"value": 1.5, "unit": "mm", "evidence": "Section 3.1, page 5"},
+      "substrate_length_Lg": {"value": 25.92, "unit": "mm", "evidence": "Table 1"},
+      "substrate_width_Wg": {"value": 34.44, "unit": "mm", "evidence": "Table 1"},
+      "reflector_width_WR": {"value": 34.44, "unit": "mm", "evidence": "Table 1; Wg = WR"},
+      "reflector_extension_LR": {"value": 20.0, "unit": "mm", "evidence": "Table 1 and Figure 2"},
+      "patch_length_Lp": {"value": 12.55, "unit": "mm", "evidence": "Table 1"},
+      "patch_width_Wp": {"value": 17.22, "unit": "mm", "evidence": "Table 1"},
+      "feed_offset_Xp": {"value": 2.89, "unit": "mm", "evidence": "Table 1 and Figure 2"}
+    },
+    "materials": {
+      "substrate": {
+        "material": "FR4_ElGendy_2022",
+        "relative_permittivity": 4.5,
+        "dielectric_loss_tangent": 0.025,
+        "evidence_class": "paper"
+      }
+    },
+    "engineering_assumptions": {
+      "conductor_representation": {
+        "value": "zero_thickness_pec_sheets",
+        "reason": "The paper does not state conductor material, conductivity, or thickness."
+      },
+      "feed_model": {
+        "value": "coaxial_probe_wave_port",
+        "probe_inner_radius_mm": 0.5,
+        "probe_outer_radius_mm": 1.225,
+        "feed_length_mm": 7.35,
+        "outer_dielectric": "vacuum",
+        "port_impedance_ohm": 50.0,
+        "reason": "Figure 2 shows an SMA/probe feed but provides no connector dimensions or dielectric."
+      },
+      "coordinate_mapping": {
+        "value": "Lp_along_x_Wp_along_y",
+        "feed_location": ["-Lp/2+Xp", "0mm", "0mm"],
+        "feed_offset_reference": "distance from the negative-X radiating edge",
+        "reason": "Figure 2 places Xp between a radiating patch edge and the probe, and Equation (3) uses the standard edge-referenced cos^2(pi*Xp/Lp) inset-feed relation. Rotation or choosing the opposite radiating edge is physically equivalent for the isolated symmetric element."
+      },
+      "reflector_interpretation": {
+        "value": "continuous_backing_sheet_Wg_by_Lg_plus_2LR",
+        "reason": "This follows the dimension arrows and side view in Figure 2."
+      },
+      "radiation_region_padding": {
+        "value": 15.0,
+        "unit": "mm",
+        "reason": "The paper does not report open-boundary placement; approximately a quarter free-space wavelength at 5.25 GHz is used."
+      },
+      "solver_translation": {
+        "value": "HFSS_DrivenTerminal",
+        "adaptive_frequency_ghz": 5.25,
+        "sweep_start_ghz": 5.0,
+        "sweep_stop_ghz": 5.5,
+        "sweep_type": "Interpolating",
+        "reason": "The paper reports CST and plots 5.0-5.5 GHz but omits solver, mesh, and sweep details."
+      }
+    },
+    "objects": {
+      "Substrate": {
+        "primitive": "box",
+        "material": "FR4_ElGendy_2022",
+        "origin": ["-Lg/2", "-Wg/2", "0mm"],
+        "size": ["Lg", "Wg", "h"]
+      },
+      "Reflector": {
+        "primitive": "rectangle_sheet",
+        "boundary": "Perfect E",
+        "origin": ["-Lg/2-LR", "-WR/2", "0mm"],
+        "size": ["Lg+2*LR", "WR"]
+      },
+      "Patch": {
+        "primitive": "rectangle_sheet",
+        "boundary": "Perfect E",
+        "origin": ["-Lp/2", "-Wp/2", "h"],
+        "size": ["Lp", "Wp"]
+      },
+      "Probe": {"primitive": "cylinder", "material": "copper", "role": "probe_inner"},
+      "ProbeFeedWire": {"primitive": "cylinder", "material": "copper", "role": "coax_inner"},
+      "ProbeFeedOuter": {"primitive": "cylinder", "material": "vacuum", "role": "coax_outer_dielectric"},
+      "ProbeFeedOuter_ObjectFromFace1": {"primitive": "sheet", "material": "pec", "role": "wave_port_cap"},
+      "Region": {"primitive": "open_region", "material": "air", "boundary": "Radiation"}
+    },
+    "operations": [
+      {"order": 1, "operation": "create_substrate", "target": "Substrate"},
+      {"order": 2, "operation": "create_reflector", "target": "Reflector"},
+      {"order": 3, "operation": "create_patch", "target": "Patch"},
+      {"order": 4, "operation": "create_aperture_tool", "target": "FeedApertureTool"},
+      {"order": 5, "operation": "subtract", "target": "Reflector", "tool": "FeedApertureTool"},
+      {"order": 6, "operation": "assign_perfect_e", "target": "Reflector"},
+      {"order": 7, "operation": "assign_perfect_e", "target": "Patch"},
+      {"order": 8, "operation": "create_probe_inner", "target": "Probe"},
+      {"order": 9, "operation": "create_probe_feed_wire", "target": "ProbeFeedWire"},
+      {"order": 10, "operation": "create_probe_feed_outer", "target": "ProbeFeedOuter"},
+      {"order": 11, "operation": "assign_perfect_e", "target": "ProbeFeedOuter", "boundary": "ProbePEC"},
+      {"order": 12, "operation": "assign_wave_port", "target": "ProbePort", "reference": "ProbeFeedOuter"},
+      {"order": 13, "operation": "create_region", "target": "Region"},
+      {"order": 14, "operation": "assign_radiation", "target": "Region"}
+    ],
+    "solver": {
+      "design_type": "HFSS",
+      "solution_type": "Terminal",
+      "setup": {
+        "name": "Setup1",
+        "type": "HFSSDriven",
+        "adaptive_frequency": {"value": 5.25, "unit": "GHz"},
+        "maximum_passes": 12,
+        "minimum_passes": 2,
+        "max_delta_s": 0.02
+      },
+      "sweep": {
+        "name": "Sweep1",
+        "type": "Interpolating",
+        "start": {"value": 5.0, "unit": "GHz"},
+        "stop": {"value": 5.5, "unit": "GHz"},
+        "points": 501
+      },
+      "s_parameter": "S11_dB"
+    },
+    "paper_response_target": {
+      "metric": "S11_dB",
+      "condition": "at_or_below",
+      "threshold_db": -10.0,
+      "band_start_ghz": 5.15,
+      "band_stop_ghz": 5.35,
+      "evidence": "Section 3.1 and Figure 3"
+    }
+  },
+  "default_absolute_tolerance": 0.0,
+  "tolerance_by_path": {
+    "parameters.*.value": 0.001,
+    "materials.*.relative_permittivity": 0.001,
+    "materials.*.dielectric_loss_tangent": 0.0001,
+    "engineering_assumptions.feed_model.*_mm": 0.001,
+    "solver.*.*.value": 0.000001
+  },
+  "s11": {
+    "frequency_column": "frequency_ghz",
+    "value_column": "s11_db",
+    "threshold_db": -10.0,
+    "minimum_overlap_points": 30,
+    "resonance_relative_error_max": 0.01,
+    "bandwidth_relative_error_max": 0.1,
+    "curve_rmse_db_max": 1.0,
+    "required": true,
+    "targets": [
+      {
+        "name": "wifi_5250_resonance",
+        "kind": "resonance",
+        "window_ghz": [5.15, 5.35],
+        "threshold_db": -10.0,
+        "minimum_points": 15,
+        "resonance_relative_error_max": 0.01,
+        "band_edge_relative_error_max": 0.1
+      },
+      {
+        "name": "wifi_band_a",
+        "kind": "passband",
+        "window_ghz": [5.15, 5.35],
+        "threshold_db": -10.0,
+        "minimum_points": 15
+      }
+    ]
+  }
+}

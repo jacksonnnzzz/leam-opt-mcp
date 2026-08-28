@@ -86,11 +86,22 @@ $env:ANTENNA_TEXT_PROVIDER = "deepseek"
 $env:DEEPSEEK_API_KEY = "<your-key>"
 $env:DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 $env:DEEPSEEK_MODEL = "<your-text-model>"
+# 可选：只覆盖本次进程使用的文本模型，包括续跑已有任务。
+$env:ANTENNA_TEXT_MODEL = "<your-text-model>"
 
 $env:ANTENNA_MCP_WORKSPACE = ".antenna-mcp"
 ```
 
 环境变量只对当前 PowerShell 进程及其子进程生效。不要把真实 API Key 写入 README、配置样例、任务 JSON 或 Git 提交。
+
+`ANTENNA_TEXT_MODEL` 是显式的运行时覆盖项，优先级高于任务创建时保存的
+`request.model`，但不会改写任务 JSON。它只传给 `ANTENNA_TEXT_PROVIDER`；本地视觉仍由
+`ANTENNA_VISION_PROVIDER` 和 `OLLAMA_VISION_MODEL` 独立控制。没有设置该变量时，继续使用
+原有的任务模型/提供方默认模型行为，因此旧任务和旧配置保持兼容。
+
+UTF-8 JSON、Markdown、CSV 等纯文本附件会在明确的不可信证据边界内嵌入文本提示，并由
+`ANTENNA_TEXT_PROVIDER` 处理；图片和 PDF 才路由至 `ANTENNA_VISION_PROVIDER`。文本附件的
+总字符数默认限制为 250000，可用 `ANTENNA_TEXT_ATTACHMENT_MAX_CHARS` 调整。
 
 也可以将视觉提供方设置为 `openai`，具体变量见 [`.env.example`](.env.example)。
 
@@ -136,12 +147,35 @@ antenna-workflow model-run <job-id> --through-stage boolean
 antenna-workflow codegen <job-id>
 ```
 
+生成流程在落盘前同时检查跨阶段结构一致性、model/boolean/simulation 职责隔离，以及
+PyAEDT 0.26.3 关键方法和参数名。`failed` 状态下不要运行 `codegen` 或 AEDT；`completed`
+也只代表生成门禁通过，最终正确性仍需 benchmark contract 和独立 HFSS/S11 验证。
+
+如果旧任务曾把 `qwen3-vl:8b` 保存到 `request.model`，并在 `model_3d` 阶段失败，可在
+同一个 PowerShell 中只覆盖续跑所用的文本模型：
+
+```powershell
+$env:ANTENNA_TEXT_PROVIDER = "deepseek"
+$env:ANTENNA_TEXT_MODEL = "<your-deepseek-text-model>"
+$env:DEEPSEEK_API_KEY = "<your-key>"
+$env:ANTENNA_VISION_PROVIDER = "ollama"
+$env:OLLAMA_VISION_MODEL = "qwen3-vl:8b"
+
+antenna-doctor
+antenna-workflow model-run <job-id> --through-stage boolean
+```
+
+续跑会复用失败阶段之前已经验证并保存的工件，从失败的 `model_3d` 重新开始；文本覆盖
+不会把 Ollama 的视觉模型改成 DeepSeek 模型。
+
 主要输出：
 
 | 文件 | 作用 |
 | --- | --- |
 | `generated_model_v001.py` | 不可变的第一版建模代码 |
 | `generated_model.py` | 指向当前最新内容的稳定文件名 |
+| `run_in_aedt_v001.py` | 在 AEDT 内运行对应几何版（`boolean`）模型的入口 |
+| `run_in_aedt.py` | 在 AEDT 内运行当前最新几何版模型的稳定入口 |
 | `python_export_manifest_v001.json` | 记录输入工件、哈希和执行边界 |
 | `parameters.json` | 参数及单位 |
 | `materials.json` | 材料定义 |
@@ -156,13 +190,22 @@ antenna-workflow codegen <job-id>
 
 ### 方式 A：AEDT 内运行 wrapper
 
-论文案例目录中包含 `run_in_aedt.py`。打开目标工程，然后在 AEDT 中选择：
+`codegen --through-stage boolean` 会在该任务目录自动生成 `run_in_aedt_vNNN.py`
+和 `run_in_aedt.py`；论文案例目录也包含相同形式的入口。打开目标工程，然后在
+AEDT 中选择：
 
 ```text
 Tools > Run Script > run_in_aedt.py
 ```
 
-wrapper 会新建一个唯一命名的 HFSS Design，只构建几何，不保存、不求解。
+wrapper 会调用仓库或安装包中统一维护、带哈希校验的 native adapter，新建一个
+唯一命名的 HFSS Design，只构建几何，不保存、不求解。不要直接选择
+`generated_model_vNNN.py`。若移动任务目录，应保留完整 GitHub 仓库，或重新运行
+`codegen` 以记录当前安装位置的 adapter。
+
+包含 `simulation_setup` 的导出不会生成或覆盖 native wrapper，因为 native adapter
+只实现几何接口，不实现 setup、端口或边界 API。此类完整仿真代码必须使用下方的
+外部 CPython/PyAEDT 方式执行。
 
 ### 方式 B：外部 PyAEDT
 
@@ -192,6 +235,21 @@ antenna-workflow regenerate <job-id>
 
 模型确认后，才能考虑端口、边界、空气区域、网格、扫频与优化范围。这些信息不能仅凭结构图片静默猜测。
 
+论文参考模型尚未通过论文门槛时，先使用版本化工程假设搜索。它会锁定论文明确参数，
+只改变标记为“来源未披露”的端口、导体、介质或边界假设，并把每次 S11、收敛证据、
+哈希和排名保存为不可覆盖版本：
+
+```powershell
+antenna-workflow assumption-plan `
+  --space ".\examples\validation\wifi_patch_5250\assumption_space.json" `
+  --output-dir ".\examples\validation\wifi_patch_5250\local_results\assumption_search_v1" `
+  --limit 10
+```
+
+完整的 AEDT 附加、恢复和失败重试命令见
+[`docs/ASSUMPTION_SEARCH.md`](docs/ASSUMPTION_SEARCH.md)。只有工程假设版本通过参考门槛
+G3 后，才能进入独立候选 G4/G5 和后续性能优化。
+
 执行 HFSS 前需要最终审核哈希和显式执行门：
 
 ```powershell
@@ -204,10 +262,27 @@ antenna-workflow hfss-build <job-id> <artifact-approval-hash> `
 
 优化器会复制输入工程，在隔离任务目录中运行试验：
 
+- 先验证每个优化变量确实会改变 HFSS 几何；
+- 未通过自适应收敛或扫频收敛门禁的试验不会参与最优排名；
 - 每次试验追加到 `trials.jsonl`；
 - 当前最优参数写入 `best.json`；
 - 最优工程单独保存；
-- 原始 `.aedt` 文件不会被覆盖。
+- 原始 `.aedt` 文件不会被覆盖；
+- 中断后可从已有试验继续，已完成任务重复执行不会再求解。
+
+建议先执行不求解的预检，再正式运行：
+
+```powershell
+antenna-workflow optimization-create .\optimization_request.json
+antenna-workflow optimization-preflight <optimization-job-id>
+
+$env:ANTENNA_MCP_ALLOW_SIMULATION = "1"
+antenna-workflow optimization-run <optimization-job-id>
+```
+
+官方探针贴片已完成一次 12 组真实 HFSS 回归：12/12 组均收敛，目标小频段内最差
+S11 从 −9.9348 dB 改善到 −11.4999 dB，源工程 SHA-256 前后一致。可复核记录见
+[`optimization_study_2026_08_28.json`](examples/validation/ansys_pyaedt_probe_patch/reference_data/optimization_study_2026_08_28.json)。
 
 完整参数格式见 [`docs/PIPELINE.md`](docs/PIPELINE.md)。
 
@@ -249,7 +324,9 @@ MCP 客户端配置示例：
 - `regenerate_antenna_python_from_feedback`
 - `build_hfss_project`
 - `create_hfss_optimization_job`
+- `preflight_hfss_optimization_job`
 - `run_hfss_optimization_job`
+- `validate_antenna_model`
 - `get_antenna_job`
 
 ## 论文复现案例
@@ -275,6 +352,33 @@ tests/                 不需要 API、AEDT 或许可证的测试
 docs/                  架构、完整流程和发布说明
 .github/               CI、Dependabot 与 Issue 模板
 ```
+
+## 正确性验证
+
+论文几何复现案例与正确性基准严格分开。仓库以 Ansys 官方 PyAEDT 探针馈电
+贴片作为已求解本地基线，并加入三篇开放论文的六个独立参考设计；它们都可分别
+执行离线结构检查和完整 S11 对比：
+
+```powershell
+antenna-workflow validate `
+  --benchmark ".\examples\validation\ansys_pyaedt_probe_patch\benchmark.json" `
+  --candidate ".\examples\validation\ansys_pyaedt_probe_patch\candidate_contract.example.json" `
+  --contract-only `
+  --report ".\tmp\probe-patch-contract-report.json"
+```
+
+没有参考与候选两条 S11 CSV 时，完整验证只会返回 `incomplete`，不会把几何相似
+误报为电磁正确。完整格式与本地参考求解流程见
+[`docs/VALIDATION.md`](docs/VALIDATION.md) 和
+[`examples/validation`](examples/validation)。
+
+多论文验证活动的当前状态、论文目标、未决假设和下一道验收门槛见
+[`examples/validation/CAMPAIGN.md`](examples/validation/CAMPAIGN.md)。其中离线测试通过、
+HFSS 参考求解通过和独立生成候选通过是三个不同结论，不会互相替代。
+面向汇报的总体结论见
+[`examples/validation/CORRECTNESS_REPORT.md`](examples/validation/CORRECTNESS_REPORT.md)。
+7 个“一案例一文件夹”的运行入口见
+[`examples/validation/cases/CASE_INDEX.md`](examples/validation/cases/CASE_INDEX.md)。
 
 ## 测试和打包
 

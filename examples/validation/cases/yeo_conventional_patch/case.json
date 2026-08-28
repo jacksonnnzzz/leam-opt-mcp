@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "case_id": "yeo_conventional_patch",
+  "design_name": "YeoConventionalPatch",
+  "runner": "run_case.py",
+  "shared_model": "../../yeo_slot_loaded_patch/reference_model.py",
+  "benchmark": "../../yeo_slot_loaded_patch/benchmark_conventional.json",
+  "paper_gate": "../../yeo_slot_loaded_patch/paper_targets.py",
+  "default_outputs": ["local_results/yeo_conventional_patch.aedt", "local_results/reference_s11.csv", "local_results/paper_target_report.json", "local_results/assumption_study/assumption_study_report.json"],
+  "status": "HFSS reference and three controlled variants solved; no variant passed the paper gate"
+}

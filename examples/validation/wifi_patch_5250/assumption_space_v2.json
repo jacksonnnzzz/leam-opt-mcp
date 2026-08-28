@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "study_id": "wifi_patch_5250_engineering_assumption_interactions_v2",
+  "case_id": "wifi_patch_5250",
+  "description": "Cartesian interaction study over the four paper-unresolved assumptions that individually improved the complete-band metric in v1. Paper-explicit dimensions and FR-4 properties remain immutable.",
+  "strategy": "cartesian",
+  "include_baseline": false,
+  "minimum_changed_assumptions": 2,
+  "maximum_changed_assumptions": 4,
+  "selection_evidence": {
+    "v1_record": "reference_data/engineering_assumption_search_2026_08_27.json",
+    "source_gap_audit": "reference_data/source_gap_audit_2026_08_28.json",
+    "rule": "Include only unresolved assumptions whose one-at-a-time v1 result improved the full-band worst S11 relative to the source-corrected baseline."
+  },
+  "paper_parameters": {
+    "center_frequency": {"value": 5.25, "unit": "GHz", "evidence": "paper"},
+    "wifi_band_start": {"value": 5.15, "unit": "GHz", "evidence": "paper"},
+    "wifi_band_stop": {"value": 5.35, "unit": "GHz", "evidence": "paper"},
+    "substrate_relative_permittivity": {"value": 4.5, "unit": "ratio", "evidence": "paper"},
+    "substrate_loss_tangent": {"value": 0.025, "unit": "ratio", "evidence": "paper"},
+    "substrate_thickness_h": {"value": 1.5, "unit": "mm", "evidence": "paper"},
+    "substrate_length_Lg": {"value": 25.92, "unit": "mm", "evidence": "paper"},
+    "substrate_width_Wg": {"value": 34.44, "unit": "mm", "evidence": "paper"},
+    "reflector_width_WR": {"value": 34.44, "unit": "mm", "evidence": "paper"},
+    "reflector_extension_LR": {"value": 20.0, "unit": "mm", "evidence": "paper"},
+    "patch_length_Lp": {"value": 12.55, "unit": "mm", "evidence": "paper"},
+    "patch_width_Wp": {"value": 17.22, "unit": "mm", "evidence": "paper"},
+    "feed_offset_Xp": {"value": 2.89, "unit": "mm", "evidence": "paper"}
+  },
+  "baseline_assumptions": {
+    "conductor_model": "zero_thickness_pec_sheets",
+    "probe_inner_radius_mm": 0.5,
+    "probe_outer_radius_mm": 1.225,
+    "feed_length_mm": 7.35,
+    "coax_dielectric": "vacuum",
+    "port_impedance_ohm": 50.0,
+    "radiation_padding_mm": 15.0,
+    "solution_type": "Terminal",
+    "sweep_start_ghz": 5.0,
+    "sweep_stop_ghz": 5.5,
+    "sweep_points": 501
+  },
+  "search_space": {
+    "radiation_padding_mm": {
+      "values": [10.0],
+      "source_status": "unresolved_from_source",
+      "rationale": "The 10 mm v1 trial produced the best complete-band metric; CST open-boundary placement is unpublished."
+    },
+    "probe_outer_radius_mm": {
+      "values": [1.0],
+      "source_status": "unresolved_from_source",
+      "rationale": "The 1.0 mm v1 trial improved the complete-band metric; connector dimensions are unpublished."
+    },
+    "feed_length_mm": {
+      "values": [5.0],
+      "source_status": "unresolved_from_source",
+      "rationale": "The 5.0 mm v1 trial improved the complete-band metric; connector length is unpublished."
+    },
+    "probe_inner_radius_mm": {
+      "values": [0.6],
+      "source_status": "unresolved_from_source",
+      "rationale": "The 0.6 mm v1 trial improved the complete-band metric; probe-pin radius is unpublished."
+    }
+  },
+  "constraints": [
+    {"left": "probe_inner_radius_mm", "operator": "<", "right": "probe_outer_radius_mm"}
+  ],
+  "solver_gate": {
+    "setup": "Setup1",
+    "sweep": "Sweep1",
+    "max_delta_s": 0.02,
+    "require_sweep_converged": true
+  },
+  "acceptance": {
+    "metric": "maximum_s11_in_target_band_db",
+    "operator": "<=",
+    "threshold": -10.0,
+    "require_converged": true
+  }
+}

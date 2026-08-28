@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "record_type": "convergence_gated_hfss_optimization_study",
+  "benchmark_id": "ansys_pyaedt_probe_patch",
+  "executed_on": "2026-08-28",
+  "environment": {
+    "aedt_version": "2025.1",
+    "pyaedt_version": "0.26.3",
+    "solution_type": "Terminal Network",
+    "adaptive_setup": "Setup1",
+    "sweep": "Sweep1",
+    "sweep_range_ghz": [8.0, 12.0]
+  },
+  "provenance": {
+    "job_id": "opt-c9934080ef55",
+    "source_project_kind": "local ignored official-reference project",
+    "source_project_sha256_before": "6bff3fcb5b5d6130fff0976647e452ab84048a3d25e712e5595e16a845a41bbf",
+    "source_project_sha256_after": "6bff3fcb5b5d6130fff0976647e452ab84048a3d25e712e5595e16a845a41bbf",
+    "source_project_unchanged": true,
+    "request_sha256": "612e79b4d2dbd991258c8bfe6de797371e12cd181a8ac98603c5c8b6f17e93b5",
+    "optimized_project_filename": "official_probe_patch_optimized.aedt",
+    "optimized_project_sha256": "45d48fe610d1bc3ed9adb142e35e3f83043a5f8d4b29494f275d71d137c5d495",
+    "raw_local_job_artifacts_ignored_by_git": true
+  },
+  "study_design": {
+    "strategy": "adaptive_surrogate",
+    "seed": 42,
+    "trial_count": 12,
+    "initial_samples": 7,
+    "candidate_pool_size": 1024,
+    "exploration_weight": 1.5,
+    "baseline_first": true,
+    "parameters": [
+      {"name": "Patch_length", "lower": 9.35, "upper": 9.8, "unit": "mm"},
+      {"name": "Patch_width", "lower": 9.0, "upper": 9.5, "unit": "mm"},
+      {"name": "probe_x_rel", "lower": 0.44, "upper": 0.53, "unit": "dimensionless"}
+    ],
+    "objectives": [
+      {
+        "name": "worst_s11_9p9_to_10p1_db",
+        "definition": "maximum S11 in 9.9-10.1 GHz",
+        "goal": "minimize",
+        "weight": 1.0
+      },
+      {
+        "name": "s11_at_10ghz_db",
+        "definition": "S11 at 10.0 GHz",
+        "goal": "minimize",
+        "weight": 0.25
+      }
+    ],
+    "score_definition": "worst_s11_9p9_to_10p1_db + 0.25 * s11_at_10ghz_db; lower is better",
+    "acceptance_gates": {
+      "all_parameters_must_change_geometry": true,
+      "adaptive_delta_s_limit": 0.02,
+      "maximum_adaptive_passes": 12,
+      "sweep_must_converge": true,
+      "unconverged_trials_are_ineligible": true
+    }
+  },
+  "parameter_effect_preflight": {
+    "passed": true,
+    "baseline_geometry_sha256": "cab694dc48549a7ff9479f3721b280b2f58f0fbea987b7f1d0576088c3d6a33d",
+    "parameters": [
+      {"name": "Patch_length", "probe_value": 9.35, "geometry_changed": true},
+      {"name": "Patch_width", "probe_value": 9.0, "geometry_changed": true},
+      {"name": "probe_x_rel", "probe_value": 0.44, "geometry_changed": true}
+    ]
+  },
+  "outcome": {
+    "status": "completed",
+    "successful_trials": 12,
+    "rejected_trials": 0,
+    "failed_trials": 0,
+    "all_trials_converged": true,
+    "baseline_trial": 1,
+    "best_trial": 9,
+    "baseline": {
+      "parameters": {"Patch_length": 9.57, "Patch_width": 9.25, "probe_x_rel": 0.485},
+      "worst_s11_9p9_to_10p1_db": -9.93483617873241,
+      "s11_at_10ghz_db": -15.475447363593329,
+      "score": -13.803698019630744,
+      "adaptive_passes_completed": 9,
+      "final_max_magnitude_delta_s": 0.01941
+    },
+    "best": {
+      "parameters": {
+        "Patch_length": 9.594167117460739,
+        "Patch_width": 9.20662378539966,
+        "probe_x_rel": 0.45688242872550744
+      },
+      "worst_s11_9p9_to_10p1_db": -11.499926496836375,
+      "s11_at_10ghz_db": -19.285516439419922,
+      "score": -16.321305606691354,
+      "adaptive_passes_completed": 10,
+      "final_max_magnitude_delta_s": 0.0132
+    },
+    "improvement": {
+      "worst_s11_9p9_to_10p1_db": 1.5650903181039642,
+      "s11_at_10ghz_db": 3.8100690758265934,
+      "weighted_score": 2.51760758706061,
+      "best_meets_full_9p9_to_10p1_below_minus_10_db": true
+    },
+    "interpretation": "This bounded 12-trial study demonstrates that the repository can preflight real HFSS variables, reject non-converged results, improve a verified baseline, preserve the source project, and save a separately hashed best project. It does not prove a global optimum or generalize correctness to other antennas."
+  },
+  "trials": [
+    {"trial": 1, "parameters": {"Patch_length": 9.57, "Patch_width": 9.25, "probe_x_rel": 0.485}, "worst_s11_9p9_to_10p1_db": -9.93483617873241, "s11_at_10ghz_db": -15.475447363593329, "score": -13.803698019630744, "adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01941, "status": "ok"},
+    {"trial": 2, "parameters": {"Patch_length": 9.415893548550029, "Patch_width": 9.444317187288622, "probe_x_rel": 0.45485616499758}, "worst_s11_9p9_to_10p1_db": -5.31698360542892, "s11_at_10ghz_db": -8.545512533069493, "score": -7.453361738696293, "adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01974, "status": "ok"},
+    {"trial": 3, "parameters": {"Patch_length": 9.4962518847523, "Patch_width": 9.228488403620474, "probe_x_rel": 0.5280392132816102}, "worst_s11_9p9_to_10p1_db": -6.269968569600236, "s11_at_10ghz_db": -9.144428601476879, "score": -8.556075719969456, "adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01974, "status": "ok"},
+    {"trial": 4, "parameters": {"Patch_length": 9.71493068133433, "Patch_width": 9.396067248614516, "probe_x_rel": 0.5055292105592875}, "worst_s11_9p9_to_10p1_db": -7.248640082472572, "s11_at_10ghz_db": -11.02823181828718, "score": -10.005698037044366, "adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01974, "status": "ok"},
+    {"trial": 5, "parameters": {"Patch_length": 9.793068686495312, "Patch_width": 9.107525377721668, "probe_x_rel": 0.48289907272287663}, "worst_s11_9p9_to_10p1_db": -5.316183413049385, "s11_at_10ghz_db": -7.9661537154230455, "score": -7.3077218419051455, "adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01974, "status": "ok"},
+    {"trial": 6, "parameters": {"Patch_length": 9.55720640459528, "Patch_width": 9.015616998200258, "probe_x_rel": 0.44437464949808847}, "worst_s11_9p9_to_10p1_db": -9.504883430674907, "s11_at_10ghz_db": -17.538504176757588, "score": -13.889509474864305, "adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01974, "status": "ok"},
+    {"trial": 7, "parameters": {"Patch_length": 9.654487435196259, "Patch_width": 9.144752569263133, "probe_x_rel": 0.4780213109283729}, "worst_s11_9p9_to_10p1_db": -10.029232070335661, "s11_at_10ghz_db": -15.84560190592763, "score": -13.990632546817569, "adaptive_passes_completed": 9, "final_max_magnitude_delta_s": 0.01974, "status": "ok"},
+    {"trial": 8, "parameters": {"Patch_length": 9.391106008472292, "Patch_width": 9.332134602698538, "probe_x_rel": 0.4926210179863162}, "worst_s11_9p9_to_10p1_db": -4.769140776768549, "s11_at_10ghz_db": -7.138969276002856, "score": -6.5538830957692635, "adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.0132, "status": "ok"},
+    {"trial": 9, "parameters": {"Patch_length": 9.594167117460739, "Patch_width": 9.20662378539966, "probe_x_rel": 0.45688242872550744}, "worst_s11_9p9_to_10p1_db": -11.499926496836375, "s11_at_10ghz_db": -19.285516439419922, "score": -16.321305606691354, "adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.0132, "status": "ok"},
+    {"trial": 10, "parameters": {"Patch_length": 9.671154825681185, "Patch_width": 9.261172436609254, "probe_x_rel": 0.4403698882310712}, "worst_s11_9p9_to_10p1_db": -7.827308996717016, "s11_at_10ghz_db": -13.887408439156522, "score": -11.299161106506146, "adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.0132, "status": "ok"},
+    {"trial": 11, "parameters": {"Patch_length": 9.504731325411422, "Patch_width": 9.116051556570962, "probe_x_rel": 0.459773211053679}, "worst_s11_9p9_to_10p1_db": -7.24407103277416, "s11_at_10ghz_db": -12.072643372689804, "score": -10.262231875946611, "adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.0132, "status": "ok"},
+    {"trial": 12, "parameters": {"Patch_length": 9.659498613628111, "Patch_width": 9.057354431849502, "probe_x_rel": 0.4400032140595614}, "worst_s11_9p9_to_10p1_db": -8.293452786522833, "s11_at_10ghz_db": -14.673930509144604, "score": -11.961935413808984, "adaptive_passes_completed": 10, "final_max_magnitude_delta_s": 0.0132, "status": "ok"}
+  ]
+}

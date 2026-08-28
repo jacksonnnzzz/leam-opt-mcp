@@ -16,6 +16,32 @@ class _FeedbackProvider:
         self.prompts.append(prompt)
         stage = prompt.split("Stage: ", 1)[1].splitlines()[0]
         corrected = "Move the feedline 1 mm right" in prompt
+        if stage == "source_analysis":
+            return json.dumps(
+                {
+                    "input_summary": "reviewed text intent",
+                    "antenna_type": "feedline",
+                    "coordinate_system": {
+                        "plane": "XY",
+                        "origin": [0, 0, 0],
+                        "axes": ["x", "y", "z"],
+                    },
+                    "components": [],
+                    "parameters": [
+                        {
+                            "symbol": "W",
+                            "value": 10.0,
+                            "unit": "mm",
+                            "geometric_meaning": "feedline width",
+                            "evidence_source": "operator-reviewed text",
+                            "confidence": 1.0,
+                        }
+                    ],
+                    "operations": [],
+                    "derived_relations": [],
+                    "uncertainties": [],
+                }
+            )
         if stage == "parameters":
             return json.dumps(
                 {"parameters": [{"name": "W", "value": 10.0, "unit": "mm"}]}
@@ -26,7 +52,9 @@ class _FeedbackProvider:
         if stage == "boolean":
             return "hfss.modeler.fit_all()"
         if stage == "model_2d":
-            return "pass"
+            return "hfss.modeler.fit_all()"
+        if stage == "dimensions":
+            return json.dumps({"solids": []})
         return json.dumps({stage: []})
 
 

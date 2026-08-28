@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "case_id": "kaur_wlan_notch",
+  "design_name": "Kaur2021WLANNotch",
+  "runner": "run_case.py",
+  "shared_model": "../../kaur_split_ring_monopole/reference_model.py",
+  "benchmark": "../../kaur_split_ring_monopole/benchmark_wlan_notch.json",
+  "paper_gate": "../../kaur_split_ring_monopole/paper_targets.py",
+  "default_outputs": ["local_results/kaur_wlan_notch.aedt", "local_results/reference_wlan_notch_s11.csv", "local_results/paper_target_wlan_notch.json"],
+  "status": "HFSS reference solved; WLAN notch-center and surrounding matched-band paper gates failed"
+}

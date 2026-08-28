@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import socket
 import subprocess
 import threading
 from contextlib import contextmanager
@@ -38,6 +39,26 @@ def temporary_multi_desktop(enabled: bool = True) -> Iterator[None]:
             yield
         finally:
             settings.use_multi_desktop = previous
+
+
+@contextmanager
+def temporary_grpc_session_probe() -> Iterator[None]:
+    """Make PyAEDT Desktop port validation use the localized-Windows-safe probe.
+
+    ``Desktop`` imports its probe into module scope, so fixing the preflight
+    alone is insufficient: the constructor can otherwise report the existing
+    port as absent and attempt a fallback launch.  Patch only for the protected
+    attach operation and always restore PyAEDT's process-global function.
+    """
+    from ansys.aedt.core import desktop as desktop_module
+
+    with _PYAEDT_SETTINGS_LOCK:
+        original = desktop_module.is_grpc_session_active
+        desktop_module.is_grpc_session_active = aedt_grpc_session_is_active
+        try:
+            yield
+        finally:
+            desktop_module.is_grpc_session_active = original
 
 
 def is_aedt_app_released(app: Any) -> bool:
@@ -85,6 +106,74 @@ def prepare_pyaedt_environment() -> dict[str, Any]:
         except (ImportError, AttributeError):
             pass
     return config
+
+
+def aedt_grpc_session_is_active(port: int, machine: str | None = None) -> bool:
+    """Return whether an AEDT process owns a listening gRPC port.
+
+    PyAEDT 0.26.3 discovers Windows process IDs by parsing ``tasklist`` output.
+    That parser can return an empty result on localized Windows installations,
+    even when ``ansysedt.exe`` is visibly listening.  Retain PyAEDT's probe as
+    the first choice, then use a process-owner-checked local psutil fallback.
+    An arbitrary process occupying the port is never accepted as AEDT.
+    """
+    if not 1 <= int(port) <= 65535:
+        return False
+    if _pyaedt_grpc_probe(port, machine):
+        return True
+    if not _is_local_machine(machine):
+        return False
+    return _local_aedt_listener_is_active(port)
+
+
+def _pyaedt_grpc_probe(port: int, machine: str | None) -> bool:
+    try:
+        from ansys.aedt.core.generic.general_methods import is_grpc_session_active
+
+        return bool(is_grpc_session_active(port, machine or "127.0.0.1"))
+    except (ImportError, OSError, RuntimeError):
+        return False
+
+
+def _is_local_machine(machine: str | None) -> bool:
+    normalized = str(machine or "").strip().casefold()
+    return normalized in {
+        "",
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "::ffff:127.0.0.1",
+        socket.gethostname().casefold(),
+    }
+
+
+def _local_aedt_listener_is_active(port: int) -> bool:
+    try:
+        import psutil
+    except ImportError:
+        return False
+    try:
+        connections = psutil.net_connections(kind="tcp")
+    except (OSError, psutil.AccessDenied):
+        return False
+    for connection in connections:
+        local_address = getattr(connection, "laddr", None)
+        local_port = getattr(local_address, "port", None)
+        if local_port is None and local_address:
+            local_port = local_address[1]
+        if (
+            local_port != port
+            or str(getattr(connection, "status", "")).upper() not in {"LISTEN", "LISTENING"}
+            or getattr(connection, "pid", None) is None
+        ):
+            continue
+        try:
+            process_name = psutil.Process(connection.pid).name().casefold()
+        except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess):
+            continue
+        if process_name in {"ansysedt", "ansysedt.exe", "ansysedtsv", "ansysedtsv.exe"}:
+            return True
+    return False
 
 
 def ensure_strict_existing_attachment(app: Any, expected_port: int) -> None:

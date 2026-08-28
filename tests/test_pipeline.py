@@ -12,8 +12,45 @@ from antenna_mcp.workspace import WorkspaceStore
 class PipelineProvider:
     def generate(self, *, system, prompt, attachments):
         stage = prompt.split("Stage: ", 1)[1].splitlines()[0]
-        if stage in {"model_3d", "model_2d", "boolean", "simulation_setup"}:
-            return "hfss.modeler.create_box([0, 0, 0], [1, 1, 1], name='part')"
+        if stage == "model_3d":
+            return "hfss.modeler.create_box(origin=[0, 0, 0], sizes=[1, 1, 1], name='part')"
+        if stage == "model_2d":
+            return "hfss.modeler.create_rectangle(orientation='XY', origin=[0, 0, 0], sizes=[1, 1], name='sheet')"
+        if stage == "boolean":
+            return "hfss.modeler.subtract('part', 'tool', keep_originals=False)"
+        if stage == "simulation_setup":
+            return (
+                "setup = hfss.create_setup('Setup1')\n"
+                "hfss.create_linear_count_sweep(setup=setup.name, unit='GHz', "
+                "start_frequency=1, stop_frequency=2, num_of_freq_points=3, "
+                "name='Sweep1')"
+            )
+        if stage == "source_analysis":
+            return json.dumps(
+                {
+                    "input_summary": "generic parametric antenna text intent",
+                    "antenna_type": "generic",
+                    "coordinate_system": {
+                        "plane": "XY",
+                        "origin": [0, 0, 0],
+                        "axes": ["x", "y", "z"],
+                    },
+                    "components": [],
+                    "parameters": [
+                        {
+                            "symbol": "x",
+                            "value": 0,
+                            "unit": "mm",
+                            "geometric_meaning": "generic optimization coordinate",
+                            "evidence_source": "test intent",
+                            "confidence": 1.0,
+                        }
+                    ],
+                    "operations": [],
+                    "derived_relations": [],
+                    "uncertainties": [],
+                }
+            )
         if stage == "parameters":
             return json.dumps(
                 {"parameters": [{"name": "x", "value": 0, "unit": "mm", "optimizable": True}]}
@@ -35,6 +72,27 @@ class PipelineProvider:
                     "save_best_as": "optimized.aedt",
                 }
             )
+        if stage == "dimensions":
+            return json.dumps({"solids": []})
+        if stage == "simulation_spec":
+            return json.dumps(
+                {
+                    "design_type": "HFSS",
+                    "solution_type": "Modal",
+                    "setup": {
+                        "name": "Setup1",
+                        "type": "HFSSDriven",
+                        "adaptive_frequency": {"value": 1.5, "unit": "GHz"},
+                    },
+                    "sweep": {
+                        "name": "Sweep1",
+                        "type": "Interpolating",
+                        "start": {"value": 1.0, "unit": "GHz"},
+                        "stop": {"value": 2.0, "unit": "GHz"},
+                    },
+                    "s_parameter": "S11_dB",
+                }
+            )
         return json.dumps({stage: []})
 
 
@@ -44,6 +102,10 @@ class FakeModeler:
 
     def create_box(self, *args, **kwargs):
         self.object_names.append(kwargs.get("name", "part"))
+        return True
+
+    def create_rectangle(self, *args, **kwargs):
+        self.object_names.append(kwargs.get("name", "sheet"))
         return True
 
     @property
@@ -60,6 +122,12 @@ class FakeHfss:
     def __setitem__(self, name, value):
         self.variables[name] = value
 
+    def create_setup(self, name):
+        return FakeSetup(name)
+
+    def create_linear_count_sweep(self, **kwargs):
+        return True
+
     def save_project(self, path):
         Path(path).write_text("aedt", encoding="utf-8")
         return True
@@ -68,9 +136,34 @@ class FakeHfss:
         pass
 
 
+class FakeSetup:
+    def __init__(self, name):
+        self.name = name
+        self.props = {}
+
+    def update(self):
+        return True
+
+
 class QuadraticEvaluator:
     def evaluate(self, parameters):
         return {"loss": (parameters["x"] - 2.0) ** 2}
+
+    def convergence_evidence(self):
+        return {
+            "converged": True,
+            "final_max_magnitude_delta_s": 0.01,
+            "sweep_converged": True,
+        }
+
+    def verify_parameter_effects(self, parameters):
+        return {
+            "schema_version": "1.0",
+            "all_parameters_effective": True,
+            "parameters": [
+                {"name": item.name, "geometry_changed": True} for item in parameters
+            ],
+        }
 
     def save_best(self, destination):
         Path(destination).write_text("best", encoding="utf-8")

@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "case_id": "yeo_2019_conventional_inset_patch",
+  "recorded_at": "2026-08-26",
+  "environment": {
+    "aedt": "2025.1",
+    "pyaedt": "0.26.3"
+  },
+  "scope": "local HFSS translation and controlled unresolved-assumption study",
+  "held_fixed": [
+    "all paper-explicit Figure 1(a) dimensions",
+    "RF-35 relative permittivity 3.5",
+    "RF-35 loss tangent 0.0018",
+    "RF-35 substrate thickness 0.76 mm",
+    "1.5-3.7 GHz frequency range with 1101 exported points"
+  ],
+  "paper_gate": {
+    "target_resonance_ghz": 2.5,
+    "maximum_resonance_relative_error": 0.01,
+    "target_first_minus_10db_band_ghz": [
+      2.49,
+      2.51
+    ],
+    "maximum_edge_absolute_error_ghz": 0.01,
+    "maximum_bandwidth_relative_error": 0.5
+  },
+  "results": {
+    "baseline_solid_wave": {
+      "conductor_model": "solid_copper_0p035mm",
+      "port_model": "wave_port",
+      "curve_sha256": "774a2f08e38fcd6a77d48b202c5a4c1005a19deb52484a4e44efcbe74f79d016",
+      "observed_resonance_ghz": 2.468,
+      "observed_s11_db": -7.832682239427586,
+      "resonance_relative_error": 0.0128,
+      "observed_first_minus_10db_band_ghz": null,
+      "paper_gate_passed": false
+    },
+    "solid_lumped": {
+      "conductor_model": "solid_copper_0p035mm",
+      "port_model": "internal_lumped_port",
+      "curve_sha256": "12a2d734284547bd2c47813ece954a6f0f2f73a1ca86b9a8afe9d207ad9e9d71",
+      "observed_resonance_ghz": 2.47,
+      "observed_s11_db": -10.060949212854162,
+      "resonance_relative_error": 0.012,
+      "observed_first_minus_10db_band_ghz": [
+        2.469030984348128,
+        2.4721133095595813
+      ],
+      "paper_gate_passed": false
+    },
+    "pec_wave": {
+      "conductor_model": "zero_thickness_pec",
+      "port_model": "full_region_face_wave_port",
+      "curve_sha256": "0f23abeca9f1af7407a5920898fc835fc85bccc749d7168bf9882d6aeacf9ae8",
+      "observed_resonance_ghz": 2.476,
+      "observed_s11_db": -6.696877295442967,
+      "resonance_relative_error": 0.0096,
+      "observed_first_minus_10db_band_ghz": null,
+      "paper_gate_passed": false
+    },
+    "pec_lumped": {
+      "conductor_model": "zero_thickness_pec",
+      "port_model": "internal_lumped_port",
+      "curve_sha256": "0141b8b22cf322a42137f4c55469f94bf718ad7f89be80506470a864a6491b2d",
+      "observed_resonance_ghz": 2.612,
+      "observed_s11_db": -2.0698599176039183,
+      "resonance_relative_error": 0.0448,
+      "observed_first_minus_10db_band_ghz": null,
+      "paper_gate_passed": false
+    }
+  },
+  "paper_gate_passed_variants": [],
+  "status": "solved_fail_paper_gate",
+  "interpretation": "None of the controlled conductor/port translations reproduces the complete paper gate. This is a CST-to-HFSS reproduction mismatch under unpublished engineering choices; it is not proof that the extracted Figure 1(a) geometry is wrong.",
+  "policy": "Do not generate or accept an independent candidate against this local reference until a versioned reference translation passes the paper gate."
+}

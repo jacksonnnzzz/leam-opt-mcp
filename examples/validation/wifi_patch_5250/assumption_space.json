@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "study_id": "wifi_patch_5250_engineering_assumptions_v1",
+  "case_id": "wifi_patch_5250",
+  "description": "Search only implementation details that are unresolved by the paper. Paper-explicit dimensions and FR-4 properties are immutable.",
+  "strategy": "one_at_a_time",
+  "include_baseline": false,
+  "paper_parameters": {
+    "center_frequency": {"value": 5.25, "unit": "GHz", "evidence": "paper"},
+    "wifi_band_start": {"value": 5.15, "unit": "GHz", "evidence": "paper"},
+    "wifi_band_stop": {"value": 5.35, "unit": "GHz", "evidence": "paper"},
+    "substrate_relative_permittivity": {"value": 4.5, "unit": "ratio", "evidence": "paper"},
+    "substrate_loss_tangent": {"value": 0.025, "unit": "ratio", "evidence": "paper"},
+    "substrate_thickness_h": {"value": 1.5, "unit": "mm", "evidence": "paper"},
+    "substrate_length_Lg": {"value": 25.92, "unit": "mm", "evidence": "paper"},
+    "substrate_width_Wg": {"value": 34.44, "unit": "mm", "evidence": "paper"},
+    "reflector_width_WR": {"value": 34.44, "unit": "mm", "evidence": "paper"},
+    "reflector_extension_LR": {"value": 20.0, "unit": "mm", "evidence": "paper"},
+    "patch_length_Lp": {"value": 12.55, "unit": "mm", "evidence": "paper"},
+    "patch_width_Wp": {"value": 17.22, "unit": "mm", "evidence": "paper"},
+    "feed_offset_Xp": {"value": 2.89, "unit": "mm", "evidence": "paper"}
+  },
+  "baseline_assumptions": {
+    "conductor_model": "zero_thickness_pec_sheets",
+    "probe_inner_radius_mm": 0.5,
+    "probe_outer_radius_mm": 1.225,
+    "feed_length_mm": 7.35,
+    "coax_dielectric": "vacuum",
+    "port_impedance_ohm": 50.0,
+    "radiation_padding_mm": 15.0,
+    "solution_type": "Terminal",
+    "sweep_start_ghz": 5.0,
+    "sweep_stop_ghz": 5.5,
+    "sweep_points": 501
+  },
+  "search_space": {
+    "coax_dielectric": {
+      "values": ["ptfe_er2p1"],
+      "source_status": "unresolved_from_source",
+      "rationale": "The connector dielectric is not reported."
+    },
+    "conductor_model": {
+      "values": ["finite_copper_0p035mm"],
+      "source_status": "unresolved_from_source",
+      "rationale": "The paper does not report conductor thickness or conductivity."
+    },
+    "probe_outer_radius_mm": {
+      "values": [1.0, 1.5],
+      "source_status": "unresolved_from_source",
+      "rationale": "The SMA outer radius is not reported."
+    },
+    "probe_inner_radius_mm": {
+      "values": [0.4, 0.6],
+      "source_status": "unresolved_from_source",
+      "rationale": "The probe pin radius is not reported."
+    },
+    "feed_length_mm": {
+      "values": [5.0, 10.0],
+      "source_status": "unresolved_from_source",
+      "rationale": "The connector length below the reflector is not reported."
+    },
+    "radiation_padding_mm": {
+      "values": [10.0, 25.0],
+      "source_status": "unresolved_from_source",
+      "rationale": "The CST open-boundary distance is not reported."
+    }
+  },
+  "constraints": [
+    {"left": "probe_inner_radius_mm", "operator": "<", "right": "probe_outer_radius_mm"}
+  ],
+  "solver_gate": {
+    "setup": "Setup1",
+    "sweep": "Sweep1",
+    "max_delta_s": 0.02,
+    "require_sweep_converged": true
+  },
+  "acceptance": {
+    "metric": "maximum_s11_in_target_band_db",
+    "operator": "<=",
+    "threshold": -10.0,
+    "require_converged": true
+  }
+}

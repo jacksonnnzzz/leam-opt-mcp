@@ -13,12 +13,14 @@ from .aedt_runtime import aedt_failure_diagnostic, planned_transport
 from .execution import HfssBuildService
 from .feedback import ModelFeedbackService
 from .modeling import ModelingService
+from .model_retry import ModelRetryService
 from .models import ModelingRequest, OptimizationRequest, PipelineRequest
 from .optimizer import OptimizationService
 from .pipeline import PipelineService
 from .review import ArtifactReviewService
 from .reviewed_model import EngineeringAssumptionService, ReviewedModelCompiler
 from .source_refinement import SourceRefinementService
+from .validation import ValidationService
 from .workspace import WorkspaceStore
 
 
@@ -90,6 +92,26 @@ def run_antenna_modeling_job(job_id: str, through_stage: str = "boolean") -> dic
     """Run modeling stages through the requested stage and save all intermediate artifacts."""
     _, modeling, _, _ = _services()
     return modeling.run(job_id, through_stage).model_dump(mode="json")
+
+
+@mcp.tool()
+def retry_antenna_modeling_job(
+    job_id: str,
+    from_stage: str,
+    through_stage: str = "boolean",
+) -> dict[str, Any]:
+    """Regenerate from one stage after freezing old downstream paths and hashes.
+
+    The operation retains approved source evidence and immutable versioned Python
+    exports. It never starts AEDT; model-provider calls are limited to the requested
+    modeling stages.
+    """
+    store = WorkspaceStore()
+    return ModelRetryService(store).retry(
+        job_id,
+        from_stage=from_stage,
+        through_stage=through_stage,
+    )
 
 
 @mcp.tool()
@@ -246,6 +268,13 @@ def create_hfss_optimization_job(request: dict[str, Any]) -> dict[str, Any]:
 
 
 @mcp.tool()
+def preflight_hfss_optimization_job(job_id: str) -> dict[str, Any]:
+    """Verify parameter-to-geometry effects on the isolated project without solving HFSS."""
+    _, _, _, optimizer = _services()
+    return optimizer.preflight(job_id).model_dump(mode="json")
+
+
+@mcp.tool()
 def run_hfss_optimization_job(job_id: str) -> dict[str, Any]:
     """Run HFSS trials. Requires ANTENNA_MCP_ALLOW_SIMULATION=1 and never overwrites the source project."""
     _, _, _, optimizer = _services()
@@ -307,6 +336,42 @@ def optimize_antenna_pipeline(job_id: str) -> dict[str, Any]:
     """Run the planned HFSS optimization and produce the best project plus complete trial history."""
     store = WorkspaceStore()
     return PipelineService(store).optimize(job_id)
+
+
+@mcp.tool()
+def validate_antenna_model(
+    benchmark_path: str,
+    candidate_path: str | None = None,
+    job_id: str | None = None,
+    reference_s11_path: str | None = None,
+    candidate_s11_path: str | None = None,
+    contract_only: bool = False,
+) -> dict[str, Any]:
+    """Compare a generated model with a frozen benchmark and optional S11 curves.
+
+    Contract-only validation checks declared geometry, materials, Boolean operations, and
+    solver setup without claiming electromagnetic correctness. Full validation requires
+    both reference and candidate S11 CSV files.
+    """
+    if (candidate_path is None) == (job_id is None):
+        raise ValueError("provide exactly one of candidate_path or job_id")
+    store = WorkspaceStore()
+    service = ValidationService(store)
+    if job_id:
+        return service.validate_job(
+            benchmark_path,
+            job_id,
+            reference_s11=reference_s11_path,
+            candidate_s11=candidate_s11_path,
+            contract_only=contract_only,
+        )
+    return service.validate_manifest(
+        benchmark_path,
+        candidate_path,
+        reference_s11=reference_s11_path,
+        candidate_s11=candidate_s11_path,
+        contract_only=contract_only,
+    )
 
 
 def main() -> None:

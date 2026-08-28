@@ -2,12 +2,15 @@ import sys
 import json
 from types import SimpleNamespace
 
+import pytest
+
 import antenna_mcp.llm as llm_module
 from antenna_mcp.llm import (
     DeepSeekChatProvider,
     OllamaVisionProvider,
     OpenAIResponsesProvider,
     RoutedLlmProvider,
+    provider_from_env,
     vision_provider_from_env,
 )
 
@@ -85,7 +88,7 @@ def test_deepseek_rejects_visual_attachments():
         raise AssertionError("expected DeepSeek to reject visual attachments")
 
 
-def test_router_sends_attachments_only_to_vision_provider():
+def test_router_sends_visual_attachments_only_to_vision_provider(tmp_path):
     calls = []
 
     class Provider:
@@ -99,9 +102,93 @@ def test_router_sends_attachments_only_to_vision_provider():
     routed = RoutedLlmProvider(text=Provider("text"), vision=Provider("vision"))
 
     assert routed.generate(system="s", prompt="p", attachments=[]) == "text"
-    attachment = object()
+    attachment = tmp_path / "drawing.png"
+    attachment.write_bytes(b"image")
     assert routed.generate(system="s", prompt="p", attachments=[attachment]) == "vision"
     assert calls == [("text", []), ("vision", [attachment])]
+
+
+def test_router_inlines_json_attachment_for_text_provider(tmp_path):
+    calls = []
+
+    class Provider:
+        def __init__(self, name):
+            self.name = name
+
+        def generate(self, **kwargs):
+            calls.append((self.name, kwargs))
+            return self.name
+
+    benchmark = tmp_path / "benchmark.json"
+    benchmark.write_text('{"generation_evidence":{"probe":"ground_to_signal"}}', "utf-8")
+    routed = RoutedLlmProvider(text=Provider("text"), vision=Provider("vision"))
+
+    assert routed.generate(system="s", prompt="p", attachments=[benchmark]) == "text"
+    name, kwargs = calls[0]
+    assert name == "text"
+    assert kwargs["attachments"] == []
+    assert "untrusted source evidence" in kwargs["prompt"]
+    assert "BEGIN ATTACHMENT: benchmark.json" in kwargs["prompt"]
+    assert "ground_to_signal" in kwargs["prompt"]
+
+
+def test_router_keeps_mixed_text_and_visual_evidence_on_vision_provider(tmp_path):
+    calls = []
+
+    class Provider:
+        def __init__(self, name):
+            self.name = name
+
+        def generate(self, **kwargs):
+            calls.append((self.name, kwargs["attachments"]))
+            return self.name
+
+    benchmark = tmp_path / "benchmark.json"
+    benchmark.write_text("{}", "utf-8")
+    drawing = tmp_path / "drawing.png"
+    drawing.write_bytes(b"image")
+    attachments = [benchmark, drawing]
+    routed = RoutedLlmProvider(text=Provider("text"), vision=Provider("vision"))
+
+    assert routed.generate(system="s", prompt="p", attachments=attachments) == "vision"
+    assert calls == [("vision", attachments)]
+
+
+def test_router_rejects_oversized_text_attachment(tmp_path, monkeypatch):
+    benchmark = tmp_path / "benchmark.json"
+    benchmark.write_text('{"too_long":true}', "utf-8")
+    monkeypatch.setenv("ANTENNA_TEXT_ATTACHMENT_MAX_CHARS", "5")
+    routed = RoutedLlmProvider(text=object(), vision=object())
+
+    with pytest.raises(ValueError, match="ANTENNA_TEXT_ATTACHMENT_MAX_CHARS=5"):
+        routed.generate(system="s", prompt="p", attachments=[benchmark])
+
+
+def test_text_model_env_overrides_persisted_job_model_without_changing_ollama(monkeypatch):
+    monkeypatch.setenv("ANTENNA_TEXT_PROVIDER", "deepseek")
+    monkeypatch.setenv("ANTENNA_VISION_PROVIDER", "ollama")
+    monkeypatch.setenv("ANTENNA_TEXT_MODEL", "  deepseek-v4-pro  ")
+    monkeypatch.setenv("OLLAMA_VISION_MODEL", "qwen3-vl:8b")
+
+    provider = provider_from_env("qwen3-vl:8b")
+
+    assert isinstance(provider, RoutedLlmProvider)
+    assert isinstance(provider.text, DeepSeekChatProvider)
+    assert provider.text.model == "deepseek-v4-pro"
+    assert isinstance(provider.vision, OllamaVisionProvider)
+    assert provider.vision.model == "qwen3-vl:8b"
+
+
+def test_blank_text_model_env_preserves_persisted_model(monkeypatch):
+    monkeypatch.setenv("ANTENNA_TEXT_PROVIDER", "deepseek")
+    monkeypatch.setenv("ANTENNA_VISION_PROVIDER", "ollama")
+    monkeypatch.setenv("ANTENNA_TEXT_MODEL", "   ")
+    monkeypatch.setenv("OLLAMA_VISION_MODEL", "vision-only-model")
+
+    provider = provider_from_env("persisted-text-model")
+
+    assert provider.text.model == "persisted-text-model"
+    assert provider.vision.model == "vision-only-model"
 
 
 def test_ollama_vision_sends_local_image_as_base64(tmp_path, monkeypatch):
@@ -141,6 +228,64 @@ def test_ollama_vision_sends_local_image_as_base64(tmp_path, monkeypatch):
     assert captured["payload"]["think"] is False
     assert captured["payload"]["options"]["num_ctx"] == 16384
     assert captured["payload"]["messages"][1]["images"] == ["aW1hZ2UtYnl0ZXM="]
+
+
+def test_ollama_supports_text_only_generation(monkeypatch):
+    captured = {}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return json.dumps({"message": {"content": '{"ok":true}'}}).encode()
+
+    def fake_urlopen(request, timeout):
+        captured["payload"] = json.loads(request.data)
+        return Response()
+
+    monkeypatch.setattr(llm_module, "urlopen", fake_urlopen)
+    result = OllamaVisionProvider("qwen3-vl:8b").generate(
+        system="system", prompt="generate parameters", attachments=[]
+    )
+
+    assert result == '{"ok":true}'
+    message = captured["payload"]["messages"][1]
+    assert message["content"] == "generate parameters"
+    assert "images" not in message
+
+
+def test_ollama_does_not_force_json_grammar_for_python_stage(monkeypatch):
+    captured = {}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return json.dumps(
+                {"message": {"content": 'patch = hfss.modeler.create_box([0, 0, 0], [1, 1, 1])'}}
+            ).encode()
+
+    def fake_urlopen(request, timeout):
+        captured["payload"] = json.loads(request.data)
+        return Response()
+
+    monkeypatch.setattr(llm_module, "urlopen", fake_urlopen)
+    result = OllamaVisionProvider("qwen3-vl:8b").generate(
+        system="system",
+        prompt="Template: paper_reconstruction\nStage: model_3d\nOutput contract:\nReturn Python.",
+        attachments=[],
+    )
+
+    assert result.startswith("patch = hfss.modeler.create_box")
+    assert "format" not in captured["payload"]
 
 
 def test_ollama_vision_accepts_only_json_thinking_fallback(tmp_path, monkeypatch):

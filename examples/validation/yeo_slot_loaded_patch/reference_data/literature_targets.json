@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "yeo_2019_slot_loaded_patch",
+  "source": {
+    "title": "Slot-Loaded Microstrip Patch Sensor Antenna for High-Sensitivity Permittivity Characterization",
+    "authors": [
+      "Junho Yeo",
+      "Jong-Ig Lee"
+    ],
+    "journal": "Electronics",
+    "year": 2019,
+    "volume": 8,
+    "article": 502,
+    "doi": "10.3390/electronics8050502",
+    "local_pdf": "../references/yeo_2019_slot_loaded_patch.pdf",
+    "pdf_sha256": "45ae972c816bf63e78dbd691bdb6da50f739ddbf3ea6537ccc1dffb89169d12a"
+  },
+  "scope": {
+    "condition": "unloaded",
+    "mut_present": false,
+    "source_solver": "CST Microwave Studio",
+    "evidence": [
+      "PDF page 3: Figure 1 topology and statement that the antennas were designed for 2.5 GHz under unloaded conditions.",
+      "PDF page 4: conventional geometry/material values and Figure 2 S11 plot.",
+      "PDF page 5: scaled slot-loaded geometry values, resonances, -10 dB bandwidths, fractional bandwidths, and quality factors."
+    ]
+  },
+  "shared": {
+    "substrate": {
+      "commercial_name": "RF-35",
+      "relative_permittivity": 3.5,
+      "loss_tangent": 0.0018,
+      "thickness_mm": 0.76
+    },
+    "ground_plane": {
+      "width_mm": 80.0,
+      "length_mm": 80.0
+    },
+    "conductor_material": null,
+    "conductor_thickness_mm": null
+  },
+  "cases": {
+    "conventional_inset_fed_patch": {
+      "figure": "Figure 1(a)",
+      "geometry": {
+        "patch_width_mm": 40.0,
+        "patch_length_mm": 31.9,
+        "feed_width_mm": 1.66,
+        "feed_length_mm": 24.5,
+        "inset_width_mm": 2.8,
+        "inset_length_mm": 9.0
+      },
+      "s11_targets": {
+        "resonances_ghz": [
+          2.5
+        ],
+        "first_minus_10db_band_ghz": [
+          2.49,
+          2.51
+        ],
+        "first_minus_10db_bandwidth_mhz": 20.0,
+        "first_fractional_bandwidth_percent": 0.8,
+        "first_quality_factor": 125
+      },
+      "evidence": [
+        "Geometry and nominal resonance: explicit prose on PDF page 4.",
+        "Bandwidth, fractional bandwidth, and quality factor: explicit prose on PDF page 5."
+      ]
+    },
+    "scaled_slot_loaded_patch": {
+      "figure": "Figure 1(c)",
+      "geometry": {
+        "patch_width_mm": 31.8,
+        "patch_length_mm": 25.4,
+        "feed_width_mm": 1.66,
+        "feed_length_mm": 27.3,
+        "inset_width_mm": 2.3,
+        "inset_length_mm": 12.0,
+        "slot_width_mm": 1.0,
+        "slot_length_mm": 29.8,
+        "slot_to_radiating_edge_mm": 1.0
+      },
+      "s11_targets": {
+        "resonances_ghz": [
+          2.5,
+          3.465
+        ],
+        "first_minus_10db_band_ghz": [
+          2.496,
+          2.503
+        ],
+        "first_minus_10db_bandwidth_mhz": 7.0,
+        "first_fractional_bandwidth_percent": 0.28,
+        "first_quality_factor": 357,
+        "second_minus_10db_band_ghz": null
+      },
+      "evidence": [
+        "Geometry, resonances, first bandwidth, fractional bandwidth, and quality factor: explicit prose on PDF page 5.",
+        "The feed width equality wf3 = wf1 links the 1.66 mm value on PDF pages 4-5."
+      ]
+    }
+  },
+  "context_only": {
+    "unscaled_slot_loaded_patch": {
+      "figure": "Figure 1(b)",
+      "resonances_ghz": [
+        2.019,
+        2.746
+      ],
+      "note": "Included only to disambiguate the blue Figure 2 trace; it is not one of the two primary validation cases in this target file."
+    }
+  },
+  "digitization": {
+    "figure": "Figure 2 on PDF page 4",
+    "embedded_raster_pixels": [
+      709,
+      520
+    ],
+    "plot_box_pixels": {
+      "left": 100,
+      "right": 684,
+      "top": 10,
+      "bottom": 431
+    },
+    "axis_limits": {
+      "frequency_ghz": [
+        1.5,
+        3.5
+      ],
+      "s11_db": [
+        -30.0,
+        0.0
+      ]
+    },
+    "frequency_resolution_mhz_per_pixel": 3.424657534,
+    "s11_resolution_db_per_pixel": 0.071258907,
+    "scaled_curve": "figure2_scaled_slot_loaded_digitized.csv",
+    "conventional_visible_curve": "figure2_conventional_visible_only.csv",
+    "scaled_first_digitized_minus_10db_band_ghz": [
+      2.48812945,
+      2.509467503
+    ],
+    "scaled_first_digitized_bandwidth_mhz": 21.338053,
+    "scaled_second_digitized_resonance_ghz": 3.462328767,
+    "scaled_second_digitized_minimum_s11_db": -11.971496,
+    "scaled_second_digitized_minus_10db_band_ghz": [
+      3.450837139,
+      3.473820396
+    ],
+    "scaled_second_digitized_bandwidth_mhz": 22.983257,
+    "use_restrictions": [
+      "Use the digitized red trace only for qualitative shape checks or a deliberately loose visual comparison.",
+      "Do not replace the text-derived first-resonance frequency and bandwidth targets with raster-derived values.",
+      "Do not use the conventional visible-only CSV for resonance, minimum-S11, bandwidth, or full-curve RMSE validation.",
+      "The red first-resonance minimum reaches the -30 dB plot floor, so the actual minimum is unresolved at or below -30 dB."
+    ]
+  },
+  "unresolved_from_paper": [
+    "Conductor material and conductor thickness.",
+    "Port type and exact port geometry.",
+    "Open/radiation boundary type and air-box clearance.",
+    "Mesh settings and convergence criteria.",
+    "Frequency sweep type, step size, and interpolation settings.",
+    "Exact conductor loss model and surface roughness.",
+    "The second-resonance -10 dB bandwidth of the scaled slot-loaded antenna."
+  ],
+  "recommended_validation_policy": {
+    "geometry": "Require the published nominal values and Figure 1 topology; record any coordinate convention as an implementation assumption.",
+    "electromagnetic_primary": "Use the explicit text-derived resonance frequencies and -10 dB band edges as primary targets.",
+    "electromagnetic_secondary": "Use Figure 2 digitization only as a visual/shape diagnostic because line width, clipping, and curve overlap dominate narrow-band error.",
+    "cross_solver_note": "HFSS-to-CST differences must not be attributed to geometry until the unresolved port, boundary, conductor, mesh, and sweep assumptions are documented."
+  }
+}

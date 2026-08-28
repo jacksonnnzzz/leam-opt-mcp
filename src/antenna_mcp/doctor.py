@@ -25,6 +25,8 @@ def build_report(
     store = WorkspaceStore(workspace or env.get("ANTENNA_MCP_WORKSPACE"))
     text_provider = env.get("ANTENNA_TEXT_PROVIDER", "openai").strip().lower()
     vision_provider = env.get("ANTENNA_VISION_PROVIDER", "openai").strip().lower()
+    raw_text_model = env.get("ANTENNA_TEXT_MODEL")
+    text_model_override = (raw_text_model or "").strip() or None
     issues: list[dict[str, str]] = []
 
     if not (3, 10) <= sys.version_info[:2] < (3, 14):
@@ -98,6 +100,7 @@ def build_report(
         "providers": {
             "text": text_provider,
             "vision": vision_provider,
+            "text_model_override": text_model_override,
             "deepseek_key_configured": bool(env.get("DEEPSEEK_API_KEY")),
             "openai_key_configured": bool(env.get("OPENAI_API_KEY")),
             "ollama_base_url": env.get("OLLAMA_BASE_URL", "http://localhost:11434"),

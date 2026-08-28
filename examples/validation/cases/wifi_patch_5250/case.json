@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "case_id": "wifi_patch_5250",
+  "design_name": "ElGendySinglePatch5250_EdgeReferencedXp",
+  "runner": "run_case.py",
+  "shared_model": "../../wifi_patch_5250/reference_model.py",
+  "benchmark": "../../wifi_patch_5250/benchmark.json",
+  "paper_gate": "built into ../../wifi_patch_5250/run_reference.py",
+  "default_outputs": ["local_results/wifi_patch_5250.aedt", "local_results/reference_s11_edge_referenced_xp.csv"],
+  "status": "edge-referenced Xp reference solved; complete 5.15-5.35 GHz paper gate failed"
+}
