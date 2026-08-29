@@ -37,7 +37,7 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
       - name: Install
-        run: python -m pip install -e ".[dev]"
+        run: python -m pip install -e ".[dev,hfss]"
       - name: Test
         run: python -m pytest
       - name: Verify command entry point
