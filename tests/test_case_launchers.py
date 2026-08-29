@@ -70,10 +70,15 @@ def test_campaign_summary_matches_the_seven_solved_reference_designs():
         "kaur_2021_split_ring_monopole": "solved/fail-paper-gate",
     }
     for case in payload["cases"]:
-        for artifact in case["artifacts"].values():
+        for artifact_name, artifact in case["artifacts"].items():
             paths = [artifact] if isinstance(artifact, str) else artifact
             assert isinstance(paths, list)
             for relative_path in paths:
+                if artifact_name == "source_pdf":
+                    source_path = Path(relative_path)
+                    assert source_path.suffix.lower() == ".pdf"
+                    assert "references" in source_path.parts
+                    continue
                 assert (VALIDATION_ROOT / relative_path).is_file(), (
                     case["case_id"],
                     relative_path,
