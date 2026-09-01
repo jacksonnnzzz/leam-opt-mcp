@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "khan_2024_28_38ghz_monopole",
+  "recorded_on": "2026-08-31",
+  "status": "solved_fail_paper_gate_after_topology_correction_and_bounded_assumption_study",
+  "environment": {
+    "aedt_version": "2025.1",
+    "pyaedt_version": "0.26.3",
+    "solution_type": "Modal",
+    "sweep_ghz": [22.0, 43.0],
+    "sweep_points": 1051
+  },
+  "paper_targets": {
+    "lower_band_ghz": [24.86, 28.65],
+    "lower_approximate_resonance_ghz": 26.7,
+    "upper_band_ghz": [36.24, 40.82],
+    "upper_approximate_resonance_ghz": 38.6
+  },
+  "v1": {
+    "design": "Khan2024SingleElement28_38GHz",
+    "interpretation": "incorrect_separate_annulus_interpretation_retained_as_negative_evidence",
+    "convergence": {
+      "adaptive_passes_completed": 5,
+      "final_max_magnitude_delta_s": 0.01952,
+      "converged": true
+    },
+    "global_minimum": {"frequency_ghz": 33.24, "s11_db": -15.586433327795895},
+    "minus_10db_segments_ghz": [[22.0, 39.84]],
+    "paper_gate_passed": false,
+    "curve_sha256": "aeb6e22b992ed58032bb2fe207011a0e36b7dc703e5c914e4faf900091ae3fb5",
+    "paper_report_sha256": "43d671630d295431a6991e7510ed88c23804dbd3cac3948df0e12b01856732bf"
+  },
+  "v2": {
+    "design": "Khan2024SingleElement28_38GHz_V2",
+    "interpretation": "figure1_and_figure2_nested_u_trace_v2",
+    "correction": "replace the V1 annulus with the outer inverted-U, inner U, and round-ended top slot shown by Figure 2",
+    "paper_dimensions_changed": false,
+    "convergence": {
+      "adaptive_passes_completed": 3,
+      "final_max_magnitude_delta_s": 0.01387,
+      "converged": true
+    },
+    "global_minimum": {"frequency_ghz": 40.9, "s11_db": -20.064698126789743},
+    "minus_10db_segments_ghz": [[22.0, 31.2], [37.8, 42.16]],
+    "upper_observed_band_ghz": [37.79751883610291, 42.17018915360868],
+    "paper_gate_passed": false,
+    "curve_sha256": "910cc8500111965fe598381fac95eafb7a5c6595ece36776ce15c733aec8a66d",
+    "paper_report_sha256": "070bdc147e1c541b4e587f353d0c0af13b400c9f28af3a8638b03407cda215c2"
+  },
+  "bounded_assumption_study_v1": {
+    "strategy": "one_at_a_time_over_paper_unresolved_port_and_radiation_boundary_choices",
+    "paper_parameters_sha256": "96b2b91ceb3c668086074bf1b796f29c602265e6d21b12a410a96f153d56bcce",
+    "assumption_space_sha256": "dcb097372cd6ea22b087485acac5b6254251a998104f81a5d30630f65e309271",
+    "trials_completed": 3,
+    "trials_converged": 3,
+    "trials_passing_paper_gate": 0,
+    "trials": [
+      {
+        "trial_id": "ast-065db4e41f49",
+        "changed_assumptions": {"radiation_padding_mm": 1.0},
+        "convergence": {"adaptive_passes_completed": 4, "final_max_magnitude_delta_s": 0.00839},
+        "metrics": {
+          "lower_resonance_ghz": 28.64,
+          "lower_minimum_s11_db": -12.804379223657609,
+          "lower_band_worst_s11_db": -12.18437890407639,
+          "upper_resonance_ghz": 40.82,
+          "upper_minimum_s11_db": -21.399904781816247,
+          "upper_band_worst_s11_db": -9.0387719029596
+        },
+        "curve_sha256": "2510ff6ad4446ec2de35064eec461c9d4a1bec3a33d3e0cfbd8e184650d5caf1"
+      },
+      {
+        "trial_id": "ast-f85bd92a0d4c",
+        "changed_assumptions": {"excitation": "internal_microstrip_lumped_port"},
+        "convergence": {"adaptive_passes_completed": 5, "final_max_magnitude_delta_s": 0.0126},
+        "metrics": {
+          "lower_resonance_ghz": 28.64,
+          "lower_minimum_s11_db": -15.145198823109363,
+          "lower_band_worst_s11_db": -10.76226021569046,
+          "upper_resonance_ghz": 40.02,
+          "upper_minimum_s11_db": -22.16050933399357,
+          "upper_band_worst_s11_db": -3.577344521051318
+        },
+        "curve_sha256": "08d775f050fffb50ee50e13a4c64ab7915221eb42863bc5758360cb21958cedd"
+      },
+      {
+        "trial_id": "ast-cbaf8041080d",
+        "changed_assumptions": {"radiation_padding_mm": 4.0},
+        "convergence": {"adaptive_passes_completed": 5, "final_max_magnitude_delta_s": 0.00336},
+        "metrics": {
+          "lower_resonance_ghz": 28.64,
+          "lower_minimum_s11_db": -10.31809394936362,
+          "lower_band_worst_s11_db": -8.879324404721672,
+          "upper_resonance_ghz": 40.82,
+          "upper_minimum_s11_db": -12.25022177669203,
+          "upper_band_worst_s11_db": -8.597403613314178
+        },
+        "curve_sha256": "a8ac616effa0de069bf9a22e391951e319238b4c9da5a995f22d353bb8819401"
+      }
+    ]
+  },
+  "interpretation": "The corrected topology and all three controlled variants converged, but none reproduced both published bands and resonances. These are negative HFSS translation results, not an accepted reference. Candidate generation remains closed."
+}

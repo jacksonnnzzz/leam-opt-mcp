@@ -18,15 +18,15 @@
     "Use repository-relative artifact paths; do not depend on a specific project name, gRPC port, user directory, or job identifier."
   ],
   "summary": {
-    "case_records": 5,
-    "implemented_reference_designs": 7,
+    "case_records": 7,
+    "implemented_reference_designs": 9,
     "solved_pass": 1,
-    "solved_failed_paper_gate": 4,
+    "solved_failed_paper_gate": 6,
     "static_tested_blocked": 0,
     "static_tested_pending_solve": 0,
-    "reference_designs_solved": 7,
+    "reference_designs_solved": 9,
     "reference_designs_passing_reference_gate": 1,
-    "reference_designs_failing_reference_gate": 6,
+    "reference_designs_failing_reference_gate": 8,
     "queued": 0,
     "independent_candidates_attempted": 1,
     "independent_candidate_artifact_sets_completed": 3,
@@ -620,6 +620,191 @@
         "interpretation": "None of the three curves is an accepted reference. Undimensioned Figure 7 placement and unpublished port, conductor, boundary, and CST choices remain unresolved."
       },
       "next_action": "Keep all Kaur candidate gates closed, preserve the negative results, and use the official probe-patch case as the only current G0-G5 regression baseline."
+    },
+    {
+      "case_id": "ibrahim_2023_38ghz_monopole",
+      "title": "Ibrahim 2023 single 38 GHz quasi-circular slotted monopole",
+      "status": "solved/fail-paper-gate",
+      "status_scope": "baseline and eight controlled HFSS variants converged; none produced the reported 37-39 GHz resonance or a -10 dB band",
+      "source": {
+        "kind": "paper",
+        "title": "Four-Port 38 GHz MIMO Antenna with High Gain and Isolation for 5G Wireless Networks",
+        "url": "https://doi.org/10.3390/s23073557",
+        "doi": "10.3390/s23073557",
+        "evidence": "Section 2 and Figures 1, 3, and 4; only the single Antenna 3 element is in scope."
+      },
+      "artifacts": {
+        "case_launcher": "cases/ibrahim_38ghz_monopole/run_case.py",
+        "benchmark": "ibrahim_38ghz_monopole/benchmark.json",
+        "assumptions": "ibrahim_38ghz_monopole/assumptions.json",
+        "assumption_space_v1": "ibrahim_38ghz_monopole/assumption_space.json",
+        "assumption_space_v2": "ibrahim_38ghz_monopole/assumption_space_v2.json",
+        "assumption_adapter": "ibrahim_38ghz_monopole/assumption_adapter.py",
+        "reference_model": "ibrahim_38ghz_monopole/reference_model.py",
+        "runner": "ibrahim_38ghz_monopole/run_reference.py",
+        "paper_target_evaluator": "ibrahim_38ghz_monopole/paper_targets.py",
+        "recorded_reference_and_assumption_studies": "ibrahim_38ghz_monopole/reference_data/hfss_reference_and_assumption_studies_2026_08_30.json",
+        "documentation": "ibrahim_38ghz_monopole/README.md"
+      },
+      "implementation_state": {
+        "benchmark_contract": "implemented",
+        "offline_static_tests": "pass",
+        "paper_target_evaluator": "implemented_and_static_tested",
+        "hfss_reference_build": "pass_in_project8",
+        "hfss_reference_solve": "pass_801_points_34_to_42_ghz",
+        "reference_convergence": "pass_6_adaptive_passes_final_delta_s_0p01816",
+        "reference_gate": "failed_no_37_to_39_ghz_local_minimum_and_no_minus_10db_band",
+        "controlled_assumption_study_v1": "5_trials_3_converged_2_geometry_failures_0_passed",
+        "controlled_assumption_study_v2": "5_trials_5_converged_0_passed",
+        "independent_candidate_generation": "not_run_by_policy_reference_gate_failed",
+        "independent_candidate_solve": "not_run"
+      },
+      "key_parameter_evidence": [
+        "Rogers RT 4003 substrate: 12 mm by 12 mm, epsilon-r 3.55, thickness 0.203 mm.",
+        "Radiator diameter R = 4.94 mm; slot W1 = 2.2 mm, L1 = 2.45 mm, L2 = 2.35 mm.",
+        "Feed Wf = 0.4 mm and Lf = 7 mm; partial ground Lg = 7.7 mm.",
+        "Reported single-element response is approximately -30 dB near 38 GHz with a 36.5-39.5 GHz band."
+      ],
+      "reference_targets": {
+        "resonance_ghz": 38.0,
+        "maximum_resonance_relative_error": 0.01,
+        "minimum_s11_db_max": -25.0,
+        "minus_10db_band_ghz": [36.5, 39.5],
+        "maximum_band_edge_absolute_error_ghz": 0.3
+      },
+      "recorded_local_reference_result": {
+        "point_count": 801,
+        "frequency_range_ghz": [34.0, 42.0],
+        "adaptive_passes_completed": 6,
+        "final_max_magnitude_delta_s": 0.01816,
+        "sweep_converged": true,
+        "minimum_frequency_ghz": 41.47,
+        "minimum_s11_db": -5.24090808888265,
+        "s11_at_38ghz_db": -4.21862418526999,
+        "minus_10db_band_ghz": null,
+        "paper_gate_passed": false,
+        "curve_sha256": "3c9b28311d04ad512f7d6fcb178c6cdb2bfae7a3a269195f60cef30a6496cbeb"
+      },
+      "recorded_controlled_assumption_studies": {
+        "paper_parameters_sha256": "8a374eec82527397cf8bf6c17d4b29968093865f035148f477f70147dfa99104",
+        "v1": {
+          "held_fixed": "all fourteen paper parameters",
+          "varied": ["excitation", "conductor representation", "radiation padding"],
+          "trials_completed_with_em_evidence": 3,
+          "trials_failed_geometry_construction": 2,
+          "trials_passing_paper_gate": 0
+        },
+        "v2": {
+          "held_fixed": "all paper dimensions including the visible Lf=7 mm contour",
+          "varied": "hidden feed-to-circle Boolean overlap from 0.02 to 1.0 mm",
+          "trials_completed_and_converged": 5,
+          "trials_passing_paper_gate": 0,
+          "common_minimum": "approximately -5.7676 dB at 41.1 GHz"
+        }
+      },
+      "uncertainties": [
+        "The paper omits dielectric loss tangent, conductor material/thickness, port construction, open-boundary placement, mesh/convergence, sweep details, and numeric S11 samples.",
+        "The unequal L1/L2 slot position is derived from the published circle, slot width, and common-floor chord relation; it is recorded separately from direct paper values.",
+        "The initial HFSS translation freezes zero-thickness PEC, tan-delta 0.0027, a 50-ohm microstrip wave port, 2 mm open-region padding, and a 34-42 GHz interpolating sweep as assumptions."
+      ],
+      "acceptance_criteria": [
+        "The local HFSS reference must converge and pass every explicit resonance, depth, and band-edge check before it becomes an accepted reference.",
+        "If the reference gate fails, revise only a documented implementation assumption and preserve every paper-explicit dimension.",
+        "Only after the reference passes may an independently generated candidate be built and compared by contract and same-version S11 RMSE."
+      ],
+      "blocker": {
+        "kind": "local_hfss_translations_failed_paper_gate",
+        "diagnostic": "The converged baseline has S11=-4.2186 dB at 38 GHz and its shallow minimum is -5.2409 dB at 41.47 GHz. Eight additional converged variants also have no -10 dB band.",
+        "interpretation": "The public paper omits the HFSS project, port/reference plane, conductor, boundary, and mesh details. The current translations are negative evidence, not accepted reference curves."
+      },
+      "next_action": "Keep the candidate gates closed and preserve the negative evidence unless new Ibrahim source files become available."
+    },
+    {
+      "case_id": "khan_2024_28_38ghz_monopole",
+      "title": "Khan 2024 28/38 GHz dual-band single element",
+      "status": "solved/fail-paper-gate",
+      "status_scope": "Figure-2-corrected V2 and three controlled HFSS variants converged; none reproduced both published resonances and bands",
+      "source": {
+        "kind": "paper",
+        "title": "A novel dual-band MIMO antenna for 5G millimeter-wave applications",
+        "url": "https://doi.org/10.1038/s41598-023-50446-0",
+        "doi": "10.1038/s41598-023-50446-0",
+        "evidence": "Figures 1-3, Table 1, and the dual-band design evaluation; only the proposed single element is in scope."
+      },
+      "artifacts": {
+        "case_launcher": "cases/khan_28_38ghz_monopole/run_case.py",
+        "benchmark": "khan_28_38ghz_monopole/benchmark.json",
+        "assumptions": "khan_28_38ghz_monopole/assumptions.json",
+        "reference_model_v1": "khan_28_38ghz_monopole/reference_model.py",
+        "reference_model_v2": "khan_28_38ghz_monopole/reference_model_v2.py",
+        "paper_target_evaluator": "khan_28_38ghz_monopole/paper_targets.py",
+        "assumption_space_v1": "khan_28_38ghz_monopole/assumption_space_v1.json",
+        "assumption_adapter": "khan_28_38ghz_monopole/assumption_adapter.py",
+        "recorded_reference_and_assumption_study": "khan_28_38ghz_monopole/reference_data/hfss_reference_and_assumption_study_2026_08_31.json",
+        "documentation": "khan_28_38ghz_monopole/README.md"
+      },
+      "implementation_state": {
+        "benchmark_contract": "implemented",
+        "offline_static_tests": "pass",
+        "paper_target_evaluator": "implemented_and_static_tested",
+        "hfss_reference_build": "pass_v1_and_figure2_corrected_v2_in_project8",
+        "hfss_reference_solve": "pass_v1_and_v2_1051_points_22_to_43_ghz",
+        "v2_convergence": "pass_3_adaptive_passes_final_delta_s_0p01387",
+        "reference_gate": "failed_v2_resonances_not_separated_at_published_frequencies_and_upper_edge_too_high",
+        "controlled_assumption_study_v1": "3_trials_3_converged_0_passed",
+        "independent_candidate_generation": "not_run_by_policy_reference_gate_failed",
+        "independent_candidate_solve": "not_run"
+      },
+      "key_parameter_evidence": [
+        "Rogers RT5880 substrate: 5 mm by 9.2 mm by 0.787 mm, epsilon-r 2.2, loss tangent 0.0009.",
+        "Table 1 freezes 22 named geometry values including PL=3.7 mm, FL=3.3 mm, FW=0.9 mm, GL=1.2 mm, Ri=0.6 mm, and R=0.3 mm.",
+        "Figure 2 establishes an outer inverted-U trace, inner U trace, and two top rods separated by a round-ended slot.",
+        "Reported proposed-element bands are 24.86-28.65 GHz and 36.24-40.82 GHz."
+      ],
+      "reference_targets": {
+        "lower_resonance_ghz": 26.7,
+        "lower_minus_10db_band_ghz": [24.86, 28.65],
+        "upper_resonance_ghz": 38.6,
+        "upper_minus_10db_band_ghz": [36.24, 40.82]
+      },
+      "recorded_local_reference_result": {
+        "revision": "figure1_and_figure2_nested_u_trace_v2",
+        "point_count": 1051,
+        "frequency_range_ghz": [22.0, 43.0],
+        "adaptive_passes_completed": 3,
+        "final_max_magnitude_delta_s": 0.01387,
+        "global_minimum_frequency_ghz": 40.9,
+        "global_minimum_s11_db": -20.064698126789743,
+        "minus_10db_segments_ghz": [[22.0, 31.2], [37.8, 42.16]],
+        "paper_gate_passed": false,
+        "curve_sha256": "910cc8500111965fe598381fac95eafb7a5c6595ece36776ce15c733aec8a66d"
+      },
+      "recorded_controlled_assumption_study": {
+        "strategy": "one_at_a_time_over_port_and_radiation_padding",
+        "paper_parameters_sha256": "96b2b91ceb3c668086074bf1b796f29c602265e6d21b12a410a96f153d56bcce",
+        "trials_completed_and_converged": 3,
+        "trials_passing_paper_gate": 0,
+        "best_trial_id": "ast-065db4e41f49",
+        "best_changed_assumption": {"radiation_padding_mm": 1.0},
+        "best_lower_band_worst_s11_db": -12.18437890407639,
+        "best_upper_band_worst_s11_db": -9.0387719029596
+      },
+      "uncertainties": [
+        "The paper does not publish a complete radiator vertex list; Lc is not uniquely anchored by the available Figure 1 rendering and remains unresolved.",
+        "Conductor material/thickness, HFSS port/reference plane, radiation region, mesh/convergence, and numeric S11 samples are not published.",
+        "V1's incorrect annulus reading is preserved as negative evidence; V2 uses the topology made explicit by Figure 2 without changing Table 1 values."
+      ],
+      "acceptance_criteria": [
+        "Require convergence plus two distinct local minima near the plotted resonances.",
+        "Require the complete 24.86-28.65 GHz and 36.24-40.82 GHz intervals at or below -10 dB.",
+        "Only after the local HFSS translation passes may an independent generated candidate be compared."
+      ],
+      "blocker": {
+        "kind": "local_hfss_translations_failed_paper_gate",
+        "diagnostic": "V2 converged and produced a 37.80-42.17 GHz upper band, but the minimum shifted to 40.90 GHz and the lower response did not form the published independent resonance. Three port/boundary variants also failed.",
+        "interpretation": "The available dimension labels and topology image are insufficient to recover the unpublished complete coordinate and HFSS implementation contract."
+      },
+      "next_action": "Keep the candidate gates closed. Obtain the authors' HFSS project or a clearer dimension/coordinate source before defining another versioned interpretation; do not tune Table 1 values."
     }
   ]
 }

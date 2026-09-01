@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "case_id": "khan_28_38ghz_monopole",
+  "design_name": "Khan2024SingleElement28_38GHz_V2",
+  "runner": "run_case.py",
+  "shared_model": "../../khan_28_38ghz_monopole/reference_model_v2.py",
+  "benchmark": "../../khan_28_38ghz_monopole/benchmark.json",
+  "paper_gate": "../../khan_28_38ghz_monopole/paper_targets.py",
+  "default_outputs": [
+    "local_results_v2/khan_28_38ghz_reference_v2.aedt",
+    "local_results_v2/reference_s11.csv",
+    "local_results_v2/paper_target_report.json"
+  ],
+  "status": "solved/fail-paper-gate; V2 and three controlled variants converged but none reproduced both published bands"
+}

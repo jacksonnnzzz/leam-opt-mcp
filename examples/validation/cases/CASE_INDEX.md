@@ -1,6 +1,6 @@
 # 独立案例目录
 
-这里按“一案例一文件夹”提供 7 个独立入口。每个目录至少包含：
+这里按“一案例一文件夹”提供 9 个独立入口。每个目录至少包含：
 
 - `run_case.py`：外部 Python/PyAEDT 建模与可选求解入口；
 - `case.json`：设计名、共享建模实现、benchmark、论文门槛和默认输出。
@@ -23,6 +23,8 @@
 | `yeo_conventional_patch` | `YeoConventionalPatch` | S11 + `paper_target_report.json` |
 | `yeo_scaled_slot_loaded_patch` | `YeoScaledSlotLoadedPatch` | S11 + `paper_target_report.json` |
 | `wifi_patch_5250` | `ElGendySinglePatch5250_EdgeReferencedXp` | S11；终端 JSON 给出完整 Wi-Fi 频带门槛 |
+| `ibrahim_38ghz_monopole` | `Ibrahim2023Antenna3_38GHz` | S11 + `paper_target_report.json`；已收敛但未通过论文门槛 |
+| `khan_28_38ghz_monopole` | `Khan2024SingleElement28_38GHz_V2` | 双频 S11 + `paper_target_report.json`；V2 与 3 个受控变体均收敛但未通过论文门槛 |
 | `kaur_baseline_uwb` | `Kaur2021BaselineUWB` | S11 + `paper_target_baseline.json` |
 | `kaur_wlan_notch` | `Kaur2021WLANNotch` | S11 + `paper_target_wlan_notch.json` |
 | `kaur_xband_notch` | `Kaur2021XBandNotch` | S11 + `paper_target_xband_notch.json` |
@@ -64,5 +66,5 @@
 把路径中的案例目录替换成表格中的任意一项即可逐个运行。脚本会拒绝覆盖同名设计、
 项目和结果文件；附加模式不会关闭已经打开的 AEDT。`local_results/` 被 Git 忽略。
 
-成功执行 Python 并不自动等于论文正确。Yeo 和 Kaur 会生成独立论文门槛报告，Wi-Fi
-会在终端结果中给出 `paper_band_target_passed`。只有报告通过后，S11 才能作为本地参考。
+成功执行 Python 并不自动等于论文正确。Yeo、Kaur、Ibrahim 和 Khan 会生成独立论文门槛报告，
+Wi-Fi 会在终端结果中给出 `paper_band_target_passed`。只有报告通过后，S11 才能作为本地参考。

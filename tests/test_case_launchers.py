@@ -12,6 +12,8 @@ CASE_IDS = {
     "yeo_conventional_patch",
     "yeo_scaled_slot_loaded_patch",
     "wifi_patch_5250",
+    "ibrahim_38ghz_monopole",
+    "khan_28_38ghz_monopole",
     "kaur_baseline_uwb",
     "kaur_wlan_notch",
     "kaur_xband_notch",
@@ -51,13 +53,13 @@ def test_all_one_case_launchers_expose_help_without_starting_aedt():
         assert "--solve" in result.stdout
 
 
-def test_campaign_summary_matches_the_seven_solved_reference_designs():
+def test_campaign_summary_matches_the_solved_and_pending_reference_designs():
     payload = json.loads((VALIDATION_ROOT / "campaign.json").read_text("utf-8"))
     summary = payload["summary"]
-    assert summary["implemented_reference_designs"] == 7
-    assert summary["reference_designs_solved"] == 7
+    assert summary["implemented_reference_designs"] == 9
+    assert summary["reference_designs_solved"] == 9
     assert summary["reference_designs_passing_reference_gate"] == 1
-    assert summary["reference_designs_failing_reference_gate"] == 6
+    assert summary["reference_designs_failing_reference_gate"] == 8
     assert summary["static_tested_blocked"] == 0
     assert summary["static_tested_pending_solve"] == 0
 
@@ -68,6 +70,8 @@ def test_campaign_summary_matches_the_seven_solved_reference_designs():
         "yeo_2019_scaled_slot_loaded_patch": "solved/fail-paper-gate",
         "wifi_patch_5250": "solved/fail-paper-gate",
         "kaur_2021_split_ring_monopole": "solved/fail-paper-gate",
+        "ibrahim_2023_38ghz_monopole": "solved/fail-paper-gate",
+        "khan_2024_28_38ghz_monopole": "solved/fail-paper-gate",
     }
     for case in payload["cases"]:
         for artifact_name, artifact in case["artifacts"].items():

@@ -173,6 +173,9 @@ def test_unknown_contract_version_is_rejected_explicitly():
     "relative_path",
     [
         "examples/validation/wifi_patch_5250/reference_model.py",
+        "examples/validation/ibrahim_38ghz_monopole/reference_model.py",
+        "examples/validation/khan_28_38ghz_monopole/reference_model.py",
+        "examples/validation/khan_28_38ghz_monopole/reference_model_v2.py",
         "examples/validation/kaur_split_ring_monopole/reference_model.py",
         "examples/validation/yeo_slot_loaded_patch/reference_model.py",
         "examples/leam_case3/build_model.py",

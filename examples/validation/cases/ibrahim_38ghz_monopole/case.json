@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "case_id": "ibrahim_38ghz_monopole",
+  "design_name": "Ibrahim2023Antenna3_38GHz",
+  "runner": "run_case.py",
+  "shared_model": "../../ibrahim_38ghz_monopole/reference_model.py",
+  "benchmark": "../../ibrahim_38ghz_monopole/benchmark.json",
+  "paper_gate": "../../ibrahim_38ghz_monopole/paper_targets.py",
+  "default_outputs": [
+    "local_results/ibrahim_38ghz_reference.aedt",
+    "local_results/reference_s11.csv",
+    "local_results/paper_target_report.json"
+  ],
+  "status": "solved/fail-paper-gate; converged baseline and eight controlled variants produced no -10 dB paper band"
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "khan_2024_28_38ghz_monopole",
+  "scope": "Proposed single element in Figure 1 only; the later MIMO arrangement is excluded",
+  "paper_explicit": {
+    "source_items": ["Figure 1", "Figure 3", "Table 1", "Dual-band design evaluation"],
+    "geometry_parameters": ["L", "W", "PL", "QW", "QL", "T", "RL", "RW", "SW", "SL", "BW", "BL", "FL", "FW", "AL", "GL", "Lc", "AW", "Ri", "R", "G", "GW"],
+    "materials": ["Rogers RT5880", "epsilon_r=2.2", "tan_delta=0.0009", "h=0.787 mm"],
+    "bands_ghz": [[24.86, 28.65], [36.24, 40.82]]
+  },
+  "figure_interpretation_v1": {
+    "coordinate_system": "x across W, y from the board/feed bottom toward the radiator top, z through the substrate",
+    "feed": "FW-wide line centred on W and extending FL from the lower edge",
+    "main_frame": "piecewise rectangles placed at y=FL+SL and centred on W",
+    "Lc": "right inner vertical connector length",
+    "Ri_and_R": "outer and inner radii of the upper U-shaped annulus",
+    "hidden_boolean_overlap_mm": 0.01,
+    "evidence_class": "engineering interpretation of Figure 1; not a published vertex list"
+  },
+  "assumed": {
+    "conductor_model": "zero-thickness PEC sheets",
+    "excitation": "50 ohm microstrip wave port on the unpadded negative-Y region face",
+    "radiation_padding_mm": 2.0,
+    "solution_type": "DrivenModal",
+    "adaptive_frequency_ghz": 38.0,
+    "sweep_ghz": [22.0, 43.0],
+    "sweep_type": "Interpolating",
+    "sweep_points": 1051,
+    "maximum_adaptive_passes": 12,
+    "minimum_adaptive_passes": 2,
+    "max_delta_s": 0.02
+  },
+  "unresolved_from_paper": [
+    "complete radiator polygon vertex coordinates and Boolean construction order",
+    "conductor material, conductivity, and thickness",
+    "wave-port geometry and reference plane",
+    "air-region padding and radiation-boundary placement",
+    "mesh operations and adaptive convergence criteria",
+    "frequency sweep implementation and numeric S11 samples"
+  ],
+  "acceptance_policy": [
+    "The HFSS reference must converge and reproduce both complete -10 dB paper bands before it becomes an accepted candidate-comparison baseline.",
+    "If the paper gate fails, modify only a versioned engineering assumption and never silently tune a Table 1 value.",
+    "A visually plausible geometry is not electromagnetic correctness evidence."
+  ]
+}

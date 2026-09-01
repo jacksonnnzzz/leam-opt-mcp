@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "ibrahim_2023_38ghz_monopole",
+  "scope": "Single Antenna 3 element in Figure 4 only; the four-port MIMO and FSS are excluded",
+  "paper_explicit": {
+    "source_pages": [2, 3, 4],
+    "source_items": ["Section 2", "Figure 1", "Figure 3", "Figure 4"],
+    "parameters": ["38 GHz", "36.5-39.5 GHz", "L", "R", "W1", "L1", "L2", "Wf", "Lf", "Lg", "h", "epsilon_r"]
+  },
+  "derived_from_paper_geometry": {
+    "radiator_radius_mm": 2.47,
+    "radiator_center_rule": ["L/2", "Lf+R/2"],
+    "slot_offset_rule": "Solve sqrt(r^2-x_left^2)-L1 = sqrt(r^2-(x_left+W1)^2)-L2",
+    "reason": "Figure 4 specifies unequal slot-side lengths and the opening width but does not print a separate horizontal slot offset. The circle-chord relation makes all three printed dimensions hold simultaneously."
+  },
+  "assumed": {
+    "conductor_model": "zero-thickness PEC sheets",
+    "feed_boolean_overlap_mm": 0.0,
+    "substrate_loss_tangent": 0.0027,
+    "excitation": "50 ohm microstrip wave port on the unpadded negative-Y region face",
+    "radiation_padding_mm": 2.0,
+    "solution_type": "DrivenModal",
+    "adaptive_frequency_ghz": 38.0,
+    "sweep_ghz": [34.0, 42.0],
+    "sweep_type": "Interpolating",
+    "sweep_points": 801,
+    "maximum_adaptive_passes": 12,
+    "minimum_adaptive_passes": 2,
+    "max_delta_s": 0.02
+  },
+  "unresolved_from_paper": [
+    "dielectric loss tangent",
+    "conductor material, conductivity, and thickness",
+    "port geometry and reference plane",
+    "air-region padding and radiation-boundary placement",
+    "mesh operations and convergence criteria",
+    "frequency-sweep implementation and sampling",
+    "numeric S11 data samples",
+    "feed-to-radiator CAD overlap policy at the printed Lf tangent"
+  ],
+  "acceptance_policy": [
+    "The local HFSS reference must pass the explicit 38 GHz resonance, approximately -30 dB minimum, and 36.5-39.5 GHz band gate before it becomes a candidate-comparison baseline.",
+    "If the local reference fails, revise only a versioned engineering assumption; do not silently tune a paper-explicit dimension.",
+    "The generated candidate and reference must be solved in the same AEDT/PyAEDT environment before curve RMSE is evaluated."
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "ibrahim_2023_38ghz_monopole",
+  "recorded_on": "2026-08-30",
+  "environment": {
+    "aedt": "2025.1",
+    "pyaedt": "0.26.3",
+    "project": "Project8",
+    "solution_type": "DrivenModal"
+  },
+  "status": "solved_fail_paper_gate_after_two_bounded_assumption_studies",
+  "paper_parameters_sha256": "8a374eec82527397cf8bf6c17d4b29968093865f035148f477f70147dfa99104",
+  "baseline": {
+    "design": "Ibrahim2023Antenna3_38GHz",
+    "point_count": 801,
+    "frequency_range_ghz": [34.0, 42.0],
+    "convergence": {
+      "adaptive_passes_completed": 6,
+      "final_max_magnitude_delta_s": 0.01816,
+      "adaptive_delta_s_limit": 0.02,
+      "adaptive_converged": true,
+      "sweep_converged": true,
+      "converged": true
+    },
+    "minimum_frequency_ghz": 41.47,
+    "minimum_s11_db": -5.24090808888265,
+    "s11_at_38ghz_db": -4.21862418526999,
+    "minus_10db_band_ghz": null,
+    "paper_gate_passed": false,
+    "curve_sha256": "3c9b28311d04ad512f7d6fcb178c6cdb2bfae7a3a269195f60cef30a6496cbeb"
+  },
+  "assumption_study_v1": {
+    "space_sha256": "3bee32f3e617e4f9a7850f32c1592a81d995885bd809df58c88dfa6c544fab92",
+    "strategy": "one_at_a_time_over_unpublished_port_conductor_and_radiation_choices",
+    "trials_planned": 5,
+    "trials_completed_with_em_evidence": 3,
+    "trials_failed_geometry_construction": 2,
+    "trials_converged": 3,
+    "trials_passing_paper_gate": 0,
+    "completed_trials": [
+      {
+        "trial_id": "ast-ac7d8838670a",
+        "changed_assumption": {"excitation": "internal_microstrip_lumped_port"},
+        "adaptive_passes_completed": 5,
+        "final_max_magnitude_delta_s": 0.01427,
+        "minimum_frequency_ghz": 42.0,
+        "minimum_s11_db": -5.9910771905842815,
+        "s11_at_38ghz_db": -4.164157710576753,
+        "paper_gate_passed": false,
+        "curve_sha256": "156e1bfb0f4d1d37c7fbd848e06e1f3a7b82ec89564c61e75e2bcaacd2f6d733"
+      },
+      {
+        "trial_id": "ast-4b7cca69002e",
+        "changed_assumption": {"radiation_padding_mm": 1.0},
+        "adaptive_passes_completed": 5,
+        "final_max_magnitude_delta_s": 0.01797,
+        "minimum_frequency_ghz": 42.0,
+        "minimum_s11_db": -4.722930472802764,
+        "s11_at_38ghz_db": -4.267470287523713,
+        "paper_gate_passed": false,
+        "curve_sha256": "627e1cbe9453ea1ada7a6ffd639016d55173a970cf050ea8f31cce0c2316dee3"
+      },
+      {
+        "trial_id": "ast-26162bb1fadc",
+        "changed_assumption": {"radiation_padding_mm": 4.0},
+        "adaptive_passes_completed": 8,
+        "final_max_magnitude_delta_s": 0.01075,
+        "minimum_frequency_ghz": 40.53,
+        "minimum_s11_db": -5.360164844913001,
+        "s11_at_38ghz_db": -4.512990686216165,
+        "paper_gate_passed": false,
+        "curve_sha256": "7a2166e0536beb56c7055a5c5a7c1dd8d43b4c5d7073d9a66b6447f0b4885630"
+      }
+    ],
+    "failed_trials": [
+      {
+        "trial_id": "ast-5548b6d17237",
+        "changed_assumption": {"conductor_model": "finite_copper_0p017mm"},
+        "error": "HFSS failed to unite the tangent-only radiator and feed volumes"
+      },
+      {
+        "trial_id": "ast-3ee368222f82",
+        "changed_assumption": {"conductor_model": "finite_copper_0p035mm"},
+        "error": "HFSS failed to unite the tangent-only radiator and feed volumes"
+      }
+    ]
+  },
+  "assumption_study_v2": {
+    "space_sha256": "0f17d279f556a07187978363dd81c882206b30fad7f411829b425ee6ff1bf43c",
+    "strategy": "one_at_a_time_hidden_feed_boolean_overlap_with_published_outer_contour_fixed",
+    "overlap_values_mm": [0.02, 0.1, 0.2, 0.4, 1.0],
+    "trials_planned": 5,
+    "trials_completed": 5,
+    "trials_converged": 5,
+    "trials_passing_paper_gate": 0,
+    "common_observation": {
+      "minimum_frequency_ghz": 41.1,
+      "minimum_s11_db_approximately": -5.7675988452148,
+      "s11_at_38ghz_db_approximately": -4.65568592171645,
+      "minus_10db_band_ghz": null,
+      "interpretation": "Every positive overlap produces the same final united outer conductor, so the five solved curves agree to numerical precision."
+    },
+    "trial_curve_sha256": {
+      "0.02": "8a7a306938743b1ddf9cd9fcb6f87e692b7fc098e1707d486fb5bbdea16ee41c",
+      "0.1": "c715c10ded97da11478cf89e9c8ede39105b25a154a54b19d12ca45cf4f879ac",
+      "0.2": "4c589063cb1681461c2534123339068d231c5d64ca8333e554f0b38a27569fbb",
+      "0.4": "c70224368e43b8a3cdf1dffac125ed7a6818ade5657c763689e8433d21eb4a9b",
+      "1.0": "49117d7d7e128715f17d22213911401f49a93ee556e248ab29bd96d33f0d7388"
+    }
+  },
+  "paper_target": {
+    "resonance_ghz": 38.0,
+    "reported_minimum_s11_db": -30.0,
+    "accepted_minimum_s11_db_max": -25.0,
+    "minus_10db_band_ghz": [36.5, 39.5]
+  },
+  "conclusion": "The baseline and all eight completed controlled variants converged, but none produced a local 37-39 GHz resonance or any -10 dB band. The current HFSS translations are negative evidence and must not be used as an accepted reference.",
+  "policy": "Do not tune any paper-explicit dimension to force a pass. Obtain new source/model evidence or proceed to the next pre-screened native-HFSS paper benchmark."
+}

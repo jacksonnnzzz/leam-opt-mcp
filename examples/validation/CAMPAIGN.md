@@ -11,11 +11,16 @@ This file is the human-readable index for `campaign.json`. It reports implementa
 | Yeo scaled slot-loaded patch | [10.3390/electronics8050502](https://doi.org/10.3390/electronics8050502) | Baseline plus three controlled variants solved | **solved/fail-paper-gate**; no variant reproduced both modes and the narrow first band | Preserve the negative result; keep candidate gates closed |
 | El-Gendy 5.25 GHz Wi-Fi patch | [10.3390/s22030797](https://doi.org/10.3390/s22030797) | Source-corrected design, 10 one-at-a-time variants, and 11 interaction variants solved | **solved/fail-paper-gate**; all 21 trials converged, best worst-band point is -8.492 dB | Freeze negative v2 evidence and keep candidate gates closed |
 | Kaur baseline/WLAN-notch/X-band-notch UWB monopoles | [10.2528/PIERC20122401](https://doi.org/10.2528/PIERC20122401) | All three isolated designs solved | **solved/fail-paper-gate**; baseline and both notch cases fail their complete gates | Preserve the negative results; keep candidate gates closed |
+| Ibrahim single 38 GHz slotted monopole | [10.3390/s23073557](https://doi.org/10.3390/s23073557) | Baseline and two versioned assumption studies completed in Project8 | **solved/fail-paper-gate**; baseline plus eight controlled variants converged, none produced a -10 dB band | Freeze negative evidence; move to the pre-screened Khan native-HFSS case unless new source files appear |
+| Khan single 28/38 GHz nested-U monopole | [10.1038/s41598-023-50446-0](https://doi.org/10.1038/s41598-023-50446-0) | V1, Figure-2-corrected V2, and three controlled variants completed in Project8 | **solved/fail-paper-gate**; V2 converged but shifted the upper minimum to 40.90 GHz and did not produce the independent lower resonance | Freeze negative evidence; obtain the authors' HFSS project or stronger coordinate evidence before another interpretation |
 
-All seven reference designs were locally solved by 2026-08-26. The official Ansys
-probe patch passes its reference gate; all six paper-derived HFSS translations fail
-their respective paper gates. A failed cross-solver translation is useful negative
-evidence but is not proof that the paper geometry is wrong.
+All nine reference designs are now locally solved. The official Ansys probe patch is
+the only accepted reference; eight paper-derived designs fail their complete paper
+gates. The newest Khan case corrected a V1 visual-topology error using Figure 2, then
+solved V2 and three port/boundary variants; all converged and none reproduced both
+published bands. It is negative evidence and must not be described as a positive benchmark. A failed paper
+translation is useful negative evidence under the recorded assumptions, not proof that
+the published geometry itself is wrong.
 
 ## 1. Official PyAEDT probe-fed patch - candidate-solved/pass
 
@@ -216,6 +221,50 @@ notch intervals, but their observed peaks occur at 5.81 and 7.71 GHz, and both f
 their surrounding matched bands and peak-magnitude checks. None is an accepted local
 reference. Exact values and hashes are frozen in
 `kaur_split_ring_monopole/reference_data/hfss_reference_outcomes_2026_08_26.json`.
+
+## 6. Ibrahim 2023 38 GHz single element - solved/fail-paper-gate
+
+The benchmark is limited to Antenna 3 in Figure 4 and keeps the paper-explicit
+`12 x 12 x 0.203 mm` substrate, `er=3.55`, `4.94 mm` circular radiator diameter,
+`W1/L1/L2=2.2/2.45/2.35 mm`, `Wf/Lf=0.4/7.0 mm`, and `Lg=7.7 mm` fixed. It does not
+mix in the four-port MIMO, decoupling, or FSS structures.
+
+The Project8 baseline converged after six adaptive passes with final `Delta S=0.01816`,
+but its minimum is only -5.2409 dB at 41.47 GHz; S11 at 38 GHz is -4.2186 dB and there
+is no -10 dB band. The first bounded study changed only unpublished port, conductor,
+and radiation-padding choices: three variants solved and converged, two finite-thickness
+variants failed the tangent-volume union, and none passed. The second study changed only
+the hidden feed/radiator Boolean overlap while preserving the published visible outline;
+all five variants solved and converged, but the equivalent united geometry produced the
+same approximately -5.7676 dB minimum at 41.10 GHz and no -10 dB band.
+
+The baseline and eight completed controlled variants therefore remain negative evidence.
+G4/G5 are closed, and paper-explicit dimensions must not be tuned to force agreement.
+The immutable convergence metrics and curve hashes are in
+`ibrahim_38ghz_monopole/reference_data/hfss_reference_and_assumption_studies_2026_08_30.json`.
+
+## 7. Khan 2024 28/38 GHz single element - solved/fail-paper-gate
+
+The paper supplies a 5 x 9.2 x 0.787 mm Rogers RT5880 board, `er=2.2`,
+`tan(delta)=0.0009`, 22 Table 1 geometry labels, and two reported bands at
+24.86-28.65 and 36.24-40.82 GHz. Only the proposed single element is in scope.
+
+V1 converged but incorrectly treated the round-ended top slot as a separate annulus.
+Figure 2 makes the actual topology explicit: an outer inverted-U trace, an inner U,
+and two top rods separated by a round-ended slot. V2 corrected only this topology
+interpretation, preserving every Table 1 value. It converged in three adaptive passes
+with final `Delta S=0.01387`. Its second -10 dB interval is approximately
+37.80-42.17 GHz with a -20.0647 dB minimum at 40.90 GHz; the lower response stays
+below -10 dB over the target interval but does not form the separate plotted minimum.
+It therefore fails the two-resonance, depth, and band-edge gate.
+
+A three-trial one-at-a-time study then changed only the unpublished port construction
+and radiation padding. All three trials converged and none passed. The best complete
+band result used 1 mm padding: lower-band worst S11 -12.1844 dB, upper-band worst
+S11 -9.0388 dB, with the minima still displaced to the right edges. The frozen record
+and curve hashes are in
+`khan_28_38ghz_monopole/reference_data/hfss_reference_and_assumption_study_2026_08_31.json`.
+No independent candidate is generated while G3 remains closed.
 
 ## Evidence policy
 

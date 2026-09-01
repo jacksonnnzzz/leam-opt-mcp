@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "ibrahim_2023_38ghz_monopole",
+  "title": "Ibrahim 2023 single 38 GHz quasi-circular slotted monopole",
+  "source": {
+    "title": "Four-Port 38 GHz MIMO Antenna with High Gain and Isolation for 5G Wireless Networks",
+    "url": "https://doi.org/10.3390/s23073557",
+    "source_type": "paper",
+    "accessed_on": "2026-08-30",
+    "notes": [
+      "Only Antenna 3 in Figure 4 is in scope; the four-port MIMO, isolation stubs, and FSS are excluded.",
+      "The paper explicitly states that HFSS was used for the design and slot-width parametric study.",
+      "Paper-explicit quantities, paper-derived coordinates, and missing HFSS implementation choices are labelled separately.",
+      "The paper does not publish numeric S11 samples; a same-version accepted local HFSS reference is required for candidate RMSE."
+    ]
+  },
+  "reference": {
+    "parameters": {
+      "target_frequency": {"value": 38.0, "unit": "GHz", "evidence": "Figure 4(b)"},
+      "band_start": {"value": 36.5, "unit": "GHz", "evidence": "Section 2 prose"},
+      "band_stop": {"value": 39.5, "unit": "GHz", "evidence": "Section 2 prose"},
+      "substrate_length_L": {"value": 12.0, "unit": "mm", "evidence": "Figure 4 caption"},
+      "substrate_width_L": {"value": 12.0, "unit": "mm", "evidence": "Figure 4 caption"},
+      "substrate_thickness_h": {"value": 0.203, "unit": "mm", "evidence": "Section 2"},
+      "substrate_relative_permittivity": {"value": 3.55, "unit": "ratio", "evidence": "Section 2"},
+      "radiator_diameter_R": {"value": 4.94, "unit": "mm", "evidence": "Figure 1 and Section 2"},
+      "slot_width_W1": {"value": 2.2, "unit": "mm", "evidence": "Figure 4 caption"},
+      "slot_left_length_L1": {"value": 2.45, "unit": "mm", "evidence": "Figure 4 caption"},
+      "slot_right_length_L2": {"value": 2.35, "unit": "mm", "evidence": "Figure 4 caption"},
+      "feed_width_Wf": {"value": 0.4, "unit": "mm", "evidence": "Figure 4 caption"},
+      "feed_length_Lf": {"value": 7.0, "unit": "mm", "evidence": "Figure 4 caption"},
+      "ground_length_Lg": {"value": 7.7, "unit": "mm", "evidence": "Figure 4 caption"}
+    },
+    "materials": {
+      "substrate": {
+        "paper_label": "Rogers RT 4003",
+        "relative_permittivity": 3.55,
+        "thickness_mm": 0.203,
+        "dielectric_loss_tangent": null,
+        "evidence_class": "paper"
+      },
+      "conductors": {
+        "material": null,
+        "thickness_mm": null,
+        "evidence_class": "unresolved"
+      }
+    },
+    "derived_geometry": {
+      "radiator_radius_mm": 2.47,
+      "radiator_center": ["L/2", "Lf+R/2", "h"],
+      "slot_floor_relation": "sqrt(r^2-x_left^2)-L1 = sqrt(r^2-(x_left+W1)^2)-L2"
+    },
+    "engineering_assumptions": {
+      "conductor_model": "zero_thickness_pec_sheets",
+      "substrate_loss_tangent": 0.0027,
+      "excitation": "50_ohm_microstrip_wave_port",
+      "radiation_padding_mm": 2.0,
+      "solution_type": "DrivenModal"
+    },
+    "objects": {
+      "Substrate": {"primitive": "box", "material_role": "paper_substrate"},
+      "Ground": {"primitive": "rectangle_sheet", "boundary": "Perfect E"},
+      "FeedLine": {"primitive": "rectangle_sheet", "operation": "unite_into_Radiator"},
+      "Radiator": {"primitive": "circle_sheet", "boundary": "Perfect E"},
+      "SlotTool": {"primitive": "rectangle_sheet", "operation": "subtract_from_Radiator"},
+      "Region": {"primitive": "open_region", "material": "air", "boundary": "Radiation"}
+    },
+    "operations": [
+      {"order": 1, "operation": "create_substrate", "target": "Substrate"},
+      {"order": 2, "operation": "create_partial_ground", "target": "Ground"},
+      {"order": 3, "operation": "create_feed", "target": "FeedLine"},
+      {"order": 4, "operation": "create_circle", "target": "Radiator"},
+      {"order": 5, "operation": "unite", "target": "Radiator", "tool": "FeedLine"},
+      {"order": 6, "operation": "create_slot_tool", "target": "SlotTool"},
+      {"order": 7, "operation": "subtract", "target": "Radiator", "tool": "SlotTool"},
+      {"order": 8, "operation": "assign_perfect_e", "target": "Ground"},
+      {"order": 9, "operation": "assign_perfect_e", "target": "Radiator"},
+      {"order": 10, "operation": "create_region", "target": "Region"},
+      {"order": 11, "operation": "assign_radiation", "target": "Region", "face_count": 5},
+      {"order": 12, "operation": "assign_wave_port", "target": "WavePort1"}
+    ],
+    "solver": {
+      "design_type": "HFSS",
+      "solution_type": "Modal",
+      "setup": {
+        "name": "Setup1",
+        "type": "HFSSDriven",
+        "adaptive_frequency": {"value": 38.0, "unit": "GHz"},
+        "maximum_passes": 12,
+        "minimum_passes": 2,
+        "max_delta_s": 0.02
+      },
+      "sweep": {
+        "name": "Sweep1",
+        "type": "Interpolating",
+        "start": {"value": 34.0, "unit": "GHz"},
+        "stop": {"value": 42.0, "unit": "GHz"},
+        "points": 801
+      },
+      "s_parameter": "S11_dB"
+    },
+    "paper_response_target": {
+      "resonance_ghz": 38.0,
+      "resonance_relative_error_max": 0.01,
+      "minimum_s11_db_max": -25.0,
+      "reported_minimum_s11_db": -30.0,
+      "minus_10db_band_ghz": [36.5, 39.5],
+      "band_edge_absolute_error_max_ghz": 0.3,
+      "evidence": "Section 2 prose and Figure 4(b)"
+    }
+  },
+  "default_absolute_tolerance": 0.0,
+  "tolerance_by_path": {
+    "parameters.*.value": 0.001,
+    "materials.*.relative_permittivity": 0.001,
+    "derived_geometry.radiator_radius_mm": 0.001,
+    "solver.*.*.value": 0.000001
+  },
+  "s11": {
+    "frequency_column": "frequency_ghz",
+    "frequency_unit": "GHz",
+    "value_column": "s11_db",
+    "value_unit": "dB",
+    "threshold_db": -10.0,
+    "minimum_overlap_points": 100,
+    "minimum_reference_coverage_fraction": 0.99,
+    "resonance_relative_error_max": 0.01,
+    "bandwidth_relative_error_max": 0.1,
+    "curve_rmse_db_max": 1.5,
+    "required": true,
+    "targets": [
+      {
+        "name": "ibrahim_38ghz_resonance",
+        "kind": "resonance",
+        "window_ghz": [37.0, 39.0],
+        "threshold_db": -10.0,
+        "minimum_points": 100,
+        "resonance_relative_error_max": 0.01,
+        "band_edge_relative_error_max": 0.1
+      },
+      {
+        "name": "ibrahim_reported_band",
+        "kind": "passband",
+        "window_ghz": [36.5, 39.5],
+        "threshold_db": -10.0,
+        "minimum_points": 200
+      }
+    ]
+  }
+}

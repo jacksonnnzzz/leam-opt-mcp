@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "study_id": "ibrahim_2023_38ghz_engineering_assumptions_v1",
+  "case_id": "ibrahim_2023_38ghz_monopole",
+  "description": "One-at-a-time search over only HFSS details omitted by the paper. Every printed dimension and material fact remains immutable.",
+  "strategy": "one_at_a_time",
+  "include_baseline": false,
+  "paper_parameters": {
+    "target_frequency": {"value": 38.0, "unit": "GHz", "evidence": "paper"},
+    "band_start": {"value": 36.5, "unit": "GHz", "evidence": "paper"},
+    "band_stop": {"value": 39.5, "unit": "GHz", "evidence": "paper"},
+    "substrate_length_L": {"value": 12.0, "unit": "mm", "evidence": "paper"},
+    "substrate_width_L": {"value": 12.0, "unit": "mm", "evidence": "paper"},
+    "substrate_thickness_h": {"value": 0.203, "unit": "mm", "evidence": "paper"},
+    "substrate_relative_permittivity": {"value": 3.55, "unit": "ratio", "evidence": "paper"},
+    "radiator_diameter_R": {"value": 4.94, "unit": "mm", "evidence": "paper"},
+    "slot_width_W1": {"value": 2.2, "unit": "mm", "evidence": "paper"},
+    "slot_left_length_L1": {"value": 2.45, "unit": "mm", "evidence": "paper"},
+    "slot_right_length_L2": {"value": 2.35, "unit": "mm", "evidence": "paper"},
+    "feed_width_Wf": {"value": 0.4, "unit": "mm", "evidence": "paper"},
+    "feed_length_Lf": {"value": 7.0, "unit": "mm", "evidence": "paper"},
+    "ground_length_Lg": {"value": 7.7, "unit": "mm", "evidence": "paper"}
+  },
+  "baseline_assumptions": {
+    "conductor_model": "zero_thickness_pec_sheets",
+    "substrate_loss_tangent": 0.0027,
+    "slot_coordinate_rule": "circle_chord_lengths_L1_L2_with_opening_W1",
+    "excitation": "microstrip_wave_port_on_unpadded_negative_y_face",
+    "port_impedance_ohm": 50.0,
+    "radiation_padding_mm": 2.0,
+    "solution_type": "Modal",
+    "adaptive_frequency_ghz": 38.0,
+    "maximum_adaptive_passes": 12,
+    "minimum_adaptive_passes": 2,
+    "max_delta_s": 0.02,
+    "sweep_start_ghz": 34.0,
+    "sweep_stop_ghz": 42.0,
+    "sweep_points": 801,
+    "sweep_type": "Interpolating"
+  },
+  "search_space": {
+    "excitation": {
+      "values": ["internal_microstrip_lumped_port"],
+      "source_status": "unresolved_from_source",
+      "rationale": "The paper states a 50-ohm feed line but does not disclose the HFSS port construction or reference plane."
+    },
+    "conductor_model": {
+      "values": ["finite_copper_0p017mm", "finite_copper_0p035mm"],
+      "source_status": "unresolved_from_source",
+      "rationale": "The paper does not disclose conductor material or thickness."
+    },
+    "radiation_padding_mm": {
+      "values": [1.0, 4.0],
+      "source_status": "unresolved_from_source",
+      "rationale": "The paper does not disclose the radiation-boundary distance."
+    }
+  },
+  "constraints": [],
+  "solver_gate": {
+    "setup": "Setup1",
+    "sweep": "Sweep1",
+    "max_delta_s": 0.02,
+    "require_sweep_converged": true
+  },
+  "acceptance": {
+    "metric": "paper_gate_violation",
+    "operator": "<=",
+    "threshold": 0.0,
+    "require_converged": true
+  }
+}
