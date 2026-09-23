@@ -36,7 +36,7 @@ Issues = "https://github.com/jacksonnnzzz/leam-opt-mcp/issues"
 Changelog = "https://github.com/jacksonnnzzz/leam-opt-mcp/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-hfss = ["pyaedt>=0.18,<0.27"]
+hfss = ["pyaedt>=0.18,<1.5"]
 local-vision = ["pymupdf>=1.24,<2"]
 dev = ["build>=1.2", "pytest>=8.3", "pytest-cov>=6"]
 
