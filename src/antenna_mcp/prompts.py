@@ -1,3 +1,6 @@
+from .reproducibility import reproducibility_prompt_contract
+
+
 STAGES = (
     "source_analysis",
     "parameters",
@@ -39,7 +42,7 @@ Never repeat work owned by another generation stage."""
 STAGE_INSTRUCTIONS = {
     "source_analysis": """Return one JSON object with exactly these top-level keys:
 input_summary, antenna_type, coordinate_system, components, parameters, operations,
-derived_relations, and uncertainties. Treat images and PDF pages as evidence, not as infallible ground truth.
+derived_relations, uncertainties, and reproducibility_evidence. Treat images and PDF pages as evidence, not as infallible ground truth.
 If the source contains multiple distinct antennas, analyze only the design named in the antenna
 intent and never combine components or dimensions across examples. If no design is named, set
 antenna_type to null and report the candidate designs in uncertainties instead of merging them.
@@ -74,7 +77,8 @@ execution order. For an attached frozen benchmark, copy every reference.operatio
 order, including helper-internal boolean operations and keep_originals flags; do not collapse or
 omit them. Record every explicit or reviewed derived equation in derived_relations with
 claim_id, expression, symbols, evidence, and confidence. Put illegible labels, conflicting dimensions, inferred symmetry, missing
-thicknesses, and other assumptions in uncertainties. Never invent an unreadable value.""",
+thicknesses, and other assumptions in uncertainties. Never invent an unreadable value. """
+    + reproducibility_prompt_contract(),
     "parameters": """Return JSON with a parameters array containing exactly one record for every
 source_analysis.parameters record and no others. Copy source symbol to name verbatim, and copy
 value and unit without conversion or normalization. You may add description and optimizable, but

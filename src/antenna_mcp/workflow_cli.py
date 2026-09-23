@@ -10,12 +10,14 @@ from .assumption_search import AssumptionStudyLedger, run_aedt_assumption_search
 from .codegen import PythonArtifactService
 from .execution import HfssBuildService
 from .feedback import ModelFeedbackService
+from .iterative_reconstruction import propose_next_iteration, run_iterative_reconstruction
 from .modeling import ModelingService
 from .model_retry import ModelRetryService
 from .models import ModelingRequest, OptimizationRequest, PipelineRequest
 from .optimizer import OptimizationService
 from .pipeline import PipelineService
 from .review import ArtifactReviewService
+from .reproducibility import ReproducibilityAuditService
 from .reviewed_model import EngineeringAssumptionService, ReviewedModelCompiler
 from .source_refinement import SourceRefinementService
 from .validation import ValidationService
@@ -48,6 +50,9 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--include-simulation", action="store_true")
     create.add_argument("--include-optimization", action="store_true")
     create.add_argument("--model", default=None)
+    create.add_argument("--source-extraction-mode", choices=("single", "split"), default="single")
+    create.add_argument("--geometry-extraction-mode", choices=("single", "staged"), default="single")
+    create.add_argument("--geometry-attachment", action="append", default=[], help="Explicit geometry-only evidence (split mode); may be repeated")
 
     run = commands.add_parser("model-run", help="Run a modeling job through one stage.")
     run.add_argument("job_id")
@@ -112,6 +117,14 @@ def build_parser() -> argparse.ArgumentParser:
     status = commands.add_parser("status", help="Read a job state and artifact paths.")
     status.add_argument("job_id")
 
+    reproducibility = commands.add_parser(
+        "reproducibility-audit",
+        help="Deterministically score source completeness before HFSS reconstruction.",
+    )
+    reproducibility_source = reproducibility.add_mutually_exclusive_group(required=True)
+    reproducibility_source.add_argument("--job-id")
+    reproducibility_source.add_argument("--source-analysis", type=Path)
+
     refine = commands.add_parser("source-refine", help="Create a reviewed source candidate.")
     refine.add_argument("job_id")
     refine.add_argument("--description", default=None)
@@ -165,6 +178,12 @@ def build_parser() -> argparse.ArgumentParser:
     assumption_run.add_argument("--active-project", required=True)
     assumption_run.add_argument("--aedt-version", default=None)
     assumption_run.add_argument("--limit", type=int)
+    assumption_run.add_argument(
+        "--trial-id",
+        action="append",
+        default=[],
+        help="Run only this exact planned trial ID; may be repeated and cannot be combined with --limit.",
+    )
     assumption_run.add_argument("--resume", action="store_true")
     assumption_run.add_argument(
         "--retry-failed",
@@ -175,6 +194,36 @@ def build_parser() -> argparse.ArgumentParser:
         "--postprocess-existing",
         action="store_true",
         help="Do not solve; extract evidence only from already solved, receipt-matched designs.",
+    )
+
+    iteration_propose = commands.add_parser(
+        "iteration-propose",
+        help="Diagnose an existing curve and propose one bounded engineering-assumption trial.",
+    )
+    iteration_propose.add_argument("--curve", required=True, type=Path)
+    iteration_propose.add_argument("--target", required=True, type=Path)
+    iteration_propose.add_argument("--space", required=True, type=Path)
+    iteration_propose.add_argument("--output-dir", required=True, type=Path)
+    iteration_propose.add_argument("--prior-knowledge", type=Path)
+
+    iteration_run = commands.add_parser(
+        "iteration-run",
+        help="Run or resume the complete diagnose-build-solve-evaluate loop.",
+    )
+    iteration_run.add_argument("--curve", required=True, type=Path)
+    iteration_run.add_argument("--target", required=True, type=Path)
+    iteration_run.add_argument("--space", required=True, type=Path)
+    iteration_run.add_argument("--adapter", required=True, type=Path)
+    iteration_run.add_argument("--output-dir", required=True, type=Path)
+    iteration_run.add_argument("--study-output-dir", required=True, type=Path)
+    iteration_run.add_argument("--grpc-port", required=True, type=int)
+    iteration_run.add_argument("--active-project", required=True)
+    iteration_run.add_argument("--aedt-version", default=None)
+    iteration_run.add_argument("--prior-knowledge", type=Path)
+    iteration_run.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="Retry the currently proposed trial when its latest immutable result failed.",
     )
 
     compile_model = commands.add_parser(
@@ -285,6 +334,9 @@ def run_command(args: argparse.Namespace) -> dict[str, Any]:
             include_simulation=args.include_simulation,
             include_optimization=args.include_optimization,
             model=args.model,
+            source_extraction_mode=args.source_extraction_mode,
+            geometry_attachments=args.geometry_attachment,
+            geometry_extraction_mode=args.geometry_extraction_mode,
         )
         return ModelingService(store).create(request).model_dump(mode="json")
     if command == "model-run":
@@ -297,6 +349,11 @@ def run_command(args: argparse.Namespace) -> dict[str, Any]:
         )
     if command == "status":
         return store.load_state(args.job_id).model_dump(mode="json")
+    if command == "reproducibility-audit":
+        service = ReproducibilityAuditService(store)
+        if args.job_id:
+            return service.audit_job(args.job_id)
+        return service.audit_file(args.source_analysis)
     if command == "source-refine":
         return SourceRefinementService(store).refine(
             args.job_id, args.description, args.visual_audit
@@ -330,6 +387,29 @@ def run_command(args: argparse.Namespace) -> dict[str, Any]:
             resume=args.resume,
             retry_failed=args.retry_failed,
             postprocess_existing=args.postprocess_existing,
+            trial_ids=args.trial_id or None,
+        )
+    if command == "iteration-propose":
+        return propose_next_iteration(
+            curve_path=args.curve,
+            target_path=args.target,
+            assumption_space_path=args.space,
+            output_dir=args.output_dir,
+            prior_knowledge_path=args.prior_knowledge,
+        )
+    if command == "iteration-run":
+        return run_iterative_reconstruction(
+            baseline_curve_path=args.curve,
+            target_path=args.target,
+            assumption_space_path=args.space,
+            adapter_path=args.adapter,
+            iteration_output_dir=args.output_dir,
+            study_output_dir=args.study_output_dir,
+            grpc_port=args.grpc_port,
+            active_project=args.active_project,
+            version=args.aedt_version,
+            prior_knowledge_path=args.prior_knowledge,
+            retry_failed=args.retry_failed,
         )
     if command == "model-compile":
         return ReviewedModelCompiler(store).compile(

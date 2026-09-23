@@ -33,6 +33,8 @@ _DERIVED_LATEST_KEYS = {
     "python_export_manifest",
     "python_model",
     "review_packet",
+    "reproducibility_assessment",
+    "reproducibility_report",
     "validation_candidate",
     "validation_report",
 }

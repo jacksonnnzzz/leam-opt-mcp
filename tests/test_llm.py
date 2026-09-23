@@ -15,6 +15,141 @@ from antenna_mcp.llm import (
 )
 
 
+@pytest.mark.parametrize("reader", ["_render_pdf_pages", "_extract_pdf_text"])
+def test_pdf_readers_reject_html_download_before_extraction(tmp_path, monkeypatch, reader):
+    pdf = tmp_path / "paper.pdf"
+    pdf.write_text("<html><body>Verifying you are not a bot</body></html>", "utf-8")
+
+    class HtmlDocument:
+        is_pdf = False
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        @property
+        def page_count(self):
+            raise AssertionError("Non-PDF document must not be processed")
+
+    monkeypatch.setitem(sys.modules, "fitz", SimpleNamespace(open=lambda path: HtmlDocument()))
+    with pytest.raises(ValueError, match="not a PDF document"):
+        getattr(llm_module, reader)(pdf)
+
+
+def test_pdf_type_guard_accepts_real_pdf_type():
+    llm_module._require_pdf_document(SimpleNamespace(name="paper.pdf"), SimpleNamespace(is_pdf=True))
+
+
+@pytest.mark.parametrize("content,thinking", [('{}', ''), ('', '{}'), ('partial', 'private reasoning')])
+def test_ollama_rejects_length_even_when_json_is_complete(monkeypatch, content, thinking):
+    from antenna_mcp.llm_result import LlmOutputTruncatedError
+    captured = {}
+
+    class Response:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def read(self):
+            return json.dumps({"done": True, "done_reason": "length", "eval_count": 16,
+                               "message": {"content": content, "thinking": thinking}}).encode()
+
+    def fake_urlopen(request, timeout):
+        captured.update(json.loads(request.data))
+        return Response()
+
+    monkeypatch.setattr(llm_module, "urlopen", fake_urlopen)
+    monkeypatch.setenv("OLLAMA_NUM_PREDICT", "16")
+    with pytest.raises(LlmOutputTruncatedError) as raised:
+        OllamaVisionProvider().generate(system="s", prompt="p", attachments=[])
+    assert captured["options"]["num_predict"] == 16
+    metadata = raised.value.metadata
+    assert metadata["status"] == "truncated"
+    assert metadata["eval_count"] == 16
+    assert "content" not in metadata and "thinking" not in metadata
+
+
+@pytest.mark.parametrize("limit", ["0", "-1", "32769", "invalid"])
+def test_ollama_output_budget_cannot_disable_limit(monkeypatch, limit):
+    monkeypatch.setenv("OLLAMA_NUM_PREDICT", limit)
+    with pytest.raises(ValueError):
+        OllamaVisionProvider().generate(system="s", prompt="p", attachments=[])
+
+
+def test_ollama_success_carries_content_free_metrics(monkeypatch):
+    class Response:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def read(self):
+            return json.dumps({"done": True, "done_reason": "stop", "eval_count": 4,
+                               "eval_duration": 100, "message": {"content": "", "thinking": '{"ok":true}'}}).encode()
+
+    monkeypatch.setattr(llm_module, "urlopen", lambda *a, **k: Response())
+    monkeypatch.delenv("OLLAMA_NUM_PREDICT", raising=False)
+    result = OllamaVisionProvider().generate(system="s", prompt="p", attachments=[])
+    assert isinstance(result, str) and json.loads(result) == {"ok": True}
+    assert result.metadata["output_token_limit"] == 4096
+    assert result.metadata["response_field"] == "thinking_valid_json_fallback"
+    assert result.metadata["eval_duration"] == 100
+
+
+def test_ollama_timeout_has_metadata(monkeypatch):
+    from antenna_mcp.llm_result import LlmRequestError
+
+    def timeout(*a, **k): raise TimeoutError("socket read timeout")
+
+    monkeypatch.setattr(llm_module, "urlopen", timeout)
+    with pytest.raises(LlmRequestError) as raised:
+        OllamaVisionProvider().generate(system="s", prompt="p", attachments=[])
+    assert raised.value.metadata["status"] == "timeout"
+    assert raised.value.metadata["wall_seconds"] >= 0
+
+
+def test_ollama_native_schema_and_evidence_order(tmp_path, monkeypatch):
+    captured = {}
+    source = tmp_path / "source.txt"
+    source.write_text("source evidence", "utf-8")
+
+    class Response:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def read(self): return b'{"message":{"content":"{}"}}'
+
+    def fake_urlopen(request, timeout):
+        captured.update(json.loads(request.data))
+        return Response()
+
+    monkeypatch.setattr(llm_module, "urlopen", fake_urlopen)
+    schema = {"type": "object", "required": ["x"], "properties": {"x": {"type": "number"}}}
+    OllamaVisionProvider().generate_structured(system="safe", prompt="contract", attachments=[source], schema=schema)
+    assert captured["format"] == schema
+    content = captured["messages"][1]["content"]
+    assert content.index("source evidence") < content.index("contract")
+
+
+def test_routed_structured_request_preserves_schema(tmp_path):
+    calls = []
+    image = tmp_path / "figure.png"
+    image.write_bytes(b"image")
+
+    class Native:
+        def generate_structured(self, **kwargs):
+            calls.append(kwargs)
+            return "{}"
+
+    class Plain:
+        def generate(self, **kwargs):
+            calls.append(kwargs)
+            return "{}"
+
+    routed = RoutedLlmProvider(text=Plain(), vision=Native())
+    routed.generate_structured(system="s", prompt="schema in prompt", attachments=[image], schema={"type": "object"})
+    assert calls[0]["schema"] == {"type": "object"}
+    routed.generate_structured(system="s", prompt="schema in prompt", attachments=[], schema={"type": "object"})
+    assert "schema" not in calls[1]
+    assert calls[1]["prompt"] == "schema in prompt"
+
+
 def test_multimodal_request_uses_original_image_and_high_detail_pdf(tmp_path, monkeypatch):
     image = tmp_path / "drawing.png"
     image.write_bytes(b"png")

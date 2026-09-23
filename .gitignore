@@ -27,3 +27,7 @@ examples/validation/cases/**/assumption_study*/
 Thumbs.db
 ~$*
 *.pptx
+# Local discovery junction; the portable skill source is in skills/.
+/.agents/skills/leam-reconstruct/
+# User-supplied thesis retained locally, not redistributed with system source.
+/etd.pdf

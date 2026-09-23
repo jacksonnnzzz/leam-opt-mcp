@@ -6,7 +6,8 @@ LEAM Opt MCP 把“看图后直接操作仿真器”拆成可审查、可恢复�
 ```mermaid
 flowchart LR
     A["PDF / image / language"] --> B["source analysis"]
-    B --> C["source refinement"]
+    B --> R["deterministic reproducibility assessment"]
+    R --> C["source refinement"]
     C --> D{"human hash approval"}
     D -->|approved| E["parameters / materials / solids / dimensions"]
     E --> F["geometry fragments"]
@@ -24,6 +25,7 @@ flowchart LR
 | 模块 | 职责 | 是否启动 AEDT |
 | --- | --- | --- |
 | `modeling.py` | 分阶段生成证据和几何片段 | 否 |
+| `reproducibility.py` | 固定规则计算 A/B/C 来源完整性等级和缺口报告 | 否 |
 | `source_refinement.py` | 图文校正、证据绑定和源审核哈希 | 否 |
 | `reviewed_model.py` | 独立管理未公开参数的工程假设 | 否 |
 | `codegen.py` | 导出不可变版本的 `generated_model_vNNN.py` | 否 |

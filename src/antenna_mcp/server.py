@@ -18,6 +18,7 @@ from .models import ModelingRequest, OptimizationRequest, PipelineRequest
 from .optimizer import OptimizationService
 from .pipeline import PipelineService
 from .review import ArtifactReviewService
+from .reproducibility import ReproducibilityAuditService
 from .reviewed_model import EngineeringAssumptionService, ReviewedModelCompiler
 from .source_refinement import SourceRefinementService
 from .validation import ValidationService
@@ -71,6 +72,9 @@ def create_antenna_modeling_job(
     include_simulation: bool = False,
     include_optimization: bool = False,
     model: str | None = None,
+    source_extraction_mode: str = "single",
+    geometry_attachments: list[str] | None = None,
+    geometry_extraction_mode: str = "single",
 ) -> dict[str, Any]:
     """Create a staged prompt-driven modeling job without running the LLM or simulator."""
     _, modeling, _, _ = _services()
@@ -83,6 +87,9 @@ def create_antenna_modeling_job(
         include_simulation=include_simulation,
         include_optimization=include_optimization,
         model=model,
+        source_extraction_mode=source_extraction_mode,
+        geometry_attachments=geometry_attachments or [],
+        geometry_extraction_mode=geometry_extraction_mode,
     )
     return modeling.create(request).model_dump(mode="json")
 
@@ -164,6 +171,25 @@ def analyze_antenna_source(
         )
     )
     return modeling.run(state.job_id, "source_analysis").model_dump(mode="json")
+
+
+@mcp.tool()
+def assess_antenna_source_reproducibility(
+    job_id: str | None = None,
+    source_analysis_path: str | None = None,
+) -> dict[str, Any]:
+    """Score source completeness with fixed rules; the LLM cannot choose the score.
+
+    Provide exactly one input. A job audit is saved beside its source artifact. A direct
+    file audit is read-only and returns the report without changing the source file.
+    """
+    if (job_id is None) == (source_analysis_path is None):
+        raise ValueError("provide exactly one of job_id or source_analysis_path")
+    store = WorkspaceStore()
+    service = ReproducibilityAuditService(store)
+    if job_id is not None:
+        return service.audit_job(job_id)
+    return service.audit_file(source_analysis_path)
 
 
 @mcp.tool()

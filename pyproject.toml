@@ -64,6 +64,19 @@ packages = ["src/antenna_mcp"]
 [tool.hatch.build.targets.wheel.force-include]
 "tools/run_generated_model_in_aedt.py" = "antenna_mcp/_aedt_native_runner.py"
 
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tools/run_generated_model_in_aedt.py",
+  "/tests",
+  "/README.md",
+  "/LICENSE",
+  "/CHANGELOG.md",
+  "/CONTRIBUTING.md",
+  "/SECURITY.md",
+  "/pyproject.toml",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"

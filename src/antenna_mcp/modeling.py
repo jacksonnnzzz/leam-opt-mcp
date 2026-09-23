@@ -7,10 +7,15 @@ import re
 from pathlib import Path
 
 from .llm import LlmProvider, provider_from_env
+from .llm_result import record_request_metadata
 from .models import JobState, ModelingRequest, OptimizationPlan
 from .execution_contract import validate_execution_fragment
 from .pyaedt_api_contract import validate_pyaedt_api_fragment
 from .prompts import STAGES, STAGE_INSTRUCTIONS, SYSTEM_PROMPT
+from .reproducibility import (
+    ReproducibilityAuditService,
+    validate_reproducibility_evidence,
+)
 from .stage_contract import validate_stage_ownership
 from .structured_contract import (
     validate_dimensions_against_solids,
@@ -18,6 +23,8 @@ from .structured_contract import (
     validate_source_component_topology,
 )
 from .workspace import WorkspaceStore
+from .evidence_consistency import check_source
+from .source_extraction import extract_source_parts
 
 
 _PYTHON_FRAGMENT_STAGES = {"model_3d", "model_2d", "boolean", "simulation_setup"}
@@ -51,7 +58,7 @@ class ModelingService:
     def create(self, request: ModelingRequest) -> JobState:
         if request.backend.value != "hfss":
             raise NotImplementedError("0.1 implements HFSS; CST is reserved by the backend interface")
-        for raw in request.attachments:
+        for raw in request.attachments + request.geometry_attachments:
             path = Path(raw).expanduser().resolve()
             if not path.is_file():
                 raise FileNotFoundError(raw)
@@ -134,6 +141,9 @@ class ModelingService:
                     validate_source_component_topology(payload)
                     _validate_source_against_attachment_contract(payload, attachments)
                     source_contract = payload
+                    self._write_reproducibility_assessment(
+                        job_id, state, payload, Path(approved_source)
+                    )
                     context.append(f"[source_analysis]\n{cleaned}")
                     if through_stage == "source_analysis":
                         break
@@ -163,6 +173,9 @@ class ModelingService:
                             validate_source_component_topology(payload)
                             _validate_source_against_attachment_contract(payload, attachments)
                             source_contract = payload
+                            self._write_reproducibility_assessment(
+                                job_id, state, payload, artifact
+                            )
                         elif stage == "optimization_spec":
                             OptimizationPlan.model_validate(payload)
                         elif stage in {"parameters", "materials", "solids"}:
@@ -209,11 +222,22 @@ class ModelingService:
                 # source_analysis so their components and parameters become an explicit
                 # evidence contract before any downstream artifact can be generated.
                 stage_attachments = attachments if stage == "source_analysis" else []
-                result = provider.generate(
-                    system=SYSTEM_PROMPT,
-                    prompt=prompt,
-                    attachments=stage_attachments,
-                )
+                if stage == "source_analysis" and request.source_extraction_mode == "split":
+                    result = extract_source_parts(
+                        provider=provider, request=request, attachments=attachments,
+                        store=self.store, state=state, validate_source=_validate_source_analysis,
+                    )
+                else:
+                    try:
+                        result = provider.generate(
+                            system=SYSTEM_PROMPT,
+                            prompt=prompt,
+                            attachments=stage_attachments,
+                        )
+                    except Exception as exc:
+                        record_request_metadata(self.store, state, stage, exc)
+                        raise
+                    record_request_metadata(self.store, state, stage, result)
                 suffix = ".py" if stage in _PYTHON_FRAGMENT_STAGES else ".json"
                 cleaned = _strip_fence(result)
                 rejected_candidate = (stage, cleaned)
@@ -258,6 +282,8 @@ class ModelingService:
                     )
                 path = self.store.write_artifact(job_id, stage + suffix, cleaned + "\n")
                 state.artifacts[stage] = str(path)
+                if stage == "source_analysis":
+                    self._write_reproducibility_assessment(job_id, state, payload, path)
                 rejected_candidate = None
                 context.append(f"[{stage}]\n{cleaned}")
                 self.store.save_state(state)
@@ -325,6 +351,30 @@ class ModelingService:
             candidate_key: str(candidate_path),
             report_key: str(report_path),
         }
+
+    def _write_reproducibility_assessment(
+        self,
+        job_id: str,
+        state: JobState,
+        source_analysis: dict[str, Any],
+        source_path: Path,
+    ) -> Path:
+        report = ReproducibilityAuditService().audit_payload(source_analysis)
+        report["job_id"] = job_id
+        report["source_artifact"] = str(source_path.resolve())
+        path = self.store.write_artifact(
+            job_id,
+            "reproducibility_assessment.json",
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+        )
+        markdown = self.store.write_artifact(
+            job_id,
+            "reproducibility_report.md",
+            ReproducibilityAuditService().render_markdown(report),
+        )
+        state.artifacts["reproducibility_assessment"] = str(path)
+        state.artifacts["reproducibility_report"] = str(markdown)
+        return path
 
     @staticmethod
     def _prompt(
@@ -534,6 +584,9 @@ def _validate_source_analysis(payload: object) -> None:
             )
         parameter_symbols.add(normalized_symbol)
         _validate_confidence(parameter["confidence"], f"{path}.confidence")
+    if "reproducibility_evidence" in payload:
+        validate_reproducibility_evidence(payload["reproducibility_evidence"])
+    check_source(payload)
 
 
 def _validate_source_against_attachment_contract(

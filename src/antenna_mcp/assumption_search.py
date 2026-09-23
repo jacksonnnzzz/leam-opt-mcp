@@ -282,8 +282,21 @@ class AssumptionStudyLedger:
         limit: int | None = None,
         resume: bool = False,
         retry_failed: bool = False,
+        trial_ids: list[str] | None = None,
     ) -> list[dict[str, Any]]:
+        if trial_ids and limit is not None:
+            raise AssumptionSearchError("--trial-id cannot be combined with --limit")
         planned = self.trials(limit=limit)
+        if trial_ids:
+            if len(set(trial_ids)) != len(trial_ids):
+                raise AssumptionSearchError("trial IDs must be unique")
+            by_id = {trial["trial_id"]: trial for trial in planned}
+            unknown = [trial_id for trial_id in trial_ids if trial_id not in by_id]
+            if unknown:
+                raise AssumptionSearchError(
+                    "unknown trial ID(s): " + ", ".join(unknown)
+                )
+            planned = [by_id[trial_id] for trial_id in trial_ids]
         results = {item["trial"]["trial_id"]: item for item in self.load_results()}
         if results and not resume:
             raise AssumptionSearchError(
@@ -546,6 +559,7 @@ def _normalize_trial_result(
                 "solver_failure",
                 "evidence_export",
                 "client_interrupted",
+                "filesystem_access",
             }:
                 raise AssumptionSearchError("failed trial has unsupported failure_kind")
             normalized["failure_kind"] = failure_kind
@@ -680,6 +694,7 @@ def run_aedt_assumption_search(
     resume: bool = False,
     retry_failed: bool = False,
     postprocess_existing: bool = False,
+    trial_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     if not 1 <= int(grpc_port) <= 65535:
         raise AssumptionSearchError("gRPC port must be between 1 and 65535")
@@ -691,9 +706,20 @@ def run_aedt_assumption_search(
         raise AssumptionSearchError(
             "adapter paper parameters do not match the frozen assumption space"
         )
+    if trial_ids and limit is not None:
+        raise AssumptionSearchError("--trial-id cannot be combined with --limit")
     planned = ledger.trials(limit=limit)
+    if trial_ids:
+        by_id = {trial["trial_id"]: trial for trial in ledger.trials()}
+        unknown = [trial_id for trial_id in trial_ids if trial_id not in by_id]
+        if unknown:
+            raise AssumptionSearchError("unknown trial ID(s): " + ", ".join(unknown))
+        planned = [by_id[trial_id] for trial_id in trial_ids]
     pending = ledger.pending_trials(
-        limit=limit, resume=resume, retry_failed=retry_failed
+        limit=limit,
+        resume=resume,
+        retry_failed=retry_failed,
+        trial_ids=trial_ids,
     )
     if postprocess_existing and not resume:
         raise AssumptionSearchError("--postprocess-existing requires --resume")
@@ -816,6 +842,7 @@ def run_aedt_assumption_search(
                             f"postprocess-only trial has no existing design {design!r}"
                         )
                 else:
+                    ensure_local_aedt_results_directory(hfss)
                     if not hfss.save_project():
                         raise RuntimeError(f"HFSS failed to save {design!r}")
                     errors_before = set(_aedt_error_messages(hfss))
@@ -988,8 +1015,41 @@ def wait_for_aedt_idle(
         time.sleep(poll_seconds)
 
 
+def ensure_local_aedt_results_directory(hfss: Any) -> Path:
+    """Create the active design's local AEDT results directory if needed.
+
+    AEDT can save a newly inserted design yet fail its first solve with WinError 5
+    while creating ``<project>.pyaedt/<design>``.  Creating only that exact
+    directory is recoverable and does not alter any existing solver files.
+    """
+    value = getattr(hfss, "results_directory", None)
+    if not isinstance(value, (str, Path)) or not str(value).strip():
+        raise RuntimeError("HFSS did not expose a local results directory")
+    directory = Path(value).expanduser()
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+    except PermissionError as exc:
+        raise PermissionError(
+            f"unable to create AEDT results directory {directory}: {exc}"
+        ) from exc
+    if not directory.is_dir():
+        raise RuntimeError(f"AEDT results path is not a directory: {directory}")
+    return directory.resolve()
+
+
 def classify_assumption_failure(error: str) -> str:
     value = error.casefold()
+    if any(
+        marker in value
+        for marker in (
+            "permissionerror",
+            "winerror 5",
+            "access is denied",
+            "permission denied",
+            "拒绝访问",
+        )
+    ):
+        return "filesystem_access"
     if any(
         marker in value
         for marker in (

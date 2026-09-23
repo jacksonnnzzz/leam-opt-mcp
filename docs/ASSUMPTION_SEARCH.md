@@ -52,6 +52,17 @@ antenna-workflow assumption-run `
 `--resume` 跳过已有完整结果。失败试验不会被覆盖；需要重新尝试时显式增加
 `--retry-failed`，系统写入下一个 `result_vNNN.json` 与 `s11_vNNN.csv`。
 
+由迭代诊断器选定单个候选时，使用不可变 trial ID 精确执行，避免顺带运行整个空间：
+
+```powershell
+antenna-workflow assumption-run ... `
+  --trial-id ast-712274fda36f `
+  --resume
+```
+
+`--trial-id` 可以重复指定，但不能与 `--limit` 同时使用。未知或重复 ID 会在连接 AEDT 前
+失败；论文参数哈希、假设哈希和构建凭据仍执行原有校验。
+
 若 AEDT 已经显示 `SOLVED`，但客户端在证据导出前中断，可以增加
 `--postprocess-existing`。该模式只接受与不可变构建凭据完全匹配的已有设计，不新建、
 不重新求解、也不保存工程：

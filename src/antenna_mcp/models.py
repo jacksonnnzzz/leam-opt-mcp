@@ -27,9 +27,16 @@ class ModelingRequest(BaseModel):
     include_simulation: bool = False
     include_optimization: bool = False
     model: str | None = None
+    source_extraction_mode: Literal["single", "split"] = "single"
+    geometry_attachments: list[str] = Field(default_factory=list)
+    geometry_extraction_mode: Literal["single", "staged"] = "single"
 
     @model_validator(mode="after")
     def valid_stages(self) -> "ModelingRequest":
+        if self.geometry_extraction_mode == "staged" and self.source_extraction_mode != "split":
+            raise ValueError("geometry_extraction_mode=staged requires source_extraction_mode=split")
+        if self.geometry_attachments and self.source_extraction_mode != "split":
+            raise ValueError("geometry_attachments requires source_extraction_mode=split")
         if self.include_optimization and not self.include_simulation:
             raise ValueError("include_optimization requires include_simulation")
         return self

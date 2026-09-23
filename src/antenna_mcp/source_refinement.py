@@ -13,6 +13,7 @@ from .llm import LlmProvider, _extract_pdf_text, provider_from_env, vision_provi
 from .modeling import _strip_fence, _validate_confidence, _validate_source_analysis
 from .models import ModelingRequest
 from .prompts import STAGE_INSTRUCTIONS
+from .reproducibility import ReproducibilityAuditService
 from .workspace import WorkspaceStore
 
 
@@ -233,9 +234,26 @@ class SourceRefinementService:
         if not report_payload.get("quality_gate_passed"):
             raise ValueError("source refinement quality gate failed; correct and refine it again")
         candidate_text = candidate.read_text("utf-8")
-        _validate_source_analysis(json.loads(candidate_text))
+        candidate_payload = json.loads(candidate_text)
+        _validate_source_analysis(candidate_payload)
         approved_path = self.store.write_artifact(job_id, "source_analysis_approved.json", candidate_text)
         state.artifacts["source_analysis_approved"] = str(approved_path)
+        audit_service = ReproducibilityAuditService()
+        assessment = audit_service.audit_payload(candidate_payload)
+        assessment["job_id"] = job_id
+        assessment["source_artifact"] = str(approved_path)
+        assessment_path = self.store.write_artifact(
+            job_id,
+            "reproducibility_assessment.json",
+            json.dumps(assessment, ensure_ascii=False, indent=2) + "\n",
+        )
+        report_path = self.store.write_artifact(
+            job_id,
+            "reproducibility_report.md",
+            audit_service.render_markdown(assessment),
+        )
+        state.artifacts["reproducibility_assessment"] = str(assessment_path)
+        state.artifacts["reproducibility_report"] = str(report_path)
         state.status = "completed"
         state.current_stage = "source_analysis_approved"
         state.error = None

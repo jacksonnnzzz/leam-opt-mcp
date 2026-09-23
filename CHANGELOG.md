@@ -4,6 +4,28 @@ All notable changes will be documented in this file.
 
 ## [Unreleased]
 
+- Add a resumable `iteration-run` controller that closes the diagnosis/HFSS/evaluation loop,
+  executes only hash-frozen proposed trials, stops deterministically, and writes versioned JSON
+  and Markdown reports. Pre-create only the active design's local AEDT results directory to avoid
+  first-solve WinError 5 failures without deleting existing solver data.
+- Add opt-in staged geometry extraction (entities/topology, parameters/relations, evidence),
+  strict field ownership and deterministic merging with versioned subpass diagnostics.
+- Bound Ollama output tokens, reject token-limited responses before parsing (including valid-looking
+  JSON), and retain versioned content-free request metrics on modeling success and failure.
+- Add explicit geometry-only attachment selection, compact geometry prompts, shared strict
+  geometry output validation, and native Ollama JSON Schema decoding without relaxing evidence gates.
+- Add up to two evidence-preserving correction requests per failed source part, with
+  versioned prompts, raw attempts, validation errors, and no automatic transport retries.
+- Add opt-in four-pass source extraction with deterministic merging, strict part ownership,
+  versioned raw outputs, and fail-closed parameter/material conflict handling.
+- Reject covered evidence-label/description contradictions and structured missing-field
+  contradictions before scoring; keep source-citation verification explicitly unclaimed.
+- Reject HTML login/bot pages mislabeled as PDF before local vision rendering or text extraction.
+- Add a deterministic, evidence-based 100-point paper reproducibility assessment with
+  A/B/C workflow grades, JSON and Markdown reports, CLI support, and an MCP tool.
+- Record criterion-level evidence separately from the score so language and vision
+  models cannot assign their own reproducibility grade.
+- Restrict source distributions to release-relevant code, tests, and documentation.
 - Add generic hash-frozen engineering-assumption planning, strict existing-AEDT execution,
   convergence-gated S11 evaluation, immutable retry attempts, and versioned ranking reports.
 - Add versioned build receipts, receipt-matched post-processing recovery, AEDT license/error

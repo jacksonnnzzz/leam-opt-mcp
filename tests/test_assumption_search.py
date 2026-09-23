@@ -7,11 +7,13 @@ from types import SimpleNamespace
 
 import pytest
 
+import antenna_mcp.workflow_cli as workflow_cli
 from antenna_mcp.assumption_search import (
     AssumptionSearchError,
     AssumptionStudyLedger,
     classify_assumption_failure,
     collect_convergence_evidence,
+    ensure_local_aedt_results_directory,
     evaluate_passband_curve,
     plan_assumption_trials,
     validate_assumption_space,
@@ -213,6 +215,18 @@ def test_failed_trial_retry_appends_a_new_immutable_result_version(tmp_path):
     assert ledger.load_results()[0]["paper_gate_passed"] is True
 
 
+def test_pending_trials_can_select_one_exact_planned_trial(tmp_path):
+    space = _write_space(tmp_path / "space.json")
+    ledger = AssumptionStudyLedger(space, tmp_path / "study")
+    ledger.initialize()
+    trials = ledger.trials()
+    assert ledger.pending_trials(trial_ids=[trials[2]["trial_id"]]) == [trials[2]]
+    with pytest.raises(AssumptionSearchError, match="unknown trial"):
+        ledger.pending_trials(trial_ids=["ast-doesnotexist"])
+    with pytest.raises(AssumptionSearchError, match="cannot be combined"):
+        ledger.pending_trials(limit=1, trial_ids=[trials[0]["trial_id"]])
+
+
 def test_only_unsolved_structural_validator_failure_is_eligible_for_receipt_adoption(tmp_path):
     path = tmp_path / "result.json"
     path.write_text(
@@ -254,7 +268,22 @@ def test_assumption_failure_classification_separates_license_from_model_failure(
     assert classify_assumption_failure("The desired vendor daemon is down") == "license_unavailable"
     assert classify_assumption_failure("Parts Patch and Probe intersect") == "geometry_validation"
     assert classify_assumption_failure("Simulation for Setup1 is already running") == "client_interrupted"
+    assert classify_assumption_failure("PermissionError: [WinError 5] access is denied") == "filesystem_access"
     assert classify_assumption_failure("HFSS failed to solve Setup1") == "solver_failure"
+
+
+def test_results_directory_preflight_creates_only_the_exact_design_directory(tmp_path):
+    directory = tmp_path / "Project9.pyaedt" / "Candidate_r1"
+    actual = ensure_local_aedt_results_directory(SimpleNamespace(results_directory=str(directory)))
+    assert actual == directory.resolve()
+    assert directory.is_dir()
+
+
+def test_results_directory_preflight_rejects_a_file(tmp_path):
+    path = tmp_path / "not-a-directory"
+    path.write_text("occupied", encoding="utf-8")
+    with pytest.raises((FileExistsError, RuntimeError)):
+        ensure_local_aedt_results_directory(SimpleNamespace(results_directory=str(path)))
 
 
 def test_wait_for_aedt_idle_drains_an_orphaned_shared_desktop_solve():
@@ -334,3 +363,38 @@ def test_workflow_cli_plans_and_reports_assumption_study(tmp_path, capsys):
     report = json.loads(capsys.readouterr().out)
     assert report["result_count"] == 0
     assert Path(report["summary"]).is_file()
+
+
+def test_workflow_cli_forwards_exact_trial_ids_without_connecting_aedt(
+    tmp_path, capsys, monkeypatch
+):
+    captured = {}
+
+    def fake_run(**kwargs):
+        captured.update(kwargs)
+        return {"status": "selected"}
+
+    monkeypatch.setattr(workflow_cli, "run_aedt_assumption_search", fake_run)
+    assert workflow_cli.main(
+        [
+            "assumption-run",
+            "--space",
+            str(tmp_path / "space.json"),
+            "--adapter",
+            str(tmp_path / "adapter.py"),
+            "--output-dir",
+            str(tmp_path / "study"),
+            "--grpc-port",
+            "50051",
+            "--active-project",
+            "Project9",
+            "--trial-id",
+            "ast-one",
+            "--trial-id",
+            "ast-two",
+            "--resume",
+        ]
+    ) == 0
+    assert json.loads(capsys.readouterr().out)["status"] == "selected"
+    assert captured["trial_ids"] == ["ast-one", "ast-two"]
+    assert captured["resume"] is True

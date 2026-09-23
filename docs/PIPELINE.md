@@ -8,6 +8,7 @@ Case 3 只是回归样例。系统入口是 `create_antenna_pipeline`，它不�
 ```text
 created
   -> source_analysis
+  -> reproducibility_assessment (deterministic A/B/C evidence score)
   -> source_refinement
   -> source_review_hash approval
   -> engineering_assumption proposal (only for null/unresolved source values)
@@ -34,6 +35,12 @@ created
 校正为 `source_analysis_candidate.json`，系统检查重复/遗漏参数并生成差异报告。用户检查后
 必须用 `source-approve` 提交候选与报告的联合哈希，才能生成下游使用的
 `source_analysis_approved.json`。
+
+每次接受 `source_analysis` 时，系统还会自动生成 `reproducibility_assessment.json` 和
+`reproducibility_report.md`。LLM 只标注固定检查项的 `explicit/derived/assumed/conflicting/
+missing/not_applicable` 证据状态；总分、六个维度分数和 A/B/C 等级由程序计算。A 表示来源较完整，
+B 要求工程假设审批，C 只能生成候选代码。任何等级都不等于电磁验证通过，详见
+[`REPRODUCIBILITY_ASSESSMENT.md`](REPRODUCIBILITY_ASSESSMENT.md)。
 
 纯文本请求也会调用配置的文本 provider 生成 `source_analysis.json`，不会再用空组件、空参数
 占位。随后有一个不可绕过的跨阶段一致性门：`parameters.json` 必须逐项保留来源参数的
@@ -104,6 +111,7 @@ model-compile mdl-xxxxxxxxxxxx --profile leam_case3 `
 调用 `generate_antenna_pipeline(job_id)`。系统依次产生：
 
 - `source_analysis.json`：图像文字、拓扑、尺寸、置信度和不确定项；
+- `reproducibility_assessment.json` / `reproducibility_report.md`：固定规则评分和来源缺口；
 - `parameters.json`、`materials.json`、`solids.json`、`dimensions.json`；
 - `model_3d.py`、`model_2d.py`、`boolean.py`；
 - `simulation_spec.json`、`simulation_setup.py`；

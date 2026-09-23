@@ -1,0 +1,4 @@
+interface:
+  display_name: "LEAM 天线复现与评估"
+  short_description: "从论文和图片评估天线复现资料，生成 HFSS 代码并记录对照反馈"
+  default_prompt: "使用 $leam-reconstruct 评估这篇论文中指定天线的复现资料完整度，列出证据和缺口，并根据我的反馈修订。"

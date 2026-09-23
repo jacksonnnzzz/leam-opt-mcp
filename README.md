@@ -17,6 +17,8 @@ PDF / 图片 / 文字描述
         ↓
 识别天线拓扑、尺寸、材料和布尔关系
         ↓
+固定规则评估论文可复现性（A / B / C）
+        ↓
 区分论文证据、视觉解释、工程假设和未确定项
         ↓
 人工审核与内容哈希确认
@@ -36,10 +38,24 @@ generated_model_v002.py
 
 ## 核心能力
 
+项目提供 [LEAM 天线复现与评估 skill](skills/leam-reconstruct/SKILL.md)，作为现有 Python
+后端的对话入口。加载该 skill 后，可以输入“评估这篇论文第 4 章的天线”或“第 32 页已有
+损耗角，请复核这项扣分”，由 skill 调用后端、解释证据，并按修订流程处理反馈。
+
+在 Codex 中，将 `skills/leam-reconstruct` 连接或安装到项目的 `.agents/skills/` 发现目录，
+然后通过 `$leam-reconstruct` 调用。仓库源文件是维护入口；本机的发现目录使用指向源文件的
+junction，因此编辑源文件会同步反映到发现目录。skill 不包含 Python 依赖或模型凭据，
+仍需完成下文的系统安装与模型配置。
+
+修改交互方式和报告组织时编辑 skill；修改评分规则时编辑 `src/antenna_mcp/reproducibility.py`。
+当前评分为待校准的资料完整度指标，不能解释为复现成功概率。历史评估需保留来源与规则版本，
+再对比修改前后的分数。
+
 - 接收自然语言、PNG/JPEG 和论文 PDF；
 - 使用本地视觉模型或云端视觉模型读取结构图；
 - 将识别结果保存为参数、材料、实体、尺寸和布尔操作等中间工件；
 - 对图文冲突、跨案例尺寸污染、低置信度结构和未公开参数执行质量检查；
+- 按固定 100 分规则评估几何、材料、馈电、求解和验证证据，输出 A/B/C 可复现性等级；
 - 用内容哈希冻结人工审核结果，工件修改后旧批准自动失效；
 - 生成 import-safe 的 `generated_model_vNNN.py`，只暴露 `build(hfss)`；
 - 保存用户的 HFSS 对照意见和截图，生成新的代码版本而不覆盖旧版本；
@@ -123,6 +139,8 @@ antenna-workflow model-create `
 ```powershell
 antenna-workflow model-run <job-id> --through-stage source_analysis
 
+antenna-workflow reproducibility-audit --job-id <job-id>
+
 antenna-workflow source-refine <job-id> `
   --description "列出全部实体、独立尺寸、派生关系、材料和未确定项"
 ```
@@ -130,6 +148,7 @@ antenna-workflow source-refine <job-id> `
 检查任务目录中的：
 
 - `source_analysis_candidate.json`；
+- `reproducibility_assessment.json` 和 `reproducibility_report.md`；
 - `source_refinement_report.json`；
 - `source_review_packet.json`；
 - 裁切后的视觉输入和视觉审计文件。
@@ -181,6 +200,8 @@ antenna-workflow model-run <job-id> --through-stage boolean
 | `materials.json` | 材料定义 |
 | `solids.json` | 实体和拓扑 |
 | `dimensions.json` | 坐标和尺寸关系 |
+| `reproducibility_assessment.json` | 固定规则计算的来源完整性评分与逐项缺口 |
+| `reproducibility_report.md` | A/B/C 等级及人工可读的后续建议 |
 
 导入 `generated_model_v001.py` 不会启动 AEDT。只有主动调用其中的 `build(hfss)`，才会修改传入的 HFSS 设计。
 
@@ -249,6 +270,24 @@ antenna-workflow assumption-plan `
 完整的 AEDT 附加、恢复和失败重试命令见
 [`docs/ASSUMPTION_SEARCH.md`](docs/ASSUMPTION_SEARCH.md)。只有工程假设版本通过参考门槛
 G3 后，才能进入独立候选 G4/G5 和后续性能优化。
+
+若要让系统按 HFSS 反馈自动选择并运行下一条有界假设，可使用 `iteration-run`：
+
+```powershell
+antenna-workflow iteration-run `
+  --curve ".\path\to\baseline_s11.csv" `
+  --target ".\path\to\iterative_target.json" `
+  --space ".\path\to\assumption_space.json" `
+  --adapter ".\path\to\assumption_adapter.py" `
+  --output-dir ".\path\to\iterative_reconstruction" `
+  --study-output-dir ".\path\to\iterative_assumption_study" `
+  --grpc-port 50051 `
+  --active-project <open-aedt-project>
+```
+
+命令可从不可变账本恢复，不会重复求解已完成候选，并生成机器可读 JSON 与 Markdown
+迭代报告。达到论文门槛、预算上限、假设耗尽或执行失败时自动停止。详见
+[`docs/ITERATIVE_RECONSTRUCTION.md`](docs/ITERATIVE_RECONSTRUCTION.md)。
 
 执行 HFSS 前需要最终审核哈希和显式执行门：
 

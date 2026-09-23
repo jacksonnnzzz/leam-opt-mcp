@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "priors": [
+    {
+      "id": "feed_geometry_interpretation",
+      "signals_any": [
+        "resonance_above_target",
+        "resonance_below_target",
+        "weak_matching",
+        "large_negative_reactance_at_target",
+        "large_positive_reactance_at_target"
+      ],
+      "modifiable_fields": [
+        "feed_outside_length_mm",
+        "patch_longitudinal_offset_mm",
+        "inset_reference"
+      ],
+      "reason": "Unreported absolute placement and feed geometry can change the electrical feed transformation and coupling.",
+      "expected_observation": "A causal feed interpretation should change target-frequency reactance or matching while paper-explicit patch dimensions remain fixed."
+    },
+    {
+      "id": "port_mode_and_reference_plane",
+      "signals_any": [
+        "weak_matching",
+        "large_negative_reactance_at_target",
+        "large_positive_reactance_at_target"
+      ],
+      "modifiable_fields": [
+        "port_cross_section_scale",
+        "port_deembed_distance_mm",
+        "port_mode_definition",
+        "excitation_type"
+      ],
+      "reason": "Unreported port geometry and reference plane can change the reported input network parameters.",
+      "expected_observation": "Port-mode fields must remain physical and the full S11 curve must improve; a phase-only change is insufficient."
+    },
+    {
+      "id": "conductor_representation",
+      "signals_any": ["weak_matching"],
+      "modifiable_fields": ["conductor_representation", "conductor_model"],
+      "reason": "Very thin finite-conductivity metal can require a solver-specific sheet or impedance representation.",
+      "expected_observation": "The representation should preserve geometry and materially change loss or matching with converged meshes."
+    },
+    {
+      "id": "open_boundary_extent",
+      "signals_any": ["resonance_above_target", "resonance_below_target", "weak_matching"],
+      "modifiable_fields": ["radiation_padding_mm", "open_boundary_type"],
+      "reason": "The source may omit the open-boundary type or spacing.",
+      "expected_observation": "A boundary-sensitive result should change when spacing or boundary type changes under the same geometry and mesh gate."
+    }
+  ]
+}
