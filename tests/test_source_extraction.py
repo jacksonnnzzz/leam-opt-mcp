@@ -5,7 +5,7 @@ import pytest
 from antenna_mcp.models import ModelingRequest
 from antenna_mcp.modeling import ModelingService
 from antenna_mcp.workspace import WorkspaceStore
-from antenna_mcp.source_extraction import criterion_ids, merge_parts
+from antenna_mcp.source_extraction import criterion_ids, merge_parts, source_part_schema
 from antenna_mcp.reproducibility import ReproducibilityAuditService
 from antenna_mcp.evidence_consistency import EvidenceConsistencyError
 
@@ -71,6 +71,26 @@ def test_invalid_part_stops_before_later_calls_and_never_publishes_source(tmp_pa
     assert len(attempts) == 3
     assert all(a["status"] == "rejected" for a in attempts)
     assert len({a["raw_artifact"] for a in attempts}) == 3
+    correction = open(attempts[1]["prompt_artifact"], encoding="utf-8").read()
+    assert "Every components[].name must be globally unique" in correction
+    assert "component_1/component_2" in correction
+
+
+def test_duplicate_parameter_correction_targets_symbols_not_components(tmp_path):
+    payloads = parts()
+    parameter = {"symbol": "W", "value": 1, "unit": "mm", "geometric_meaning": "width",
+                 "evidence_source": "Table 1", "confidence": 0.9}
+    payloads["geometry"]["parameters"] = [parameter, {**parameter, "symbol": "w"}]
+    store = WorkspaceStore(tmp_path)
+    service = ModelingService(store, Provider(payloads))
+    job = service.create(ModelingRequest(description="Extract a generic antenna", source_extraction_mode="split"))
+    state = service.run(job.job_id, "source_analysis")
+    assert state.status == "failed"
+    report = json.loads(open(state.artifacts["source_split_v001_report"], encoding="utf-8").read())
+    correction = open(report["parts"]["geometry"]["attempts"][1]["prompt_artifact"], encoding="utf-8").read()
+    assert "parameters[].symbol must be unique" in correction
+    assert "W and w are the same symbol" in correction
+    assert "components[].name" not in correction
 
 
 def test_material_conflict_not_silently_overwritten():
@@ -218,6 +238,41 @@ def test_merge_conflicts_do_not_trigger_unbounded_corrections(tmp_path):
     assert report["failed_part"] == "merge"
 
 
+def test_failed_run_resumes_only_integrity_matched_validated_parts(tmp_path):
+    class RecoveringProvider(Provider):
+        fail_solver = True
+
+        def generate(self, **kwargs):
+            part = next(p for p in self.payloads if f"Source part: {p}\n" in kwargs["prompt"])
+            if part == "solver" and self.fail_solver:
+                self.calls.append(part)
+                raise RuntimeError("temporary solver extraction failure")
+            return super().generate(**kwargs)
+
+        def generate_structured(self, *, schema, **kwargs):
+            return self.generate(**kwargs)
+
+    provider = RecoveringProvider(parts())
+    store = WorkspaceStore(tmp_path)
+    service = ModelingService(store, provider)
+    job = service.create(ModelingRequest(description="Extract a generic antenna", source_extraction_mode="split"))
+    first = service.run(job.job_id, "source_analysis")
+    assert first.status == "failed"
+    assert provider.calls == ["geometry", "materials", "solver"]
+
+    provider.fail_solver = False
+    second = service.run(job.job_id, "source_analysis")
+    assert second.status == "completed", second.error
+    assert provider.calls == ["geometry", "materials", "solver", "solver", "validation"]
+    report = json.loads(open(second.artifacts["source_split_v002_report"], encoding="utf-8").read())
+    assert report["version"] == "1.5"
+    assert report["parts"]["geometry"]["attempts"] == []
+    assert report["parts"]["materials"]["attempts"] == []
+    assert report["parts"]["geometry"]["reused_from"]["part"] == "geometry"
+    assert report["parts"]["materials"]["reused_from"]["part"] == "materials"
+    assert "reused_from" not in report["parts"]["solver"]
+
+
 def test_explicit_geometry_attachments_and_native_schema_are_isolated(tmp_path):
     class StructuredProvider(Provider):
         def __init__(self):
@@ -245,13 +300,32 @@ def test_explicit_geometry_attachments_and_native_schema_are_isolated(tmp_path):
     state = service.run(job.job_id, "source_analysis")
     assert state.status == "completed", state.error
     assert provider.inputs == [[geometry], [full], [full], [full]]
-    assert len(provider.schemas) == 1
-    schema = provider.schemas[0]
-    assert "confidence" in schema["$defs"]["Component"]["required"]
-    assert schema["$defs"]["Criterion"]["properties"]["id"]["enum"] == criterion_ids("geometry")
+    assert len(provider.schemas) == 4
+    geometry_schema, materials_schema, solver_schema, validation_schema = provider.schemas
+    assert "confidence" in geometry_schema["$defs"]["Component"]["required"]
+    assert geometry_schema["$defs"]["Criterion"]["properties"]["id"]["enum"] == criterion_ids("geometry")
+    assert "component_materials" in materials_schema["required"]
+    assert materials_schema["$defs"]["Criterion"]["properties"]["id"]["enum"] == criterion_ids("materials")
+    assert solver_schema["$defs"]["Criterion"]["properties"]["id"]["enum"] == criterion_ids("solver")
+    assert validation_schema["$defs"]["Criterion"]["properties"]["id"]["enum"] == criterion_ids("validation")
     report = json.loads(open(state.artifacts["source_split_v001_report"], encoding="utf-8").read())
     assert report["parts"]["geometry"]["input_selection"] == "explicit_geometry_attachments"
     assert report["parts"]["geometry"]["attachments"][0]["path"] == str(geometry)
+
+
+def test_nongeometry_native_schemas_match_local_contracts():
+    materials = source_part_schema("materials", criterion_ids("materials"))
+    assert materials["additionalProperties"] is False
+    assert set(materials["required"]) == {
+        "parameters", "uncertainties", "reproducibility_evidence", "component_materials"
+    }
+    assignment = materials["$defs"]["MaterialAssignment"]
+    assert assignment["additionalProperties"] is False
+    assert set(assignment["required"]) == {"name", "material", "evidence_source"}
+    for part in ("materials", "solver", "validation"):
+        schema = source_part_schema(part, criterion_ids(part))
+        criteria = schema["$defs"]["Evidence"]["properties"]["criteria"]
+        assert criteria["minItems"] == criteria["maxItems"] == len(criterion_ids(part))
 
 
 @pytest.mark.parametrize("invalid", ["string_confidence", "bool_confidence", "coordinates", "extra_parameter"])
@@ -279,6 +353,14 @@ def test_geometry_schema_preserves_structured_evidence_and_relationships():
     result = GeometryOutput.model_validate(payload, strict=True)
     assert result.components[0].model_dump()["parent_layer"] == "signal"
     assert result.components[0].geometric_evidence == {"z_extent": [0, 1], "formula": "h"}
+
+
+def test_geometry_parameter_prompt_excludes_nonconstruction_fact_inventory():
+    from antenna_mcp.source_geometry import GEOMETRY_SUBPROMPTS
+    prompt = GEOMETRY_SUBPROMPTS["geometry_parameters"]
+    assert "construction-dimension table" in prompt
+    assert "frequency bands" in prompt and "missing_* placeholders" in prompt
+    assert "never infer" in prompt
 
 
 def test_geometry_attachments_require_split_and_existing_file(tmp_path):

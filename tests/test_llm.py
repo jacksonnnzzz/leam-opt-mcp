@@ -123,8 +123,34 @@ def test_ollama_native_schema_and_evidence_order(tmp_path, monkeypatch):
     schema = {"type": "object", "required": ["x"], "properties": {"x": {"type": "number"}}}
     OllamaVisionProvider().generate_structured(system="safe", prompt="contract", attachments=[source], schema=schema)
     assert captured["format"] == schema
+    assert captured["think"] is False
     content = captured["messages"][1]["content"]
     assert content.index("source evidence") < content.index("contract")
+    assert content.rstrip().endswith("/no_think")
+
+
+def test_ollama_structured_soft_no_think_can_be_disabled(monkeypatch):
+    captured = {}
+
+    class Response:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def read(self): return b'{"message":{"content":"{}"}}'
+
+    def fake_urlopen(request, timeout):
+        captured.update(json.loads(request.data))
+        return Response()
+
+    monkeypatch.setattr(llm_module, "urlopen", fake_urlopen)
+    monkeypatch.setenv("OLLAMA_STRUCTURED_NO_THINK", "false")
+    result = OllamaVisionProvider().generate_structured(
+        system="safe", prompt="contract", attachments=[], schema={"type": "object"}
+    )
+
+    assert result == "{}"
+    assert not captured["messages"][1]["content"].rstrip().endswith("/no_think")
+    assert result.metadata["think_requested"] is False
+    assert result.metadata["structured_no_think"] is False
 
 
 def test_routed_structured_request_preserves_schema(tmp_path):

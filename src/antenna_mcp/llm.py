@@ -192,6 +192,17 @@ class OllamaVisionProvider:
             user_prompt += "\n\nText attachments:\n" + "\n\n".join(text_attachments)
         if schema is not None:
             user_prompt += "\n\nEnd of source evidence. Extraction request and output contract:\n" + prompt
+        structured_no_think = schema is not None and os.getenv(
+            "OLLAMA_STRUCTURED_NO_THINK", "1"
+        ).strip().lower() not in {"0", "false", "no", "off"}
+        if structured_no_think:
+            # Some Qwen/Ollama combinations expose no hard thinking-control
+            # metadata and continue reasoning despite ``think: false``.  The
+            # model's documented per-message soft switch prevents an entire
+            # structured response from being spent on hidden reasoning.  Keep
+            # this scoped to schema-bound extraction and allow operators to
+            # disable it for models that do not need the compatibility hint.
+            user_prompt += "\n\n/no_think"
         user_message: dict[str, object] = {"role": "user", "content": user_prompt}
         if images:
             user_message["images"] = images
@@ -231,6 +242,7 @@ class OllamaVisionProvider:
         metadata = {"provider": "ollama", "model": self.model, "status": "requesting",
                     "output_token_limit": output_limit, "context_limit": payload["options"]["num_ctx"],
                     "timeout_seconds": timeout, "native_schema": schema is not None,
+                    "think_requested": False, "structured_no_think": structured_no_think,
                     "request_sha256": hashlib.sha256(request.data).hexdigest()}
         try:
             with urlopen(request, timeout=timeout) as response:

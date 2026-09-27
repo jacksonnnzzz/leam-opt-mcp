@@ -87,7 +87,12 @@ GEOMETRY_SUBPARTS = {
 GEOMETRY_SUBPROMPTS = {
     "geometry_entities": (
         "Extract ONLY physical component identities, coordinate system, and ordered Boolean operations. "
-        "One name per physical object/tool, not per figure view; preserve all evidenced objects. "
+        "Every components[].name must be globally unique. Give repeated physical instances stable "
+        "distinct names such as slot_top/slot_bottom or capacitor_1/capacitor_2; a shared role or "
+        "type is not a valid repeated name. One component per physical object/tool, not per figure "
+        "view; preserve all evidenced objects. Do not create components for boundary conditions, "
+        "mesh settings, solver settings, missing material properties, or generic placeholder objects; "
+        "put those missing non-geometry facts only in uncertainties. "
         "Keep geometric_evidence and explicit producer relationships. Material may be null. "
         "Do not return a parameter table or evidence criteria. Confidence is your extraction estimate. "
         "Unknown coordinates remain null. Disclose entity/topology uncertainties."
@@ -96,6 +101,13 @@ GEOMETRY_SUBPROMPTS = {
         "Extract ONLY the selected variant's geometry parameters and derived relations. "
         "Use source symbols, units and page/table citations. Existing component identities are fixed; "
         "do not return or rename components. No material properties or simulation results. "
+        "The parameter array is a construction-dimension table, not a general fact inventory: "
+        "exclude frequency bands, S-parameters, gain, polarization, material identity/properties, "
+        "feed or slot counts, categorical orientation labels, figure names, and missing_* placeholders. "
+        "Keep qualitative placement or orientation in component evidence/uncertainties rather than "
+        "inventing a scalar parameter. Include a derived relation only when the source explicitly "
+        "prints the equation or the relation is an exact restatement of cited dimensions; never infer "
+        "a formula merely because the values look related. "
         "Preserve supported values; unreadable values remain null and disclosed. "
         "Derived relations include claim_id, expression, symbols, evidence, confidence."
     ),
