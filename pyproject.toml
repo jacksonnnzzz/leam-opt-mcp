@@ -23,7 +23,7 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "mcp>=1.27,<2",
+  "mcp>=1.27,<3",
   "numpy>=1.26,<3",
   "openai>=1.68,<3",
   "pydantic>=2.8,<3",
